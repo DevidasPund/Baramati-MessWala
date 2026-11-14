@@ -2,11 +2,15 @@
 node_modules/
 dist/
 build/
+.cache/
 
 # Environment files
 .env
 .env.local
 .env.*.local
+*.env
+backend/.env
+frontend/.env
 
 # Logs
 npm-debug.log*
@@ -24,13 +28,18 @@ Thumbs.db
 # Uploads except placeholder
 uploads/*
 !uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 
-# Credentials & Service Accounts
+# Credentials, Private Keys & Service Accounts
 *serviceAccount*.json
 *service-account*.json
 firebase-adminsdk*.json
+*.pem
+*.key
+*.cert
+*.crt
 
 # Database Backups & Dumps
 backups/*.dump
 backups/*.sql
-

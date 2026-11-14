@@ -1,7 +1,18 @@
 import axios from 'axios';
 
+// Normalize VITE_API_URL to ensure /api suffix is present and trailing slashes are handled
+const rawApiUrl = import.meta.env.VITE_API_URL;
+let baseURL = '/api';
+
+if (rawApiUrl && typeof rawApiUrl === 'string') {
+  const trimmed = rawApiUrl.trim().replace(/\/+$/, '');
+  if (trimmed) {
+    baseURL = trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+  }
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL,
   timeout: 30000,
 });
 

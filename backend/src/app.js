@@ -34,8 +34,13 @@ app.use(helmet({
 }));
 
 // CORS Configuration Allowlist
+const configuredFrontends = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((url) => url.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:5173',
+  ...configuredFrontends,
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:5000',
@@ -46,8 +51,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Normalize incoming origin by removing trailing slashes
+    const normalizedOrigin = origin ? origin.replace(/\/+$/, '') : null;
     // Allow non-browser requests or matching origins (including preview Vercel domains)
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    if (!normalizedOrigin || allowedOrigins.includes(normalizedOrigin) || normalizedOrigin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(new Error(`CORS Error: Origin ${origin} not permitted.`));
