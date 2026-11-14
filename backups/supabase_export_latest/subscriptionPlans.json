@@ -1,0 +1,129 @@
+[
+  {
+    "id": "0fd8f078-99ec-480d-b235-de1dd65cd289",
+    "name": "Full Day Monthly (Lunch + Dinner)",
+    "code": "M-FULL-2MEAL",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "3200",
+    "includedMeals": [
+      "LUNCH",
+      "DINNER"
+    ],
+    "description": "Daily unlimited delicious Lunch and Dinner with weekly Sunday feast.",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:10:38.184Z",
+    "updatedAt": "2026-11-13T19:10:38.184Z"
+  },
+  {
+    "id": "f702a19b-4a3e-4842-ac33-fd159d563e27",
+    "name": "All Three Meals Monthly (Breakfast + Lunch + Dinner)",
+    "code": "M-ALL-3MEAL",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "4200",
+    "includedMeals": [
+      "BREAKFAST",
+      "LUNCH",
+      "DINNER"
+    ],
+    "description": "Complete nutritional cover: Healthy breakfast with tea, wholesome lunch and dinner.",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:10:38.189Z",
+    "updatedAt": "2026-11-13T19:10:38.189Z"
+  },
+  {
+    "id": "713b7259-d7ff-4ff1-bf2e-52e703aa0dff",
+    "name": "Lunch Only Monthly",
+    "code": "M-LUNCH-ONLY",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "1800",
+    "includedMeals": [
+      "LUNCH"
+    ],
+    "description": "Ideal for college students and working professionals for midday meals.",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:10:38.192Z",
+    "updatedAt": "2026-11-13T19:10:38.192Z"
+  },
+  {
+    "id": "1b170c32-0f5b-4dc8-a626-2344b577bf35",
+    "name": "Dinner Only Monthly",
+    "code": "M-DINNER-ONLY",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "1800",
+    "includedMeals": [
+      "DINNER"
+    ],
+    "description": "Fresh, warm home-style dinner every evening.",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:10:38.194Z",
+    "updatedAt": "2026-11-13T19:10:38.194Z"
+  },
+  {
+    "id": "55ae2a4d-36ee-4aff-9944-64065fc03d4c",
+    "name": "Weekly Trial Pack (Lunch + Dinner)",
+    "code": "W-TRIAL-2MEAL",
+    "planType": "WEEKLY",
+    "durationDays": 7,
+    "price": "850",
+    "includedMeals": [
+      "LUNCH",
+      "DINNER"
+    ],
+    "description": "7-day trial to experience Baramati Messwala taste and hygiene.",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:10:38.196Z",
+    "updatedAt": "2026-11-13T19:10:38.196Z"
+  },
+  {
+    "id": "8143fd6c-59ed-45e0-a5e5-1837fc8db971",
+    "name": "Special Student Monthly (Lunch + Dinner)",
+    "code": "TEST-PLAN-1995",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "3400",
+    "includedMeals": [
+      "LUNCH",
+      "DINNER"
+    ],
+    "description": "Test plan with lunch and dinner included",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:33:32.004Z",
+    "updatedAt": "2026-11-13T19:33:32.004Z"
+  },
+  {
+    "id": "6749e7fe-0ab3-441e-95f8-d308b972fb1e",
+    "name": "Special Student Monthly (Lunch + Dinner)",
+    "code": "TEST-PLAN-3428",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "3400",
+    "includedMeals": [
+      "LUNCH",
+      "DINNER"
+    ],
+    "description": "Test plan with lunch and dinner included",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:34:33.437Z",
+    "updatedAt": "2026-11-13T19:34:33.437Z"
+  },
+  {
+    "id": "ce0ac395-8f19-4f12-bece-2c890bd02275",
+    "name": "Special Student Monthly (Lunch + Dinner)",
+    "code": "TEST-PLAN-3485",
+    "planType": "MONTHLY",
+    "durationDays": 30,
+    "price": "3400",
+    "includedMeals": [
+      "LUNCH",
+      "DINNER"
+    ],
+    "description": "Test plan with lunch and dinner included",
+    "isActive": true,
+    "createdAt": "2026-11-13T19:35:23.496Z",
+    "updatedAt": "2026-11-13T19:35:23.496Z"
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "9a3fbde7-b969-4558-8323-5f3a46cc9f85",
+    "complaintNumber": "CMP-2026-0001",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "subject": "Request for slightly less spicy dinner",
+    "description": "The sev bhaji was a bit spicy yesterday evening. Would appreciate medium spice.",
+    "category": "FOOD_QUALITY",
+    "status": "RESOLVED",
+    "adminResponse": "Noted! We have instructed our chef to keep dinner spices moderate for student comfort.",
+    "resolvedAt": "2026-11-13T19:10:38.608Z",
+    "createdAt": "2026-11-13T19:10:38.614Z",
+    "updatedAt": "2026-11-13T19:10:38.614Z"
+  }
+]

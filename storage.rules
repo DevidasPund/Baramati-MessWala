@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (request.auth.token.role == 'ADMIN' || request.auth.token.role == 'SUPER_ADMIN');
+    }
+
+    // Public business assets (menu images, logos, QR codes)
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Official UPI Payment QR Code
+    match /settings/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Customer payment screenshots
+    match /payments/{customerId}/{fileName} {
+      allow read: if isAdmin() || (isAuthenticated() && request.auth.token.customerId == customerId);
+      allow write: if isAuthenticated() && 
+                    request.resource.size < 5 * 1024 * 1024 &&
+                    request.resource.contentType.matches('image/.*');
+    }
+
+    // Generated Invoices (PDFs)
+    match /invoices/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "id": "21242fa1-9648-4471-9666-c0925dd8b2ff",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "rating": 5,
+    "foodQualityRating": 5,
+    "hygieneRating": 5,
+    "serviceRating": 5,
+    "comments": "Food taste is exceptionally good, feels just like home-cooked food in Baramati!",
+    "mealDate": "2026-11-13",
+    "mealType": "LUNCH",
+    "createdAt": "2026-11-13T19:10:38.609Z"
+  }
+]

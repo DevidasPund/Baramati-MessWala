@@ -1,0 +1,21 @@
+[
+  {
+    "id": "b935eabc-fd47-40d9-a488-6478beda4d0d",
+    "userId": "13d5e2e1-701e-4600-b090-a919a69c2dd9",
+    "staffCode": "STAFF-001",
+    "name": "Ramesh Shinde",
+    "phone": "9876543211",
+    "email": "staff@baramatimesswala.com",
+    "designation": "Floor Manager & Attendance Incharge",
+    "role": "STAFF",
+    "permissions": [
+      "scan_attendance",
+      "view_menu",
+      "customer_search",
+      "mark_attendance"
+    ],
+    "isActive": true,
+    "createdAt": "2026-11-13T19:10:38.339Z",
+    "updatedAt": "2026-11-13T19:10:38.339Z"
+  }
+]

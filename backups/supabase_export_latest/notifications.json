@@ -1,0 +1,2075 @@
+[
+  {
+    "id": "c9336722-ad2a-4252-bd65-552dc0f83596",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Nikhil Shinde!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-005*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-005",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T19:33:32.120Z"
+  },
+  {
+    "id": "7749f1f7-f2eb-4a09-8e11-0333e4d3c9fa",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Nikhil Shinde!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-006*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-006",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T19:34:33.553Z"
+  },
+  {
+    "id": "9671af1b-97a4-4680-83ad-93a560c4f599",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Nikhil Shinde!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-007*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-007",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T19:35:23.611Z"
+  },
+  {
+    "id": "fbbc36c8-1409-4e36-8347-dda34fae19d6",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "EXTRA MEAL CONFIRMATION",
+    "message": "🍛 *Extra Meal Confirmed* - Baramati Messwala\n\nHello Nikhil Shinde, your request for *2x DINNER* on 2026-11-13 has been confirmed.\nCharge: ₹220 (will be added to your monthly bill).",
+    "type": "EXTRA_MEAL_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "date": "2026-11-13",
+      "count": 2,
+      "mealType": "DINNER",
+      "totalAmount": 220,
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T19:35:23.875Z"
+  },
+  {
+    "id": "6bd0a975-dd98-4779-84a7-ba611e0abdc6",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Nikhil Shinde, your bill for 12/2026 has been generated.\n\nInvoice No: *INV-2026-0008*\nSubscription: ₹3400\nExtra Meals: ₹0\nTotal Payable: *₹3400*\nDue Date: 12/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "12/10/2026",
+      "monthYear": "12/2026",
+      "totalAmount": 3400,
+      "customerName": "Nikhil Shinde",
+      "invoiceNumber": "INV-2026-0008",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 3400
+    },
+    "createdAt": "2026-11-13T19:35:23.894Z"
+  },
+  {
+    "id": "193c5275-b55b-457c-8135-12b99465a8be",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "PAYMENT CONFIRMATION",
+    "message": "💳 *Payment Verified & Received!* - Baramati Messwala\n\nDear Nikhil Shinde, we have received your payment of *₹3400* for Invoice *INV-2026-0008* via UPI.\n\nReceipt/Payment No: *PAY-2026-0008*\nStatus: CONFIRMED. Thank you!",
+    "type": "PAYMENT_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "amount": 3400,
+      "method": "UPI",
+      "customerName": "Nikhil Shinde",
+      "invoiceNumber": "INV-2026-0008",
+      "paymentNumber": "PAY-2026-0008"
+    },
+    "createdAt": "2026-11-13T19:35:23.947Z"
+  },
+  {
+    "id": "25610175-0dea-4272-833c-42878a057c1e",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Aditya Deshmukh!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-008*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-008",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:09:57.904Z"
+  },
+  {
+    "id": "e378af64-bb73-432e-b4f5-f2233d4f131f",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Pooja Kadam!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-009*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-009",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:09:58.093Z"
+  },
+  {
+    "id": "da75d624-4b43-417a-a4c6-0bfef235ef6d",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "EXTRA MEAL CONFIRMATION",
+    "message": "🍛 *Extra Meal Confirmed* - Baramati Messwala\n\nHello Aditya Deshmukh, your request for *2x LUNCH* on 2026-11-13 has been confirmed.\nCharge: ₹180 (will be added to your monthly bill).",
+    "type": "EXTRA_MEAL_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "date": "2026-11-13",
+      "count": 2,
+      "mealType": "LUNCH",
+      "totalAmount": 180,
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:09:58.293Z"
+  },
+  {
+    "id": "13cbfae0-6efb-4663-a76d-d123676cb59b",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Aditya Deshmukh, your bill for 1/2026 has been generated.\n\nInvoice No: *INV-2026-0010*\nSubscription: ₹850\nExtra Meals: ₹0\nTotal Payable: *₹850*\nDue Date: 1/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "1/10/2026",
+      "monthYear": "1/2026",
+      "totalAmount": 850,
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0010",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 850
+    },
+    "createdAt": "2026-11-13T20:09:58.304Z"
+  },
+  {
+    "id": "a4b2a36d-c3d1-41b9-ab8d-0390900538d8",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "PAYMENT CONFIRMATION",
+    "message": "💳 *Payment Verified & Received!* - Baramati Messwala\n\nDear Aditya Deshmukh, we have received your payment of *₹850* for Invoice *INV-2026-0010* via UPI.\n\nReceipt/Payment No: *PAY-2026-0011*\nStatus: CONFIRMED. Thank you!",
+    "type": "PAYMENT_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "amount": 850,
+      "method": "UPI",
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0010",
+      "paymentNumber": "PAY-2026-0011"
+    },
+    "createdAt": "2026-11-13T20:09:58.354Z"
+  },
+  {
+    "id": "832c05aa-9908-4c94-9136-86a3cc057036",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Amit Patil"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "97e0895f-d28a-471a-9c3c-bfeef855aeed",
+    "customerId": "46a54dc6-82d8-4248-b88a-07b81a3f304e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Rohit Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "24bee1d8-893b-48dc-a232-99601d5df353",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "1f35b104-ae56-46d6-8fd8-4e2787f53482",
+    "customerId": "7a4c34a8-03af-46a6-a5f4-47f5d35a1a41",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Priya Kulkarni"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "51448fc1-de0d-4b55-b0c2-e94ab83d7ae6",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "a2b2e0d4-b36b-4227-b5ce-fb81c517ba0c",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "393906e7-85fb-4c0f-96f0-5b6309780586",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "ceb3939e-ba31-4b53-931c-e57d5baefd6c",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:09:58.373Z"
+  },
+  {
+    "id": "16200f32-aef8-42f4-92d3-318dd8397696",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Aditya Deshmukh!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-010*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-010",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:13:14.462Z"
+  },
+  {
+    "id": "627e0d1a-d261-4c5a-a999-ff8e0986d042",
+    "customerId": "f27cc92e-59e5-4a2e-8ebc-328ab4f7a9b2",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Pooja Kadam!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-011*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-011",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:13:14.831Z"
+  },
+  {
+    "id": "de8f0bfe-39dd-4c6b-bb9a-252562e59337",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "EXTRA MEAL CONFIRMATION",
+    "message": "🍛 *Extra Meal Confirmed* - Baramati Messwala\n\nHello Aditya Deshmukh, your request for *2x LUNCH* on 2026-11-13 has been confirmed.\nCharge: ₹180 (will be added to your monthly bill).",
+    "type": "EXTRA_MEAL_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "date": "2026-11-13",
+      "count": 2,
+      "mealType": "LUNCH",
+      "totalAmount": 180,
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:13:15.287Z"
+  },
+  {
+    "id": "b74c249f-eae8-48e4-9653-f8b5ec48cdda",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Aditya Deshmukh, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0012*\nSubscription: ₹4200\nExtra Meals: ₹0\nTotal Payable: *₹4200*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 4200,
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0012",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 4200
+    },
+    "createdAt": "2026-11-13T20:13:15.318Z"
+  },
+  {
+    "id": "cae73682-98d7-46ae-8676-1e4d7de63e3d",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "PAYMENT CONFIRMATION",
+    "message": "💳 *Payment Verified & Received!* - Baramati Messwala\n\nDear Aditya Deshmukh, we have received your payment of *₹4200* for Invoice *INV-2026-0012* via UPI.\n\nReceipt/Payment No: *PAY-2026-0014*\nStatus: CONFIRMED. Thank you!",
+    "type": "PAYMENT_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "amount": 4200,
+      "method": "UPI",
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0012",
+      "paymentNumber": "PAY-2026-0014"
+    },
+    "createdAt": "2026-11-13T20:13:15.428Z"
+  },
+  {
+    "id": "7debff51-b1a1-4f42-ab67-d801ec7d1598",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Amit Patil"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "d1f2ad18-b53a-47d4-b089-e2164370024e",
+    "customerId": "46a54dc6-82d8-4248-b88a-07b81a3f304e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Rohit Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "6a2ff4a9-edbc-444d-a87d-4e3253624183",
+    "customerId": "7a4c34a8-03af-46a6-a5f4-47f5d35a1a41",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Priya Kulkarni"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "26650444-3836-4993-96aa-07899aa0dc49",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "6bf30c1e-a8cb-4f35-9316-6015208ebb9d",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "138e613d-a092-45b8-aaa0-a70f445c7e62",
+    "customerId": "f27cc92e-59e5-4a2e-8ebc-328ab4f7a9b2",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:13:15.470Z"
+  },
+  {
+    "id": "5738b5ec-1685-4226-9294-6dbd962b5301",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "05108fc3-28ad-433c-ac7f-e74d9d4f3613",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:13:15.470Z"
+  },
+  {
+    "id": "c4bbaa4a-6c0a-470a-8964-bdc795884220",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "6f5ce08a-2d7b-43c4-b575-722ae8738874",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:13:15.469Z"
+  },
+  {
+    "id": "8fa70ef3-0eaf-4d5a-ae6b-fbf26d8ffcb3",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Aditya Deshmukh!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-012*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-012",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:14:55.262Z"
+  },
+  {
+    "id": "b9f2b59d-baa7-40cc-ae70-b7eec955dd7b",
+    "customerId": "9e38b0dc-a244-4f39-b275-9e46c4b9eedd",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Pooja Kadam!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-013*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-013",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:14:55.688Z"
+  },
+  {
+    "id": "e555e36c-96d1-4a1b-b9fe-0d2d55d7eeb8",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "EXTRA MEAL CONFIRMATION",
+    "message": "🍛 *Extra Meal Confirmed* - Baramati Messwala\n\nHello Aditya Deshmukh, your request for *2x LUNCH* on 2026-11-13 has been confirmed.\nCharge: ₹180 (will be added to your monthly bill).",
+    "type": "EXTRA_MEAL_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "date": "2026-11-13",
+      "count": 2,
+      "mealType": "LUNCH",
+      "totalAmount": 180,
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:14:56.120Z"
+  },
+  {
+    "id": "2385d96c-d06d-4517-86d0-b982f1cb3f29",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Aditya Deshmukh, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0014*\nSubscription: ₹4200\nExtra Meals: ₹0\nTotal Payable: *₹4200*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 4200,
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0014",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 4200
+    },
+    "createdAt": "2026-11-13T20:14:56.152Z"
+  },
+  {
+    "id": "72c6922d-ef82-4ec7-b481-bac27393b9e1",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "PAYMENT CONFIRMATION",
+    "message": "💳 *Payment Verified & Received!* - Baramati Messwala\n\nDear Aditya Deshmukh, we have received your payment of *₹4200* for Invoice *INV-2026-0014* via UPI.\n\nReceipt/Payment No: *PAY-2026-0017*\nStatus: CONFIRMED. Thank you!",
+    "type": "PAYMENT_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "amount": 4200,
+      "method": "UPI",
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0014",
+      "paymentNumber": "PAY-2026-0017"
+    },
+    "createdAt": "2026-11-13T20:14:56.269Z"
+  },
+  {
+    "id": "b00f2010-ac86-4e6a-85f7-e8919094ac4a",
+    "customerId": "46a54dc6-82d8-4248-b88a-07b81a3f304e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Rohit Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "d225fa3d-d13a-4c63-b055-e7f9131147c2",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Amit Patil"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "ad23780c-1af1-4dd4-84b3-75bcb932cbd6",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "8b30fb3c-03ed-41a0-9c64-d49734c4db4b",
+    "customerId": "7a4c34a8-03af-46a6-a5f4-47f5d35a1a41",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Priya Kulkarni"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "9239f262-cda5-46c5-b538-ad30fd1168f4",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "441ed800-c143-4e67-9646-c35a20d3c29d",
+    "customerId": "9e38b0dc-a244-4f39-b275-9e46c4b9eedd",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "865822bc-a7dc-403d-be15-41081a3fd7cb",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "6b6db71e-4c85-4fd5-a940-69a4f3bae0e3",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "940ffdf0-dd4d-4f5e-ae59-b75ddaf10041",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "b6a92998-7bfd-478d-ba8c-d3e5acc6d331",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "f3c3288a-7efa-4953-9e43-42d26b820546",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "72c19f7a-fdab-47d2-9da8-70edb2813111",
+    "customerId": "f27cc92e-59e5-4a2e-8ebc-328ab4f7a9b2",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:14:56.313Z"
+  },
+  {
+    "id": "40149c95-6ac0-4211-899c-32399aeefb76",
+    "customerId": "10fca061-9302-4063-9748-1d3e34a1ab4e",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Pooja Kadam!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-014*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-014",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:56:40.022Z"
+  },
+  {
+    "id": "cb847c96-2624-4393-9e47-719e75928b03",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Amit Patil, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0015*\nSubscription: ₹3200\nExtra Meals: ₹0\nTotal Payable: *₹3200*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 3200,
+      "customerName": "Amit Patil",
+      "invoiceNumber": "INV-2026-0015",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 3200
+    },
+    "createdAt": "2026-11-13T20:56:58.032Z"
+  },
+  {
+    "id": "fa660258-586d-4a28-96be-f0bcf1c02b6d",
+    "customerId": "46a54dc6-82d8-4248-b88a-07b81a3f304e",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Rohit Deshmukh, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0016*\nSubscription: ₹4200\nExtra Meals: ₹0\nTotal Payable: *₹4200*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 4200,
+      "customerName": "Rohit Deshmukh",
+      "invoiceNumber": "INV-2026-0016",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 4200
+    },
+    "createdAt": "2026-11-13T20:57:03.617Z"
+  },
+  {
+    "id": "c2d4c4e3-da2f-4549-822b-2441637c749f",
+    "customerId": "6e9e6bac-88dd-44c4-b8e6-6a8773a43c07",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Swapnil Jadhav, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0017*\nSubscription: ₹0\nExtra Meals: ₹0\nTotal Payable: *₹0*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 0,
+      "customerName": "Swapnil Jadhav",
+      "invoiceNumber": "INV-2026-0017",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 0
+    },
+    "createdAt": "2026-11-13T20:57:07.611Z"
+  },
+  {
+    "id": "66d9745f-0b95-4b37-8b2d-590252249138",
+    "customerId": "7a4c34a8-03af-46a6-a5f4-47f5d35a1a41",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Priya Kulkarni, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0018*\nSubscription: ₹1800\nExtra Meals: ₹0\nTotal Payable: *₹1800*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 1800,
+      "customerName": "Priya Kulkarni",
+      "invoiceNumber": "INV-2026-0018",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 1800
+    },
+    "createdAt": "2026-11-13T20:57:10.786Z"
+  },
+  {
+    "id": "40a18e14-f35c-4571-bfdd-3da94bfaadb8",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Aditya Deshmukh, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0023*\nSubscription: ₹850\nExtra Meals: ₹0\nTotal Payable: *₹850*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 850,
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0023",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 850
+    },
+    "createdAt": "2026-11-13T20:57:29.981Z"
+  },
+  {
+    "id": "87a5b89e-73a7-4c89-9362-1621672b73e3",
+    "customerId": "f27cc92e-59e5-4a2e-8ebc-328ab4f7a9b2",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Pooja Kadam, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0024*\nSubscription: ₹0\nExtra Meals: ₹0\nTotal Payable: *₹0*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 0,
+      "customerName": "Pooja Kadam",
+      "invoiceNumber": "INV-2026-0024",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 0
+    },
+    "createdAt": "2026-11-13T20:57:32.429Z"
+  },
+  {
+    "id": "7cee946d-7657-4be5-99be-0747ebd0f532",
+    "customerId": "9e38b0dc-a244-4f39-b275-9e46c4b9eedd",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Pooja Kadam, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0025*\nSubscription: ₹0\nExtra Meals: ₹0\nTotal Payable: *₹0*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 0,
+      "customerName": "Pooja Kadam",
+      "invoiceNumber": "INV-2026-0025",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 0
+    },
+    "createdAt": "2026-11-13T20:57:35.054Z"
+  },
+  {
+    "id": "4455c7f2-6e92-4cca-866f-85bcb097a403",
+    "customerId": "10fca061-9302-4063-9748-1d3e34a1ab4e",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Pooja Kadam, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0026*\nSubscription: ₹0\nExtra Meals: ₹0\nTotal Payable: *₹0*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 0,
+      "customerName": "Pooja Kadam",
+      "invoiceNumber": "INV-2026-0026",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 0
+    },
+    "createdAt": "2026-11-13T20:57:37.953Z"
+  },
+  {
+    "id": "6b83ecf7-2507-423f-828e-f0d526cbef77",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:57:52.534Z"
+  },
+  {
+    "id": "dc761911-b4ce-4a6d-af29-db18432b97e6",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Nikhil Shinde, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0019*\nSubscription: ₹3400\nExtra Meals: ₹0\nTotal Payable: *₹3400*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 3400,
+      "customerName": "Nikhil Shinde",
+      "invoiceNumber": "INV-2026-0019",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 3400
+    },
+    "createdAt": "2026-11-13T20:57:13.636Z"
+  },
+  {
+    "id": "2313ad07-3fa5-4760-943e-623d8575a991",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Nikhil Shinde, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0020*\nSubscription: ₹3400\nExtra Meals: ₹0\nTotal Payable: *₹3400*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 3400,
+      "customerName": "Nikhil Shinde",
+      "invoiceNumber": "INV-2026-0020",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 3400
+    },
+    "createdAt": "2026-11-13T20:57:16.625Z"
+  },
+  {
+    "id": "2fb1077e-3cf3-41d8-9f12-e006c1bf05cc",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Nikhil Shinde, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0021*\nSubscription: ₹3400\nExtra Meals: ₹0\nTotal Payable: *₹3400*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 3400,
+      "customerName": "Nikhil Shinde",
+      "invoiceNumber": "INV-2026-0021",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 3400
+    },
+    "createdAt": "2026-11-13T20:57:20.616Z"
+  },
+  {
+    "id": "4fc9270e-b4a6-4a14-907d-dab05064cb15",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Pooja Kadam, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0022*\nSubscription: ₹0\nExtra Meals: ₹0\nTotal Payable: *₹0*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 0,
+      "customerName": "Pooja Kadam",
+      "invoiceNumber": "INV-2026-0022",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 0
+    },
+    "createdAt": "2026-11-13T20:57:26.694Z"
+  },
+  {
+    "id": "3d53fcc0-e6cf-4743-97e3-055063380455",
+    "customerId": "7a4c34a8-03af-46a6-a5f4-47f5d35a1a41",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Priya Kulkarni"
+    },
+    "createdAt": "2026-11-13T20:57:52.534Z"
+  },
+  {
+    "id": "7d54dc91-148f-4ced-9a5a-3cebeb0b98d2",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "7bf8a11e-675c-46f1-9c31-33b9a9e19b8f",
+    "customerId": "9e38b0dc-a244-4f39-b275-9e46c4b9eedd",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "d7864e1d-70c7-4311-95cc-0864c75f3c47",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "4c7bf463-2f4f-4d52-b461-3dd48fe43839",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "8a25a70a-3cd2-410d-8a8a-727c27297d93",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:57:52.534Z"
+  },
+  {
+    "id": "5a02ea81-7aed-44af-9a35-f03bf29e7e07",
+    "customerId": "46a54dc6-82d8-4248-b88a-07b81a3f304e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Rohit Deshmukh"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "9092d4cc-050a-4b76-9d2b-348a2b1a45e9",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-13T20:57:52.534Z"
+  },
+  {
+    "id": "7f09d126-253e-4f3e-ad9e-6f3df737d01a",
+    "customerId": "10fca061-9302-4063-9748-1d3e34a1ab4e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "6d2f3ddf-406b-41f3-b3b7-976989fef915",
+    "customerId": "f27cc92e-59e5-4a2e-8ebc-328ab4f7a9b2",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "58fde097-6fb6-4737-a255-c4e8622fc928",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Amit Patil"
+    },
+    "createdAt": "2026-11-13T20:57:52.535Z"
+  },
+  {
+    "id": "4b7406de-b7f5-4852-987f-74dd7da0cd19",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-13T20:57:52.534Z"
+  },
+  {
+    "id": "df4300d8-29b4-46cd-9f22-87a5273666c9",
+    "customerId": "5aecabcc-0e91-466d-884b-427a7b9bb276",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Aditya Deshmukh!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-015*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-015",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:36:50.562Z"
+  },
+  {
+    "id": "3950a5b7-db26-4853-8837-e2bdc4252019",
+    "customerId": "a9fdedea-5145-43f4-ae2e-530ddb511f31",
+    "title": "WELCOME",
+    "message": "🎉 Welcome to *Baramati Messwala*, Pooja Kadam!\n\nYour registration is complete. Your Customer ID is: *BMW-2026-016*.\nManage your meals, view your daily menu and scan your attendance directly on MessMate portal.\n\nHelpline: +91 9822334455\n\"Manage Your Mess, The Smart Way!\"",
+    "type": "WELCOME",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "customerCode": "BMW-2026-016",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-14T06:37:03.726Z"
+  },
+  {
+    "id": "1c969db1-1a88-410b-a235-a68d7e2324f0",
+    "customerId": "5aecabcc-0e91-466d-884b-427a7b9bb276",
+    "title": "EXTRA MEAL CONFIRMATION",
+    "message": "🍛 *Extra Meal Confirmed* - Baramati Messwala\n\nHello Aditya Deshmukh, your request for *2x LUNCH* on 2026-11-14 has been confirmed.\nCharge: ₹180 (will be added to your monthly bill).",
+    "type": "EXTRA_MEAL_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "date": "2026-11-14",
+      "count": 2,
+      "mealType": "LUNCH",
+      "totalAmount": 180,
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:37:46.909Z"
+  },
+  {
+    "id": "d26b8784-baf1-41ae-b76c-d0aec29a9540",
+    "customerId": "5aecabcc-0e91-466d-884b-427a7b9bb276",
+    "title": "BILL GENERATED",
+    "message": "📄 *Monthly Bill Generated* - Baramati Messwala\n\nDear Aditya Deshmukh, your bill for 2/2026 has been generated.\n\nInvoice No: *INV-2026-0028*\nSubscription: ₹4200\nExtra Meals: ₹0\nTotal Payable: *₹4200*\nDue Date: 2/10/2026\n\nPlease pay via UPI or Cash.",
+    "type": "BILL_GENERATED",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "dueDate": "2/10/2026",
+      "monthYear": "2/2026",
+      "totalAmount": 4200,
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0028",
+      "extraMealAmount": 0,
+      "subscriptionAmount": 4200
+    },
+    "createdAt": "2026-11-14T06:37:53.609Z"
+  },
+  {
+    "id": "395f106f-84d4-470e-9dc1-86817015c7b2",
+    "customerId": "5aecabcc-0e91-466d-884b-427a7b9bb276",
+    "title": "PAYMENT CONFIRMATION",
+    "message": "💳 *Payment Verified & Received!* - Baramati Messwala\n\nDear Aditya Deshmukh, we have received your payment of *₹4200* for Invoice *INV-2026-0028* via UPI.\n\nReceipt/Payment No: *PAY-2026-0020*\nStatus: CONFIRMED. Thank you!",
+    "type": "PAYMENT_CONFIRMATION",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "amount": 4200,
+      "method": "UPI",
+      "customerName": "Aditya Deshmukh",
+      "invoiceNumber": "INV-2026-0028",
+      "paymentNumber": "PAY-2026-0020"
+    },
+    "createdAt": "2026-11-14T06:38:11.720Z"
+  },
+  {
+    "id": "d6d664a1-9e1c-4d3a-99a3-0fe0670bc41f",
+    "customerId": "46a54dc6-82d8-4248-b88a-07b81a3f304e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Rohit Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "a7db3356-ad13-4980-8cac-0417f0266544",
+    "customerId": "7a4c34a8-03af-46a6-a5f4-47f5d35a1a41",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Priya Kulkarni"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "a172683b-51c0-4e2d-bf23-9b2bf033033e",
+    "customerId": "aa7d442c-7ddc-4c4e-a7ac-4d16e2022e23",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-14T06:38:32.422Z"
+  },
+  {
+    "id": "a0b3d111-f26c-435c-b560-83956e6694cf",
+    "customerId": "5aecabcc-0e91-466d-884b-427a7b9bb276",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "2bcac951-8d68-4d09-912c-49611214fcfb",
+    "customerId": "5119be97-ab20-4743-b3f4-ea3b83137939",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "0afb588b-0aa2-4b1c-b7c4-7e14b4bc657f",
+    "customerId": "da132489-5ff3-4535-8c21-1d074952accf",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Nikhil Shinde"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "09d662e6-73ea-48f1-b16a-e5e70fd78e18",
+    "customerId": "587965b6-ecbe-4528-8680-237686e64808",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "240456f5-2b71-4ae6-bb6a-5c1e183bf1f2",
+    "customerId": "a9fdedea-5145-43f4-ae2e-530ddb511f31",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "8d3ddee8-ea3f-464a-b18f-93e158378e6b",
+    "customerId": "3186dc79-52c4-4398-884b-67088eec3281",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Amit Patil"
+    },
+    "createdAt": "2026-11-14T06:38:32.422Z"
+  },
+  {
+    "id": "f8d518bd-f744-4112-b0f6-3a2344a5e409",
+    "customerId": "f81002c9-a119-4e7c-88b8-8a2ad70612f3",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "a1c032f5-d126-4b7c-902f-7e22385ee678",
+    "customerId": "9e38b0dc-a244-4f39-b275-9e46c4b9eedd",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "9368a293-e86b-401b-b679-a06faa149ac0",
+    "customerId": "10fca061-9302-4063-9748-1d3e34a1ab4e",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "e0ce8eb7-80cd-434e-a8d3-05a640e88448",
+    "customerId": "7265f34a-4bc6-4a7c-a4de-9568692afd2c",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Aditya Deshmukh"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "190ae0b4-8d46-469f-ae2a-226841bd7e1f",
+    "customerId": "41b8976d-6299-4413-a0ad-4c7dc177c5d7",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  },
+  {
+    "id": "1270d3c0-b86b-4221-b482-ca335262599c",
+    "customerId": "f27cc92e-59e5-4a2e-8ebc-328ab4f7a9b2",
+    "title": "Poha & Hot Masala Chai",
+    "message": "🍽️ *Today's Special Menu* - Baramati Messwala\n\nBREAKFAST: *Poha & Hot Masala Chai*\nDishes: Kanda Poha with Sev & Coconut, Spicy Tarri, Roasted Peanuts, Hot Special Masala Chai\n\nEnjoy hot & fresh meals at Baramati Messwala!",
+    "type": "MENU_UPDATE",
+    "channel": "BOTH",
+    "isRead": false,
+    "whatsappMessageId": null,
+    "deliveryStatus": "MOCKED",
+    "metadata": {
+      "items": [
+        "Kanda Poha with Sev & Coconut",
+        "Spicy Tarri",
+        "Roasted Peanuts",
+        "Hot Special Masala Chai"
+      ],
+      "title": "Poha & Hot Masala Chai",
+      "mealType": "BREAKFAST",
+      "customerName": "Pooja Kadam"
+    },
+    "createdAt": "2026-11-14T06:38:32.421Z"
+  }
+]

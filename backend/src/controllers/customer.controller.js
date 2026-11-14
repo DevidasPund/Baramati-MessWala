@@ -1,0 +1,327 @@
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import prisma from '../config/db.js';
+import { successResponse, errorResponse } from '../utils/response.js';
+import { logAudit } from '../middleware/auditLogger.js';
+import { whatsappService } from '../integrations/whatsapp.js';
+
+export const getCustomers = async (req, res, next) => {
+  try {
+    const { search = '', status, page = 1, limit = 10 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const take = Number(limit);
+
+    const where = {};
+
+    if (status && status !== 'ALL') {
+      where.status = status;
+    }
+
+    if (search.trim()) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search } },
+        { customerCode: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [total, customers] = await Promise.all([
+      prisma.customer.count({ where }),
+      prisma.customer.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          subscriptions: {
+            where: { status: 'ACTIVE' },
+            include: { plan: true },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      }),
+    ]);
+
+    return successResponse(res, 'Customers fetched', {
+      customers,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / take),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCustomerById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, email: true, role: true, isActive: true, lastLogin: true } },
+        subscriptions: {
+          include: { plan: true },
+          orderBy: { createdAt: 'desc' },
+        },
+        attendance: {
+          take: 30,
+          orderBy: { scanTime: 'desc' },
+        },
+        invoices: {
+          orderBy: { createdAt: 'desc' },
+          include: { items: true },
+        },
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
+        extraMeals: {
+          orderBy: { createdAt: 'desc' },
+        },
+        complaints: {
+          orderBy: { createdAt: 'desc' },
+        },
+        feedback: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!customer) {
+      return errorResponse(res, 'Customer not found.', 404);
+    }
+
+    return successResponse(res, 'Customer details fetched', { customer });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createCustomer = async (req, res, next) => {
+  try {
+    const { name, phone, email, address, emergencyContact, status = 'ACTIVE', planId, initialPaymentMethod, notes } = req.body;
+
+    if (!name || !phone) {
+      return errorResponse(res, 'Customer name and phone number are required.', 400);
+    }
+
+    const cleanPhone = phone.trim();
+    const cleanEmail = (email || `${cleanPhone}@baramatimesswala.com`).toLowerCase().trim();
+
+    // Prevent duplicate phone
+    const existingPhone = await prisma.customer.findUnique({ where: { phone: cleanPhone } });
+    if (existingPhone) {
+      return errorResponse(res, 'A customer with this phone number already exists.', 409);
+    }
+
+    // Default password for customer
+    const rawPassword = 'Pass@' + cleanPhone.slice(-4);
+    const passwordHash = await bcrypt.hash(rawPassword, 10);
+
+    const count = await prisma.customer.count();
+    const customerCode = `BMW-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
+    const qrToken = 'bmw_qr_' + crypto.randomBytes(16).toString('hex');
+
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email: cleanEmail,
+          passwordHash,
+          role: 'CUSTOMER',
+          isActive: true,
+        },
+      });
+
+      const customer = await tx.customer.create({
+        data: {
+          userId: user.id,
+          customerCode,
+          name,
+          phone: cleanPhone,
+          email: cleanEmail,
+          address,
+          emergencyContact,
+          status,
+          qrToken,
+          notes,
+        },
+      });
+
+      let subscription = null;
+      let invoice = null;
+
+      if (planId) {
+        const plan = await tx.subscriptionPlan.findUnique({ where: { id: planId } });
+        if (plan) {
+          const startDate = new Date();
+          const endDate = new Date();
+          endDate.setDate(endDate.getDate() + plan.durationDays);
+
+          subscription = await tx.subscription.create({
+            data: {
+              customerId: customer.id,
+              planId: plan.id,
+              startDate,
+              endDate,
+              amount: plan.price,
+              status: 'ACTIVE',
+            },
+          });
+
+          // Create first invoice
+          const invMonth = startDate.getMonth() + 1;
+          const invYear = startDate.getFullYear();
+          invoice = await tx.invoice.create({
+            data: {
+              invoiceNumber: `INV-${invYear}-${customer.customerCode.replace('BMW-', '')}`,
+              customerId: customer.id,
+              subscriptionId: subscription.id,
+              billingMonth: invMonth,
+              billingYear: invYear,
+              periodStart: startDate,
+              periodEnd: endDate,
+              subscriptionAmount: plan.price,
+              totalAmount: plan.price,
+              paidAmount: initialPaymentMethod ? plan.price : 0.00,
+              balanceDue: initialPaymentMethod ? 0.00 : plan.price,
+              status: initialPaymentMethod ? 'PAID' : 'PENDING',
+              dueDate: new Date(startDate.getTime() + 5 * 24 * 3600 * 1000),
+              items: {
+                create: [
+                  {
+                    description: `${plan.name} (${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()})`,
+                    itemType: 'SUBSCRIPTION',
+                    quantity: 1,
+                    unitPrice: plan.price,
+                    amount: plan.price,
+                    date: startDate,
+                  },
+                ],
+              },
+            },
+          });
+
+          if (initialPaymentMethod) {
+            await tx.payment.create({
+              data: {
+                paymentNumber: `PAY-${invYear}-${customer.customerCode.replace('BMW-', '')}`,
+                invoiceId: invoice.id,
+                customerId: customer.id,
+                amount: plan.price,
+                paymentMethod: initialPaymentMethod,
+                status: 'VERIFIED',
+                verifiedById: req.user.id,
+                verifiedAt: new Date(),
+                notes: 'Initial joining payment recorded by admin',
+              },
+            });
+          }
+        }
+      }
+
+      return { user, customer, subscription, invoice, tempPassword: rawPassword };
+    }, { maxWait: 15000, timeout: 35000 });
+
+    await logAudit(req.user.id, 'CREATE_CUSTOMER', 'Customer', result.customer.id, { customerCode }, req);
+
+    whatsappService.sendNotification({
+      customerId: result.customer.id,
+      phone: result.customer.phone,
+      templateType: 'WELCOME',
+      data: {
+        customerName: result.customer.name,
+        customerCode: result.customer.customerCode,
+      },
+    }).catch((err) => console.error('Notification error:', err));
+
+    return successResponse(res, 'Customer created successfully', result, 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateCustomer = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, email, address, emergencyContact, status, notes } = req.body;
+
+    const existing = await prisma.customer.findUnique({ where: { id } });
+    if (!existing) {
+      return errorResponse(res, 'Customer not found', 404);
+    }
+
+    if (phone && phone !== existing.phone) {
+      const duplicate = await prisma.customer.findUnique({ where: { phone } });
+      if (duplicate && duplicate.id !== id) {
+        return errorResponse(res, 'Another customer with this phone number already exists.', 409);
+      }
+    }
+
+    const updated = await prisma.customer.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(phone && { phone }),
+        ...(email && { email }),
+        ...(address && { address }),
+        ...(emergencyContact && { emergencyContact }),
+        ...(status && { status }),
+        ...(notes !== undefined && { notes }),
+      },
+    });
+
+    await logAudit(req.user.id, 'UPDATE_CUSTOMER', 'Customer', id, req.body, req);
+
+    return successResponse(res, 'Customer updated successfully', { customer: updated });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteCustomer = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!customer) {
+      return errorResponse(res, 'Customer not found', 404);
+    }
+
+    // Deleting the User cascades delete to Customer and related records
+    await prisma.user.delete({ where: { id: customer.userId } });
+
+    await logAudit(req.user.id, 'DELETE_CUSTOMER', 'Customer', id, { customerCode: customer.customerCode }, req);
+
+    return successResponse(res, 'Customer deleted successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const regenerateQrToken = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const newQrToken = 'bmw_qr_' + crypto.randomBytes(16).toString('hex');
+
+    const customer = await prisma.customer.update({
+      where: { id },
+      data: { qrToken: newQrToken },
+    });
+
+    await logAudit(req.user.id, 'REGENERATE_QR', 'Customer', id, null, req);
+
+    return successResponse(res, 'QR Token regenerated successfully', { qrToken: customer.qrToken });
+  } catch (error) {
+    next(error);
+  }
+};

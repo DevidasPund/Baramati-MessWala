@@ -1,0 +1,443 @@
+[
+  {
+    "id": "e4beb9ae-887a-4813-93e6-89676281cb59",
+    "date": "2026-11-12",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.566Z",
+    "updatedAt": "2026-11-13T19:10:38.566Z"
+  },
+  {
+    "id": "19b7d875-a508-4968-8ba2-6f3d65d6addc",
+    "date": "2026-11-12",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.574Z",
+    "updatedAt": "2026-11-13T19:10:38.574Z"
+  },
+  {
+    "id": "222aea15-e08f-41a9-9d6f-4507cec47be4",
+    "date": "2026-11-12",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.576Z",
+    "updatedAt": "2026-11-13T19:10:38.576Z"
+  },
+  {
+    "id": "809ac412-0c7c-4d68-9c95-c5c97c84e9bd",
+    "date": "2026-11-13",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.578Z",
+    "updatedAt": "2026-11-13T19:10:38.578Z"
+  },
+  {
+    "id": "7bb109a9-443e-4175-a485-4e625fd0f6ca",
+    "date": "2026-11-13",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": true,
+    "specialNote": "Special Sunday Sweet Included!",
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.579Z",
+    "updatedAt": "2026-11-13T19:10:38.579Z"
+  },
+  {
+    "id": "4288ef06-dfc2-48aa-b56c-574d6412bcda",
+    "date": "2026-11-13",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.581Z",
+    "updatedAt": "2026-11-13T19:10:38.581Z"
+  },
+  {
+    "id": "6e126e97-2509-414d-8a24-5ad3ba831608",
+    "date": "2026-11-14",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.582Z",
+    "updatedAt": "2026-11-13T19:10:38.582Z"
+  },
+  {
+    "id": "3b95a496-bd2f-4a28-8f70-9d669c793c3c",
+    "date": "2026-11-14",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.584Z",
+    "updatedAt": "2026-11-13T19:10:38.584Z"
+  },
+  {
+    "id": "9081f10a-74cf-4722-afcb-f029cc0ad9e1",
+    "date": "2026-11-14",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.585Z",
+    "updatedAt": "2026-11-13T19:10:38.585Z"
+  },
+  {
+    "id": "30c09949-d7f4-439d-a512-b6646fabc869",
+    "date": "2026-11-15",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.586Z",
+    "updatedAt": "2026-11-13T19:10:38.586Z"
+  },
+  {
+    "id": "334744b0-ffcf-4fb7-a524-12945824cfac",
+    "date": "2026-11-15",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.588Z",
+    "updatedAt": "2026-11-13T19:10:38.588Z"
+  },
+  {
+    "id": "1efa87be-d0c4-4af0-bdf9-7ef7c63c7073",
+    "date": "2026-11-15",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.589Z",
+    "updatedAt": "2026-11-13T19:10:38.589Z"
+  },
+  {
+    "id": "073140a6-8d98-4b05-8abf-0ec852070acf",
+    "date": "2026-11-16",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.591Z",
+    "updatedAt": "2026-11-13T19:10:38.591Z"
+  },
+  {
+    "id": "78f93558-4b17-4a87-a3f4-6cb2968ee108",
+    "date": "2026-11-16",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.593Z",
+    "updatedAt": "2026-11-13T19:10:38.593Z"
+  },
+  {
+    "id": "dceedf92-9f69-4afe-a378-ec812394724b",
+    "date": "2026-11-16",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.595Z",
+    "updatedAt": "2026-11-13T19:10:38.595Z"
+  },
+  {
+    "id": "ae00ef28-1fb5-4610-ac20-7ed1298249ca",
+    "date": "2026-11-17",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.596Z",
+    "updatedAt": "2026-11-13T19:10:38.596Z"
+  },
+  {
+    "id": "a0dd3eb6-cd41-4ccc-8802-7eb99991147c",
+    "date": "2026-11-17",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.597Z",
+    "updatedAt": "2026-11-13T19:10:38.597Z"
+  },
+  {
+    "id": "c9a0b290-5d7e-4326-a712-4bbb08a684e1",
+    "date": "2026-11-17",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.599Z",
+    "updatedAt": "2026-11-13T19:10:38.599Z"
+  },
+  {
+    "id": "19a5ea03-2d52-4539-97ec-e59339a3ec5b",
+    "date": "2026-11-18",
+    "mealType": "BREAKFAST",
+    "title": "Poha & Hot Masala Chai",
+    "items": [
+      "Kanda Poha with Sev & Coconut",
+      "Spicy Tarri",
+      "Roasted Peanuts",
+      "Hot Special Masala Chai"
+    ],
+    "description": "Authentic Maharashtrian breakfast freshly prepared with hand-pounded spices.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.601Z",
+    "updatedAt": "2026-11-13T19:10:38.601Z"
+  },
+  {
+    "id": "f12e3993-0998-48ce-bef0-bd3b128c230c",
+    "date": "2026-11-18",
+    "mealType": "LUNCH",
+    "title": "Special Maharashtrian Thali",
+    "items": [
+      "Paneer Kolhapuri",
+      "Bhendi Fry",
+      "Chapati (4 pcs) or Jowar Bhakri",
+      "Amti / Dal Tadka",
+      "Indrayani Steamed Rice",
+      "Papad & Pickle",
+      "Gulab Jamun (1 pc)"
+    ],
+    "description": "Wholesome royal meal made with pure ghee and farm-fresh local vegetables.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.602Z",
+    "updatedAt": "2026-11-13T19:10:38.602Z"
+  },
+  {
+    "id": "2e8b595b-d1b6-4877-b191-c71ecc4a75c0",
+    "date": "2026-11-18",
+    "mealType": "DINNER",
+    "title": "Sev Bhaji & Fresh Chapati Dinner",
+    "items": [
+      "Khandeshi Sev Bhaji",
+      "Aloo Methi Sukhi",
+      "Phulke / Chapati (4 pcs)",
+      "Jeera Rice",
+      "Moong Dal Fry",
+      "Kachumber Salad",
+      "Buttermilk / Taak"
+    ],
+    "description": "Light, comforting and nutritious dinner for perfect digestion and sound sleep.",
+    "imageUrl": null,
+    "isSpecial": false,
+    "specialNote": null,
+    "isPublished": true,
+    "createdAt": "2026-11-13T19:10:38.605Z",
+    "updatedAt": "2026-11-13T19:10:38.605Z"
+  }
+]

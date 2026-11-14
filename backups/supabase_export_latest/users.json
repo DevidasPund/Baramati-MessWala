@@ -1,0 +1,182 @@
+[
+  {
+    "id": "5127064b-391c-4fd7-8159-8f1020b4f4c4",
+    "email": "rohit@baramatimesswala.com",
+    "passwordHash": "$2b$10$FzMNkAeuxGCSwDb.GyQ/gOKCuMdaOVfMON8h/XxLisKzDKsg9F/Wi",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T19:10:38.534Z",
+    "updatedAt": "2026-11-13T19:10:38.534Z"
+  },
+  {
+    "id": "9497a719-db07-4c06-9ec2-0fad769c6284",
+    "email": "swapnil@baramatimesswala.com",
+    "passwordHash": "$2b$10$FzMNkAeuxGCSwDb.GyQ/gOKCuMdaOVfMON8h/XxLisKzDKsg9F/Wi",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T19:10:38.548Z",
+    "updatedAt": "2026-11-13T19:10:38.548Z"
+  },
+  {
+    "id": "972e2622-1079-4427-b41f-b456d1675895",
+    "email": "priya@baramatimesswala.com",
+    "passwordHash": "$2b$10$FzMNkAeuxGCSwDb.GyQ/gOKCuMdaOVfMON8h/XxLisKzDKsg9F/Wi",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T19:10:38.555Z",
+    "updatedAt": "2026-11-13T19:10:38.555Z"
+  },
+  {
+    "id": "af2d6f5a-6d9d-4aaf-87a1-8b65c834f42f",
+    "email": "nikhil_1794598412008@baramatimesswala.com",
+    "passwordHash": "$2b$10$k1.YNVdr48HOKToyUR1FZurDhdFYN.wcRrE878IjmqYY7RtjylMse",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-13T19:33:32.244Z",
+    "createdAt": "2026-11-13T19:33:32.082Z",
+    "updatedAt": "2026-11-13T19:33:32.246Z"
+  },
+  {
+    "id": "841c4de0-3b4c-4f00-b64c-1cf0c1b07044",
+    "email": "nikhil_1794598473441@baramatimesswala.com",
+    "passwordHash": "$2b$10$rAi3g3nTmNas4ku1F95aCuikE8Xk3mtpV/ImsLmWTkyI20vh5TykW",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-13T19:34:33.676Z",
+    "createdAt": "2026-11-13T19:34:33.513Z",
+    "updatedAt": "2026-11-13T19:34:33.678Z"
+  },
+  {
+    "id": "68d9479e-5344-47a7-a9d3-7651c77eb76b",
+    "email": "nikhil_1794598523499@baramatimesswala.com",
+    "passwordHash": "$2b$10$rWi6KzNqIDxS7dpO/kYmreLLdy0XLlkoI8kSQIv5FlSGqjXHpo03C",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-13T19:35:23.737Z",
+    "createdAt": "2026-11-13T19:35:23.572Z",
+    "updatedAt": "2026-11-13T19:35:23.738Z"
+  },
+  {
+    "id": "80c72ea7-fdfa-46c2-9764-cddcf2289031",
+    "email": "pooja_1794600598020@baramatimesswala.com",
+    "passwordHash": "$2b$10$snNkmwzP2oxidHTqUxGI8ukVuxs3GVxrSZdPr//QhMNdUSIoYnr42",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T20:09:58.089Z",
+    "updatedAt": "2026-11-13T20:09:58.089Z"
+  },
+  {
+    "id": "c65124ef-cf19-44d0-b96a-f93a32a975cd",
+    "email": "aditya_1794600597786@baramatimesswala.com",
+    "passwordHash": "$2b$10$TqJWgXTpeZOlf8SSscsEwe483eTCh.tFInoGUerE8tPtDMB/QjLoO",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-13T20:09:58.160Z",
+    "createdAt": "2026-11-13T20:09:57.866Z",
+    "updatedAt": "2026-11-13T20:09:58.160Z"
+  },
+  {
+    "id": "aa745176-9e35-46c2-a1dc-1faaa1db6510",
+    "email": "pooja_1794600794674@baramatimesswala.com",
+    "passwordHash": "$2b$10$ambD5v6kAZYSrhBk0TJxQO3gRb/X4Z9Z4Cna/khenczZ4NCLmTziC",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T20:13:14.822Z",
+    "updatedAt": "2026-11-13T20:13:14.822Z"
+  },
+  {
+    "id": "bd6ad76b-7b2a-4143-a34e-41bfe8a23ccc",
+    "email": "aditya_1794600794221@baramatimesswala.com",
+    "passwordHash": "$2b$10$zN9mdF2hCdkHCTXaUjDAV.4zT1LsD6UtYEg652QHsaKvN8tucwcLy",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-13T20:13:14.983Z",
+    "createdAt": "2026-11-13T20:13:14.384Z",
+    "updatedAt": "2026-11-13T20:13:14.985Z"
+  },
+  {
+    "id": "e37b82cc-d623-48d8-b321-f038c631fbe1",
+    "email": "pooja_1794600895521@baramatimesswala.com",
+    "passwordHash": "$2b$10$0fzsGTm/I84Ure5Xo.Sh9eltBZ0ADMuyrb7TkNERXZmVpMdZE9M7K",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T20:14:55.678Z",
+    "updatedAt": "2026-11-13T20:14:55.678Z"
+  },
+  {
+    "id": "98dec949-d143-4515-8533-d5b6e8ce1bab",
+    "email": "aditya_1794600895012@baramatimesswala.com",
+    "passwordHash": "$2b$10$ry5znYhSK2nmKSQ0xWSp9urM1nl8oJGgDA8xZK2HZKDKKyw3YV/YG",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-13T20:14:55.835Z",
+    "createdAt": "2026-11-13T20:14:55.183Z",
+    "updatedAt": "2026-11-13T20:14:55.836Z"
+  },
+  {
+    "id": "9c979f60-e8f7-4885-8da9-ed4fa41752ab",
+    "email": "pooja_1794603397366@baramatimesswala.com",
+    "passwordHash": "$2b$10$FvfeUEu0VqwwUJRLemDQVuryzz07TLmtwXwsGWK4vde5VkhXktumS",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-13T20:56:39.015Z",
+    "updatedAt": "2026-11-13T20:56:39.015Z"
+  },
+  {
+    "id": "13d5e2e1-701e-4600-b090-a919a69c2dd9",
+    "email": "staff@baramatimesswala.com",
+    "passwordHash": "$2b$10$FVdVFVlfcbdg4KX8YwH3YOScpLn9SoCFXJu28QonjOB3yHrSRifUW",
+    "role": "STAFF",
+    "isActive": true,
+    "lastLogin": "2026-11-14T06:36:36.239Z",
+    "createdAt": "2026-11-13T19:10:38.339Z",
+    "updatedAt": "2026-11-14T06:36:36.240Z"
+  },
+  {
+    "id": "14252666-f67f-426f-9fb8-d089d3470e1f",
+    "email": "customer@baramatimesswala.com",
+    "passwordHash": "$2b$10$FzMNkAeuxGCSwDb.GyQ/gOKCuMdaOVfMON8h/XxLisKzDKsg9F/Wi",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-14T06:36:38.752Z",
+    "createdAt": "2026-11-13T19:10:38.417Z",
+    "updatedAt": "2026-11-14T06:36:38.753Z"
+  },
+  {
+    "id": "af43c218-76c0-435f-bf6f-fd5e21c5a886",
+    "email": "pooja_1794638221649@baramatimesswala.com",
+    "passwordHash": "$2b$10$0L8m0Ct9myyBVxAN5tNPyODnkjLeUKGYB7UlumPQkd8vUxA3y1.Bi",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": null,
+    "createdAt": "2026-11-14T06:37:02.722Z",
+    "updatedAt": "2026-11-14T06:37:02.722Z"
+  },
+  {
+    "id": "a4bbab8d-7f8f-46a4-8b4e-ec0f3e536fb2",
+    "email": "aditya_1794638203387@baramatimesswala.com",
+    "passwordHash": "$2b$10$uxOuxJAebWnADkEQa6Uyo.SOS4pXgKX6g3Htf7u1Fztreinr4sdWm",
+    "role": "CUSTOMER",
+    "isActive": true,
+    "lastLogin": "2026-11-14T06:37:05.931Z",
+    "createdAt": "2026-11-14T06:36:45.474Z",
+    "updatedAt": "2026-11-14T06:37:05.932Z"
+  },
+  {
+    "id": "d75f490e-6be9-42ae-9ac8-effb31d24422",
+    "email": "admin@baramatimesswala.com",
+    "passwordHash": "$2b$10$G6oNPGNLaCt6ubnOVVhdjO5Gq8To54k2AyviUC6IL8kOo1etAGIy.",
+    "role": "SUPER_ADMIN",
+    "isActive": true,
+    "lastLogin": "2026-11-14T11:41:19.569Z",
+    "createdAt": "2026-11-13T19:10:38.269Z",
+    "updatedAt": "2026-11-14T11:41:19.572Z"
+  }
+]

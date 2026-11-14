@@ -1,0 +1,536 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  PAUSED
+}
+
+enum PlanType {
+  MONTHLY
+  WEEKLY
+  CUSTOM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  PAUSED
+  CANCELLED
+  PENDING
+}
+
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+}
+
+enum AttendanceMethod {
+  CUSTOMER_SCANS_MESS
+  STAFF_SCANS_CUSTOMER
+  MANUAL_ADMIN
+}
+
+enum ExtraMealCategory {
+  EXTRA_MEAL
+  GUEST_MEAL
+}
+
+enum ExtraMealStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum MealRequestType {
+  MEAL_SKIP
+  PAUSE_SUBSCRIPTION
+  RESUME_SUBSCRIPTION
+  RENEWAL_REQUEST
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum InvoiceItemType {
+  SUBSCRIPTION
+  EXTRA_MEAL
+  GUEST_MEAL
+  DISCOUNT
+  ADJUSTMENT
+}
+
+enum PaymentMethod {
+  UPI
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  PARTIAL
+}
+
+enum NotificationType {
+  WELCOME
+  SUBSCRIPTION_ACTIVATION
+  EXPIRY_REMINDER
+  RENEWAL_REMINDER
+  BILL_GENERATED
+  PAYMENT_REMINDER
+  PAYMENT_CONFIRMATION
+  EXTRA_MEAL_CONFIRMATION
+  ANNOUNCEMENT
+  MENU_UPDATE
+}
+
+enum NotificationChannel {
+  WHATSAPP
+  IN_APP
+  BOTH
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  MOCKED
+}
+
+enum ComplaintCategory {
+  FOOD_QUALITY
+  HYGIENE
+  TIMING
+  BILLING
+  STAFF_BEHAVIOR
+  OTHER
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model User {
+  id                 String               @id @default(uuid())
+  email              String               @unique
+  passwordHash       String
+  role               Role                 @default(CUSTOMER)
+  isActive           Boolean              @default(true)
+  lastLogin          DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  customer           Customer?
+  staff              Staff?
+  auditLogs          AuditLog[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model Customer {
+  id               String          @id @default(uuid())
+  userId           String          @unique
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerCode     String          @unique // e.g. "BMW-2026-001"
+  name             String
+  phone            String          @unique
+  email            String?
+  address          String?
+  emergencyContact String?
+  profilePhoto     String?
+  joiningDate      DateTime        @default(now())
+  status           CustomerStatus  @default(ACTIVE)
+  qrToken          String          @unique // Non-guessable secure token for QR
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  subscriptions    Subscription[]
+  attendance       Attendance[]
+  extraMeals       ExtraMeal[]
+  mealRequests     MealRequest[]
+  invoices         Invoice[]
+  payments         Payment[]
+  notifications    Notification[]
+  feedback         Feedback[]
+  complaints       Complaint[]
+
+  @@index([phone])
+  @@index([customerCode])
+  @@index([status])
+}
+
+model Staff {
+  id               String          @id @default(uuid())
+  userId           String          @unique
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffCode        String          @unique // e.g. "STAFF-01"
+  name             String
+  phone            String          @unique
+  email            String?
+  designation      String          @default("Staff Member")
+  role             Role            @default(STAFF)
+  permissions      Json?           // e.g. ["scan_attendance", "view_menu", "customer_search"]
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  attendanceScans  Attendance[]    @relation("ScannedByStaff")
+}
+
+model SubscriptionPlan {
+  id               String          @id @default(uuid())
+  name             String          // e.g. "Monthly Both Meals (Lunch + Dinner)"
+  code             String          @unique // e.g. "M-BOTH"
+  planType         PlanType        @default(MONTHLY)
+  durationDays     Int             @default(30)
+  price            Decimal         @db.Decimal(10, 2)
+  includedMeals    String[]        // ["LUNCH", "DINNER"] or ["BREAKFAST", "LUNCH", "DINNER"]
+  description      String?
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  subscriptions    Subscription[]
+}
+
+model Subscription {
+  id               String             @id @default(uuid())
+  customerId       String
+  customer         Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  planId           String
+  plan             SubscriptionPlan   @relation(fields: [planId], references: [id])
+  startDate        DateTime
+  endDate          DateTime
+  amount           Decimal            @db.Decimal(10, 2)
+  discount         Decimal            @default(0.00) @db.Decimal(10, 2)
+  paidAmount       Decimal            @default(0.00) @db.Decimal(10, 2)
+  status           SubscriptionStatus @default(ACTIVE)
+  pausedAt         DateTime?
+  resumeAt         DateTime?
+  autoRenewal      Boolean            @default(false)
+  renewalReminderSent Boolean         @default(false)
+  notes            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  invoices         Invoice[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([endDate])
+}
+
+model Attendance {
+  id               String           @id @default(uuid())
+  customerId       String
+  customer         Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  mealType         MealType
+  date             String           // Stored as ISO YYYY-MM-DD for fast unambiguous querying
+  scanTime         DateTime         @default(now())
+  method           AttendanceMethod @default(CUSTOMER_SCANS_MESS)
+  scannedById      String?
+  scannedByStaff   Staff?           @relation("ScannedByStaff", fields: [scannedById], references: [id], onDelete: SetNull)
+  isVerified       Boolean          @default(true)
+  notes            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([customerId, mealType, date], name: "unique_customer_meal_date")
+  @@index([date])
+  @@index([mealType])
+  @@index([customerId])
+}
+
+model FoodMenu {
+  id               String           @id @default(uuid())
+  date             String           // YYYY-MM-DD
+  mealType         MealType
+  title            String           // e.g. "Special Maharashtrian Thali"
+  items            Json             // array of dish strings: ["Paneer Masala", "Chapati (4)", "Dal Tadka", "Jeera Rice", "Gulab Jamun"]
+  description      String?
+  imageUrl         String?
+  isSpecial        Boolean          @default(false)
+  specialNote      String?
+  isPublished      Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@unique([date, mealType], name: "unique_date_meal_menu")
+  @@index([date])
+  @@index([mealType])
+}
+
+model ExtraMeal {
+  id               String            @id @default(uuid())
+  customerId       String
+  customer         Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  mealType         MealType
+  date             String            // YYYY-MM-DD
+  count            Int               @default(1)
+  mealCategory     ExtraMealCategory @default(EXTRA_MEAL)
+  chargePerMeal    Decimal           @db.Decimal(10, 2)
+  totalAmount      Decimal           @db.Decimal(10, 2)
+  status           ExtraMealStatus   @default(PENDING)
+  requestReason    String?
+  adminNotes       String?
+  invoiceId        String?
+  invoice          Invoice?          @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([customerId])
+  @@index([date])
+  @@index([status])
+}
+
+model MealRequest {
+  id               String          @id @default(uuid())
+  customerId       String
+  customer         Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  requestType      MealRequestType
+  startDate        DateTime
+  endDate          DateTime?
+  mealType         MealType?       // for MEAL_SKIP
+  reason           String?
+  status           RequestStatus   @default(PENDING)
+  adminNotes       String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Invoice {
+  id                 String         @id @default(uuid())
+  invoiceNumber      String         @unique // e.g. "INV-2026-0001"
+  customerId         String
+  customer           Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  subscriptionId     String?
+  subscription       Subscription?  @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  billingMonth       Int            // 1-12
+  billingYear        Int            // 2026
+  periodStart        DateTime
+  periodEnd          DateTime
+  subscriptionAmount Decimal        @default(0.00) @db.Decimal(10, 2)
+  extraMealCharges   Decimal        @default(0.00) @db.Decimal(10, 2)
+  guestMealCharges   Decimal        @default(0.00) @db.Decimal(10, 2)
+  discountAmount     Decimal        @default(0.00) @db.Decimal(10, 2)
+  taxAmount          Decimal        @default(0.00) @db.Decimal(10, 2)
+  totalAmount        Decimal        @db.Decimal(10, 2)
+  paidAmount         Decimal        @default(0.00) @db.Decimal(10, 2)
+  balanceDue         Decimal        @db.Decimal(10, 2)
+  status             InvoiceStatus  @default(PENDING)
+  isApprovedByAdmin  Boolean        @default(true)
+  approvedAt         DateTime?
+  dueDate            DateTime
+  notes              String?
+  pdfPath            String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  items              InvoiceItem[]
+  payments           Payment[]
+  extraMealsIncluded ExtraMeal[]
+
+  @@unique([customerId, billingMonth, billingYear], name: "unique_customer_month_year_invoice")
+  @@index([customerId])
+  @@index([status])
+  @@index([billingYear, billingMonth])
+}
+
+model InvoiceItem {
+  id               String          @id @default(uuid())
+  invoiceId        String
+  invoice          Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description      String
+  itemType         InvoiceItemType @default(SUBSCRIPTION)
+  quantity         Int             @default(1)
+  unitPrice        Decimal         @db.Decimal(10, 2)
+  amount           Decimal         @db.Decimal(10, 2)
+  date             DateTime?
+
+  @@index([invoiceId])
+}
+
+model Payment {
+  id               String         @id @default(uuid())
+  paymentNumber    String         @unique // e.g. "PAY-2026-0001"
+  invoiceId        String?
+  invoice          Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  customerId       String
+  customer         Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  amount           Decimal        @db.Decimal(10, 2)
+  paymentMethod    PaymentMethod  @default(UPI)
+  transactionRef   String?        // UPI UTR or reference
+  screenshotUrl    String?
+  status           PaymentStatus  @default(PENDING)
+  verifiedById     String?        // Admin user ID who verified
+  verifiedAt       DateTime?
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([customerId])
+  @@index([invoiceId])
+  @@index([status])
+}
+
+model Notification {
+  id                 String              @id @default(uuid())
+  customerId         String
+  customer           Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title              String
+  message            String
+  type               NotificationType
+  channel            NotificationChannel @default(BOTH)
+  isRead             Boolean             @default(false)
+  whatsappMessageId  String?
+  deliveryStatus     DeliveryStatus      @default(PENDING)
+  metadata           Json?
+  createdAt          DateTime            @default(now())
+
+  @@index([customerId])
+  @@index([isRead])
+}
+
+model Feedback {
+  id                 String          @id @default(uuid())
+  customerId         String
+  customer           Customer        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  rating             Int             // 1-5 overall
+  foodQualityRating  Int?            // 1-5
+  hygieneRating      Int?            // 1-5
+  serviceRating      Int?            // 1-5
+  comments           String?
+  mealDate           String?         // YYYY-MM-DD
+  mealType           MealType?
+  createdAt          DateTime        @default(now())
+
+  @@index([customerId])
+  @@index([rating])
+}
+
+model Complaint {
+  id               String            @id @default(uuid())
+  complaintNumber  String            @unique // e.g. "CMP-2026-0001"
+  customerId       String
+  customer         Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  subject          String
+  description      String
+  category         ComplaintCategory @default(FOOD_QUALITY)
+  status           ComplaintStatus   @default(OPEN)
+  adminResponse    String?
+  resolvedAt       DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model BusinessSettings {
+  id                  String   @id @default("default")
+  businessName        String   @default("Baramati Messwala")
+  tagline             String   @default("Manage Your Mess, The Smart Way!")
+  developerName       String   @default("Devidas Pund")
+  logoUrl             String?
+  phone               String   @default("+91 9876543210")
+  email               String   @default("contact@baramatimesswala.com")
+  address             String   @default("Near Vidyanagari, Baramati, Maharashtra 413133")
+  googleMapsUrl       String?  @default("https://maps.google.com/?q=Baramati+Messwala")
+  upiId               String   @default("baramatimesswala@upi")
+  upiPayeeName        String   @default("Baramati Messwala")
+  upiQrImage          String?
+  breakfastStartTime  String   @default("07:30")
+  breakfastEndTime    String   @default("10:00")
+  lunchStartTime      String   @default("12:00")
+  lunchEndTime        String   @default("15:00")
+  dinnerStartTime     String   @default("19:30")
+  dinnerEndTime       String   @default("22:30")
+  extraBreakfastPrice Decimal  @default(40.00) @db.Decimal(10, 2)
+  extraLunchPrice     Decimal  @default(90.00) @db.Decimal(10, 2)
+  extraDinnerPrice    Decimal  @default(90.00) @db.Decimal(10, 2)
+  guestMealPrice      Decimal  @default(110.00) @db.Decimal(10, 2)
+  expiryReminderDays  String   @default("7,3,1")
+  whatsappEnabled     Boolean  @default(false)
+  whatsappAccessToken String?
+  whatsappPhoneId     String?
+  whatsappAccountId   String?
+  whatsappApiVersion  String   @default("v21.0")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+model MessQrSession {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  mealType  MealType
+  date      String   // YYYY-MM-DD
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([date])
+}

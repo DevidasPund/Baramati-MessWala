@@ -1,0 +1,141 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserRole() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'ADMIN' || getUserRole() == 'SUPER_ADMIN');
+    }
+
+    function isStaff() {
+      return isAuthenticated() && (getUserRole() == 'STAFF' || isAdmin());
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Public / Business Settings
+    match /businessSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Food Menu: Publicly readable, admin editable
+    match /foodMenu/{menuId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Subscription Plans: Publicly readable, admin editable
+    match /subscriptionPlans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Customers: Customers read/update their own profile, Admins full access
+    match /customers/{customerId} {
+      allow read: if isStaff() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Staff
+    match /staff/{staffId} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // Subscriptions
+    match /subscriptions/{subscriptionId} {
+      allow read: if isStaff() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow write: if isAdmin();
+    }
+
+    // Attendance: Staff/Admin can create/read, Customer can read own
+    match /attendance/{attendanceId} {
+      allow read: if isStaff() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow create: if isStaff() || isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Mess QR Sessions: Read by authenticated users, written by admin/staff
+    match /messQrSessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isStaff();
+    }
+
+    // Meal Requests (Skips): Customer can create & read own, Admin manages
+    match /mealRequests/{requestId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Extra Meals: Customer can create & read own, Admin manages
+    match /extraMeals/{extraId} {
+      allow read: if isStaff() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Invoices: Customer can read own invoices, Admin manages
+    match /invoices/{invoiceId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow write: if isAdmin();
+    }
+
+    // Invoice Items
+    match /invoiceItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Payments: Customer can submit & read own, Admin verifies/rejects
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Notifications: User can read and mark own notifications as read
+    match /notifications/{notifId} {
+      allow read, update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create, delete: if isAdmin();
+    }
+
+    // Feedback & Complaints
+    match /feedback/{feedbackId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    match /complaints/{complaintId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.customerId == request.auth.token.customerId);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Audit Logs: Strictly Admin read-only, privileged service writes
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+  }
+}
