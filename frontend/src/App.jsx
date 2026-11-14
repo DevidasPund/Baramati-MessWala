@@ -46,6 +46,9 @@ import { CustomerBillsPage } from './pages/customer/CustomerBillsPage';
 import { CustomerExtraMealsPage } from './pages/customer/CustomerExtraMealsPage';
 import { CustomerFeedbackPage } from './pages/customer/CustomerFeedbackPage';
 import { CustomerProfilePage } from './pages/customer/CustomerProfilePage';
+import { CustomerSubscriptionPage } from './pages/customer/CustomerSubscriptionPage';
+import { CustomerMenuPage } from './pages/customer/CustomerMenuPage';
+import { CustomerNotificationsPage } from './pages/customer/CustomerNotificationsPage';
 
 // Staff
 import { StaffLayout } from './layouts/StaffLayout';
@@ -122,6 +125,9 @@ function App() {
           <Route path="attendance" element={<CustomerAttendancePage />} />
           <Route path="bills" element={<CustomerBillsPage />} />
           <Route path="extra-meals" element={<CustomerExtraMealsPage />} />
+          <Route path="subscription" element={<CustomerSubscriptionPage />} />
+          <Route path="menu" element={<CustomerMenuPage />} />
+          <Route path="notifications" element={<CustomerNotificationsPage />} />
           <Route path="feedback" element={<CustomerFeedbackPage />} />
           <Route path="profile" element={<CustomerProfilePage />} />
         </Route>

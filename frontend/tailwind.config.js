@@ -26,7 +26,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Noto Sans Devanagari"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        marathi: ['"Noto Sans Devanagari"', 'sans-serif'],
       },
     },
   },

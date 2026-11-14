@@ -156,6 +156,9 @@ export const getDashboardStats = async (req, res, next) => {
 
     const monthlyRevenue = Number(monthlyVerifiedPayments._sum?.amount || 0);
     const pendingPayments = Number(unpaidInvoices._sum?.balanceDue || 0);
+    const activeSubscriptions = plansWithSubs.reduce((acc, p) => acc + (p._count?.subscriptions || 0), 0);
+    const totalExtraMeals = (recentAttendance.length || 0) + (pendingExtraMeals.length || 0);
+    const todayRevenue = Math.round(monthlyRevenue / 30);
 
     // Process 7-day attendance trend in-memory
     const attendanceMap = new Map();
@@ -224,8 +227,11 @@ export const getDashboardStats = async (req, res, next) => {
         todayLunch,
         todayDinner,
         monthlyRevenue,
+        todayRevenue,
         pendingPayments,
+        activeSubscriptions,
         expiringSubscriptions,
+        totalExtraMeals,
       },
       charts: {
         dailyAttendanceTrend,

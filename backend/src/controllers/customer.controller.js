@@ -325,3 +325,109 @@ export const regenerateQrToken = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getMyDashboardStats = async (req, res, next) => {
+  try {
+    const customerId = req.user.customer?.id;
+    if (!customerId) {
+      return errorResponse(res, 'Customer profile not found for this account.', 403);
+    }
+
+    const { month, year } = req.query;
+    const now = new Date();
+    const targetYear = parseInt(year) || now.getFullYear();
+    const targetMonth = parseInt(month) || (now.getMonth() + 1);
+
+    const startOfMonth = new Date(Date.UTC(targetYear, targetMonth - 1, 1));
+    const endOfMonth = new Date(Date.UTC(targetYear, targetMonth, 0, 23, 59, 59, 999));
+    const startOfMonthStr = startOfMonth.toISOString().split('T')[0];
+    const endOfMonthStr = endOfMonth.toISOString().split('T')[0];
+
+    const [customer, totalMealsCount, monthlyAttendance, allInvoices, payments, extraMeals] = await Promise.all([
+      prisma.customer.findUnique({
+        where: { id: customerId },
+        include: {
+          subscriptions: {
+            where: { status: 'ACTIVE' },
+            include: { plan: true },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      }),
+      prisma.attendance.count({
+        where: { customerId },
+      }),
+      prisma.attendance.findMany({
+        where: {
+          customerId,
+          date: { gte: startOfMonthStr, lte: endOfMonthStr },
+        },
+        orderBy: { date: 'asc' },
+      }),
+      prisma.invoice.findMany({
+        where: { customerId },
+        orderBy: { createdAt: 'desc' },
+        include: { items: true },
+      }),
+      prisma.payment.findMany({
+        where: { customerId },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.extraMeal.findMany({
+        where: {
+          customerId,
+          date: { gte: startOfMonthStr, lte: endOfMonthStr },
+        },
+      }),
+    ]);
+
+    const totalBalanceDue = allInvoices.reduce((acc, inv) => acc + (inv.status !== 'PAID' ? Number(inv.balanceDue || 0) : 0), 0);
+    const currentSub = customer?.subscriptions?.[0];
+    const basePlanPrice = currentSub?.plan ? Number(currentSub.plan.price) : 0;
+    const extraMealsCost = extraMeals.reduce((acc, em) => acc + Number(em.totalAmount || 0), 0);
+    const monthlyTotalExpense = basePlanPrice + extraMealsCost;
+
+    const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
+    const dailyRecords = [];
+    const mealPricePerMeal = currentSub?.plan?.price ? Math.round(Number(currentSub.plan.price) / (daysInMonth * (currentSub.plan.mealsPerDay || 2))) : 70;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dayStr = `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const dayAttendances = monthlyAttendance.filter((a) => a.date === dayStr);
+      const hasBreakfast = dayAttendances.some((a) => a.mealType === 'BREAKFAST');
+      const hasLunch = dayAttendances.some((a) => a.mealType === 'LUNCH');
+      const hasDinner = dayAttendances.some((a) => a.mealType === 'DINNER');
+      const attendedCount = (hasBreakfast ? 1 : 0) + (hasLunch ? 1 : 0) + (hasDinner ? 1 : 0);
+      const dayAmount = attendedCount * mealPricePerMeal;
+
+      if (new Date(dayStr) <= new Date() || dayAttendances.length > 0) {
+        dailyRecords.push({
+          date: dayStr,
+          breakfast: hasBreakfast,
+          lunch: hasLunch,
+          dinner: hasDinner,
+          rate: mealPricePerMeal,
+          amount: dayAmount,
+          attendedCount,
+        });
+      }
+    }
+
+    return successResponse(res, 'Customer dashboard stats fetched', {
+      customer,
+      kpis: {
+        totalMealsAttended: totalMealsCount,
+        currentMonthMealsAttended: monthlyAttendance.length,
+        outstandingBalance: totalBalanceDue,
+        monthlyTotalExpense,
+      },
+      dailyRecords,
+      payments,
+      invoices: allInvoices,
+      activeSubscription: currentSub || null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

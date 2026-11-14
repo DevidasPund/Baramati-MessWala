@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
+import { Star, MessageSquare, AlertCircle, CheckCircle2, Clock, Send, ThumbsUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -41,10 +41,10 @@ export const CustomerFeedbackPage = () => {
         hygieneRating,
         comments,
       });
-      toast.success(res.message || 'Thank you for your rating!');
+      toast.success(res.message || 'आपल्या बहुमूल्य अभिप्रायाबद्दल धन्यवाद!');
       setComments('');
     } catch (err) {
-      toast.error('Failed to submit rating');
+      toast.error('अभिप्राय नोंदवता आला नाही.');
     } finally {
       setSubmittingRating(false);
     }
@@ -53,220 +53,225 @@ export const CustomerFeedbackPage = () => {
   const handleSubmitComplaint = async (e) => {
     e.preventDefault();
     if (!subject || !description) {
-      toast.error('Subject and description are required');
+      toast.error('विषय आणि तपशील भरणे आवश्यक आहे');
       return;
     }
 
     setSubmittingComplaint(true);
     try {
-      const res = await api.post('/feedback/complaints', { subject, description, category });
-      toast.success(res.message || 'Complaint submitted');
+      const res = await api.post('/feedback/complaints', {
+        subject,
+        description,
+        category,
+      });
+      toast.success(res.message || 'तक्रार यशस्वीरित्या नोंदवली गेली. प्रशासन लवकरच संपर्क करेल.');
       setSubject('');
       setDescription('');
       fetchComplaints();
     } catch (err) {
-      toast.error('Failed to submit complaint');
+      toast.error(err.message || 'तक्रार नोंदवता आली नाही');
     } finally {
       setSubmittingComplaint(false);
     }
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-slate-900">Feedback & Support Desk</h2>
-        <p className="text-xs text-slate-500">Rate your dining experience or raise complaints for prompt resolution</p>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <MessageSquare className="w-6 h-6 text-blue-600" />
+          <span>अभिप्राय व तक्रार निवारण</span>
+        </h1>
+        <p className="text-xs text-slate-500 font-medium">
+          आपला अनुभव शेअर करा किंवा सेवेबद्दल तक्रार असल्यास बारामती मेस व्यवस्थापनाला कळवा
+        </p>
       </div>
 
-      <div className="flex items-center gap-2 p-1 bg-white rounded-2xl border border-slate-200 shadow-2xs w-fit">
+      {/* Segment Tabs */}
+      <div className="flex bg-slate-200/60 p-1 rounded-2xl">
         <button
           onClick={() => setActiveTab('rate')}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-            activeTab === 'rate' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600'
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeTab === 'rate'
+              ? 'bg-white text-blue-600 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          Rate Today's Meal
+          ⭐ जेवणाचा अभिप्राय द्या
         </button>
         <button
           onClick={() => setActiveTab('complaint')}
-          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all ${
-            activeTab === 'complaint' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600'
+          className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeTab === 'complaint'
+              ? 'bg-white text-rose-600 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          File a Complaint / Issue ({myComplaints.length})
+          ⚠️ तक्रार नोंदवा
         </button>
       </div>
 
+      {/* Tab 1: Rating Form */}
       {activeTab === 'rate' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xs space-y-6">
-          <div className="space-y-1">
-            <h3 className="font-bold text-sm text-slate-900">How Was Your Food Today?</h3>
-            <p className="text-xs text-slate-500">Your ratings directly guide our head chef's daily kitchen preparation.</p>
-          </div>
-
-          <form onSubmit={handleSubmitRating} className="space-y-5 text-xs">
+        <form onSubmit={handleSubmitRating} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-6">
+          <div className="space-y-4">
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-2">Overall Experience</label>
-              <div className="flex items-center gap-2">
-                {[1, 2, 3, 4, 5].map((s) => (
+              <label className="block text-xs font-bold text-slate-700 mb-2">
+                एकूण जेवणाचा अनुभव (Overall Rating)
+              </label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
                   <button
-                    key={s}
+                    key={star}
                     type="button"
-                    onClick={() => setRating(s)}
-                    className="p-1 focus:outline-none"
+                    onClick={() => setRating(star)}
+                    className="p-1 text-amber-400 hover:scale-110 transition-transform"
                   >
-                    <Star
-                      className={`w-7 h-7 ${
-                        s <= rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
-                      }`}
-                    />
+                    <Star className={`w-8 h-8 ${rating >= star ? 'fill-amber-400' : 'text-slate-200'}`} />
                   </button>
                 ))}
-                <span className="font-bold text-slate-700 ml-2">{rating} of 5 Stars</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Taste & Quality</label>
-                <select
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  अन्नाचा दर्जा (Food Quality): {foodRating}/5
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
                   value={foodRating}
                   onChange={(e) => setFoodRating(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
-                >
-                  <option value={5}>5 - Excellent</option>
-                  <option value={4}>4 - Good</option>
-                  <option value={3}>3 - Average</option>
-                  <option value={2}>2 - Needs improvement</option>
-                  <option value={1}>1 - Poor</option>
-                </select>
+                  className="w-full accent-blue-600"
+                />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Dining Hygiene</label>
-                <select
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  स्वच्छता (Hygiene): {hygieneRating}/5
+                </label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
                   value={hygieneRating}
                   onChange={(e) => setHygieneRating(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
-                >
-                  <option value={5}>5 - Spotless Clean</option>
-                  <option value={4}>4 - Clean</option>
-                  <option value={3}>3 - Acceptable</option>
-                  <option value={2}>2 - Needs attention</option>
-                </select>
+                  className="w-full accent-blue-600"
+                />
               </div>
             </div>
 
             <div>
-              <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Comments & Suggestions</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                तुमच्या प्रतिक्रिया किंवा सुधारणा सूचना:
+              </label>
               <textarea
-                rows={3}
-                placeholder="Let us know what you loved or what we can cook better..."
+                rows="4"
+                placeholder="जेवणाची चव कशी वाटली? पोळ्या, आमटी, भाज्यांबद्दल आपले मत लिहा..."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
-                className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-sans"
+              ></textarea>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={submittingRating}
+            className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-50"
+          >
+            <Send className="w-4 h-4" />
+            <span>{submittingRating ? 'पाठवत आहे...' : 'अभिप्राय पाठवा'}</span>
+          </button>
+        </form>
+      )}
+
+      {/* Tab 2: Complaint Form & List */}
+      {activeTab === 'complaint' && (
+        <div className="space-y-6">
+          <form onSubmit={handleSubmitComplaint} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                तक्रारीचा प्रकार (Category)
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-rose-500"
+              >
+                <option value="FOOD_QUALITY">जेवणाचा दर्जा / चव</option>
+                <option value="HYGIENE">स्वच्छता किंवा भांडी</option>
+                <option value="TIMING">जेवणाची वेळ / उशीर</option>
+                <option value="STAFF_BEHAVIOR">कर्मचाऱ्यांचे वर्तन</option>
+                <option value="BILLING">बिल किंवा पेमेंट प्रश्न</option>
+                <option value="OTHER">इतर तक्रार</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                तक्रारीचा विषय (Subject)
+              </label>
+              <input
+                type="text"
+                placeholder="उदा. पोळ्या वेळेवर उपलब्ध नव्हत्या"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-rose-500 font-medium"
               />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                तपशील (Detailed Description)
+              </label>
+              <textarea
+                rows="4"
+                placeholder="नेमकी काय अडचण आली ते सविस्तर लिहा..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-rose-500"
+              ></textarea>
             </div>
 
             <button
               type="submit"
-              disabled={submittingRating}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50"
+              disabled={submittingComplaint}
+              className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-rose-600/20 disabled:opacity-50"
             >
-              {submittingRating ? 'Submitting...' : 'Submit Review'}
+              <AlertCircle className="w-4 h-4" />
+              <span>{submittingComplaint ? 'नोंद होत आहे...' : 'तक्रार दाखल करा'}</span>
             </button>
           </form>
-        </div>
-      )}
 
-      {activeTab === 'complaint' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xs space-y-5">
-            <h3 className="font-bold text-sm text-slate-900">Submit a Complaint</h3>
-            <p className="text-xs text-slate-500">Every issue is assigned a unique complaint tracking number and reviewed by management.</p>
-
-            <form onSubmit={handleSubmitComplaint} className="space-y-4 text-xs">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Issue Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
-                  >
-                    <option value="FOOD_QUALITY">Food Quality / Taste</option>
-                    <option value="HYGIENE">Hygiene & Cleanliness</option>
-                    <option value="TIMING">Meal Timings</option>
-                    <option value="BILLING">Billing & Accounts</option>
-                    <option value="STAFF_BEHAVIOR">Staff Behavior</option>
-                    <option value="OTHER">Other Query</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Subject *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Too much spice in dinner curry"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Detailed Description *</label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="Describe what occurred, date and meal timing..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={submittingComplaint}
-                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50"
-              >
-                {submittingComplaint ? 'Registering...' : 'Register Complaint'}
-              </button>
-            </form>
-          </div>
-
-          {/* List of my past complaints */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 font-bold text-xs text-slate-900">
-              My Registered Complaints ({myComplaints.length})
-            </div>
+          {/* Previous Complaints */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              मागील तक्रारींची स्थिती
+            </h3>
             {myComplaints.length > 0 ? (
-              <div className="divide-y divide-slate-100 text-xs">
-                {myComplaints.map((c) => (
-                  <div key={c.id} className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-emerald-700">{c.complaintNumber}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        c.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                      }`}>
-                        {c.status}
-                      </span>
-                    </div>
-                    <div className="font-bold text-slate-900">{c.subject}</div>
-                    <p className="text-slate-600 text-[11px]">{c.description}</p>
-                    {c.adminResponse && (
-                      <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-emerald-900 font-medium text-[11px]">
-                        <strong>Response:</strong> {c.adminResponse}
-                      </div>
-                    )}
+              myComplaints.map((c) => (
+                <div key={c.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-slate-900">{c.subject}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        c.status === 'RESOLVED'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}
+                    >
+                      {c.status === 'RESOLVED' ? 'निवारण झाले' : 'प्रलंबित'}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <p className="text-xs text-slate-600 font-medium">{c.description}</p>
+                </div>
+              ))
             ) : (
-              <p className="p-6 text-center text-xs text-slate-400">No complaints registered.</p>
+              <p className="text-xs text-slate-400 font-medium">कोणतीही प्रलंबित तक्रार नाही.</p>
             )}
           </div>
         </div>

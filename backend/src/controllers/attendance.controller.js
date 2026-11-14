@@ -370,9 +370,13 @@ export const getAttendanceList = async (req, res, next) => {
     const take = Number(limit);
 
     const where = {};
+    if (req.user?.role === 'CUSTOMER') {
+      where.customerId = req.user.customer?.id || 'none';
+    } else if (customerId) {
+      where.customerId = customerId;
+    }
     if (date) where.date = date;
     if (mealType && mealType !== 'ALL') where.mealType = mealType;
-    if (customerId) where.customerId = customerId;
 
     if (search) {
       where.customer = {
@@ -426,9 +430,13 @@ export const exportAttendanceExcel = async (req, res, next) => {
   try {
     const { date, mealType, customerId } = req.query;
     const where = {};
+    if (req.user?.role === 'CUSTOMER') {
+      where.customerId = req.user.customer?.id || 'none';
+    } else if (customerId) {
+      where.customerId = customerId;
+    }
     if (date) where.date = date;
     if (mealType && mealType !== 'ALL') where.mealType = mealType;
-    if (customerId) where.customerId = customerId;
 
     const records = await prisma.attendance.findMany({
       where,

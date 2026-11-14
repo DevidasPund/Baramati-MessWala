@@ -13,6 +13,11 @@ import {
   Clock,
   ArrowRight,
   TrendingUp,
+  CreditCard,
+  UtensilsCrossed,
+  Filter,
+  CheckCircle2,
+  Calendar,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -35,6 +40,7 @@ export const AdminDashboardPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dateFilter, setDateFilter] = useState('month'); // 'today', 'yesterday', 'week', 'month', 'last_month', 'custom'
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -46,7 +52,7 @@ export const AdminDashboardPage = () => {
       }
     } catch (err) {
       console.error('Dashboard stats error:', err);
-      setError(err.message || 'Failed to load dashboard metrics.');
+      setError(err.message || 'डॅशबोर्ड माहिती लोड करण्यात अडचण आली.');
     } finally {
       setLoading(false);
     }
@@ -58,19 +64,19 @@ export const AdminDashboardPage = () => {
 
   if (loading && !stats) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 font-sans">
         <div className="flex items-center justify-between pb-2">
-          <div className="h-6 w-48 bg-slate-200 rounded-lg animate-pulse"></div>
-          <span className="text-xs text-slate-400 font-medium">Fetching real-time mess metrics...</span>
+          <div className="h-6 w-56 bg-slate-200 rounded-lg animate-pulse" />
+          <span className="text-xs text-slate-400 font-bold">मेस डेटा लोड होत आहे...</span>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 animate-pulse">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-24 bg-slate-200 rounded-2xl"></div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-pulse">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-28 bg-slate-200 rounded-2xl" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
-          <div className="h-72 bg-slate-200 rounded-2xl lg:col-span-2"></div>
-          <div className="h-72 bg-slate-200 rounded-2xl"></div>
+          <div className="h-72 bg-slate-200 rounded-2xl lg:col-span-2" />
+          <div className="h-72 bg-slate-200 rounded-2xl" />
         </div>
       </div>
     );
@@ -78,17 +84,17 @@ export const AdminDashboardPage = () => {
 
   if (error && !stats) {
     return (
-      <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 bg-white rounded-3xl border border-slate-200 shadow-sm text-center space-y-4">
+      <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 bg-white rounded-3xl border border-slate-200 shadow-sm text-center space-y-4 font-sans">
         <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
           <AlertCircle className="w-8 h-8" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900">Dashboard Unavailable</h3>
-        <p className="text-sm text-slate-500 max-w-md">{error}</p>
+        <h3 className="text-lg font-extrabold text-slate-900">डॅशबोर्ड माहिती उपलब्ध नाही</h3>
+        <p className="text-xs text-slate-500 max-w-md">{error}</p>
         <button
           onClick={fetchDashboard}
-          className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors"
+          className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
         >
-          Retry Loading
+          पुन्हा प्रयत्न करा (Retry)
         </button>
       </div>
     );
@@ -96,54 +102,171 @@ export const AdminDashboardPage = () => {
 
   const { kpis, charts, activities } = stats;
 
+  // 8 Exact Dashboard KPI Cards as requested
   const kpiCards = [
-    { title: 'Total Customers', value: kpis.totalCustomers, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { title: 'Active Members', value: kpis.activeCustomers, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { title: 'Inactive Members', value: kpis.inactiveCustomers, icon: UserX, color: 'text-rose-600', bg: 'bg-rose-50' },
-    { title: "Today's Total Scans", value: kpis.todayTotalAttendance, icon: CalendarCheck, color: 'text-teal-600', bg: 'bg-teal-50' },
-    { title: 'Breakfast Attendance', value: kpis.todayBreakfast, icon: Coffee, color: 'text-orange-600', bg: 'bg-orange-50' },
-    { title: 'Lunch Attendance', value: kpis.todayLunch, icon: Utensils, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    { title: 'Dinner Attendance', value: kpis.todayDinner, icon: Moon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    { title: 'Monthly Revenue', value: `₹${Number(kpis.monthlyRevenue).toFixed(0)}`, icon: IndianRupee, color: 'text-emerald-700', bg: 'bg-emerald-100/70' },
-    { title: 'Pending Dues', value: `₹${Number(kpis.pendingPayments).toFixed(0)}`, icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-50' },
-    { title: 'Expiring in ≤ 7d', value: kpis.expiringSubscriptions, icon: Clock, color: 'text-red-600', bg: 'bg-red-50' },
+    {
+      title: 'एकूण ग्राहक',
+      value: kpis.totalCustomers,
+      subtitle: 'नोंदणीकृत सदस्य',
+      icon: Users,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
+      link: '/admin/customers',
+    },
+    {
+      title: 'सक्रिय ग्राहक',
+      value: kpis.activeCustomers,
+      subtitle: 'सध्या जेवण घेणारे',
+      icon: UserCheck,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+      link: '/admin/customers?status=ACTIVE',
+    },
+    {
+      title: 'आजची एकूण हजेरी',
+      value: kpis.todayTotalAttendance,
+      subtitle: `सकाळ: ${kpis.todayBreakfast} • दुपार: ${kpis.todayLunch} • रात्र: ${kpis.todayDinner}`,
+      icon: CalendarCheck,
+      color: 'text-teal-600',
+      bg: 'bg-teal-50',
+      link: '/admin/attendance',
+    },
+    {
+      title: 'आजचे उत्पन्न',
+      value: `₹${Number(kpis.todayRevenue || 0).toLocaleString('en-IN')}`,
+      subtitle: 'आजची जमा रक्कम',
+      icon: IndianRupee,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+      link: '/admin/payments',
+    },
+    {
+      title: 'एकूण बाकी रक्कम',
+      value: `₹${Number(kpis.pendingPayments || 0).toLocaleString('en-IN')}`,
+      subtitle: 'थकबाकी बिले',
+      icon: AlertCircle,
+      color: 'text-rose-600',
+      bg: 'bg-rose-50',
+      link: '/admin/billing',
+    },
+    {
+      title: 'सक्रिय सबस्क्रिप्शन',
+      value: kpis.activeSubscriptions || kpis.activeCustomers,
+      subtitle: 'वैध मासिक पास',
+      icon: CreditCard,
+      color: 'text-purple-600',
+      bg: 'bg-purple-50',
+      link: '/admin/subscriptions',
+    },
+    {
+      title: 'संपणारी सबस्क्रिप्शन',
+      value: kpis.expiringSubscriptions,
+      subtitle: 'पुढील ७ दिवसांत संपणारे',
+      icon: Clock,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+      link: '/admin/subscriptions',
+    },
+    {
+      title: 'अतिरिक्त जेवण',
+      value: kpis.totalExtraMeals || 0,
+      subtitle: 'अतिरिक्त + पाहुणे ताट',
+      icon: UtensilsCrossed,
+      color: 'text-orange-600',
+      bg: 'bg-orange-50',
+      link: '/admin/extra-meals',
+    },
+  ];
+
+  // Date Filter Pills
+  const filterPills = [
+    { id: 'today', name: 'आज' },
+    { id: 'yesterday', name: 'काल' },
+    { id: 'week', name: 'या आठवड्यात' },
+    { id: 'month', name: 'या महिन्यात' },
+    { id: 'last_month', name: 'मागील महिना' },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* 10 Dashboard KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {kpiCards.map((card, i) => {
+    <div className="space-y-7 font-sans">
+      {/* Top Header & Date Filter Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            मेस व्यवसाय अवलोकन (Dashboard Overview)
+          </h2>
+          <p className="text-xs text-slate-500 font-medium">
+            बारामती मेसवाला • रिअल-टाईम हजेरी, महसूल आणि सबस्क्रिप्शन विश्लेषण
+          </p>
+        </div>
+
+        {/* Date Filters */}
+        <div className="flex items-center gap-1 bg-white p-1 rounded-2xl border border-slate-200 shadow-2xs text-xs font-bold flex-wrap">
+          <div className="px-2.5 py-1 text-slate-400 flex items-center gap-1 text-[11px] uppercase tracking-wider">
+            <Filter className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">कालावधी:</span>
+          </div>
+          {filterPills.map((pill) => (
+            <button
+              key={pill.id}
+              onClick={() => setDateFilter(pill.id)}
+              className={`px-3 py-1.5 rounded-xl transition-all ${
+                dateFilter === pill.id
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              {pill.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Eight Dashboard KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {kpiCards.map((card, idx) => {
           const Icon = card.icon;
           return (
-            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">
+            <Link
+              key={idx}
+              to={card.link}
+              className="bg-white p-5 rounded-2xl border border-slate-200/90 hover:border-blue-300 hover:shadow-xs transition-all flex flex-col justify-between group"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                   {card.title}
                 </span>
-                <div className={`w-7 h-7 rounded-lg ${card.bg} ${card.color} flex items-center justify-center`}>
-                  <Icon className="w-3.5 h-3.5" />
+                <div className={`w-9 h-9 rounded-xl ${card.bg} ${card.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                  <Icon className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl font-black text-slate-900 tracking-tight">
-                {card.value}
+
+              <div className="mt-2">
+                <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  {card.value}
+                </div>
+                <div className="text-[11px] font-medium text-slate-500 mt-0.5 truncate">
+                  {card.subtitle}
+                </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
 
-      {/* Main Charts Row */}
+      {/* 5. Main Analytics Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Daily Attendance Trend (7 Days) */}
-        <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
+        <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base">Daily Attendance Trend (Last 7 Days)</h3>
-              <p className="text-xs text-slate-400">Total customer scans broken down by day</p>
+              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                दैनंदिन हजेरी आलेख (Daily Attendance Trend)
+              </h3>
+              <p className="text-xs text-slate-400 font-medium">मागील ७ दिवसांमधील ग्राहक उपस्थिती</p>
             </div>
-            <Link to="/admin/attendance" className="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1">
-              <span>View Table</span>
+            <Link to="/admin/attendance" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
+              <span>हजेरी यादी पाहा</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -152,26 +275,39 @@ export const AdminDashboardPage = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={charts.dailyAttendanceTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="attendanceColor" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#059669" stopOpacity={0} />
+                  <linearGradient id="attBlue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} />
                 <YAxis stroke="#94a3b8" fontSize={11} allowDecimals={false} />
-                <Tooltip />
-                <Area type="monotone" dataKey="total" stroke="#059669" strokeWidth={2.5} fillOpacity={1} fill="url(#attendanceColor)" name="Total Scans" />
+                <Tooltip
+                  formatter={(value) => [`${value} जेवणे`, 'एकूण हजेरी']}
+                  labelFormatter={(label) => `वार: ${label}`}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="total"
+                  stroke="#2563eb"
+                  strokeWidth={2.5}
+                  fillOpacity={1}
+                  fill="url(#attBlue)"
+                  name="हजेरी"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Active vs Inactive Customer Pie */}
-        <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4 flex flex-col justify-between">
+        {/* Customer Status Ratio (Pie) */}
+        <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-slate-900 text-sm sm:text-base">Customer Membership Ratio</h3>
-            <p className="text-xs text-slate-400">Active vs Paused vs Inactive</p>
+            <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+              ग्राहक स्थिती गुणोत्तर (Customer Ratio)
+            </h3>
+            <p className="text-xs text-slate-400 font-medium">सक्रिय वि. स्थगित वि. निष्क्रिय</p>
           </div>
 
           <div className="h-48 w-full flex items-center justify-center">
@@ -196,27 +332,35 @@ export const AdminDashboardPage = () => {
           </div>
 
           <div className="flex items-center justify-around text-xs pt-2 border-t border-slate-100">
-            {charts.activeVsInactive.map((item) => (
-              <div key={item.name} className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-slate-600 font-medium">{item.name}: <strong>{item.value}</strong></span>
-              </div>
-            ))}
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="text-slate-600 font-semibold">सक्रिय: {kpis.activeCustomers}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-slate-600 font-semibold">स्थगित: {kpis.pausedCustomers || 0}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+              <span className="text-slate-600 font-semibold">बंद: {kpis.inactiveCustomers}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Revenue & Subscription Distribution Row */}
+      {/* Revenue & Meal-wise Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Revenue Trend (6 Months) */}
-        <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
+        {/* Monthly Revenue Trend */}
+        <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm sm:text-base">Monthly Revenue Trend</h3>
-              <p className="text-xs text-slate-400">Verified receipts in INR</p>
+              <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+                मासिक उत्पन्न आलेख (Monthly Revenue Trend)
+              </h3>
+              <p className="text-xs text-slate-400 font-medium">पडताळणी झालेले मासिक उत्पन्न (रुपये)</p>
             </div>
-            <Link to="/admin/payments" className="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1">
-              <span>View Payments</span>
+            <Link to="/admin/payments" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
+              <span>पेमेंट यादी</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -227,115 +371,119 @@ export const AdminDashboardPage = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
                 <YAxis stroke="#94a3b8" fontSize={11} />
-                <Tooltip formatter={(value) => `₹${value}`} />
-                <Bar dataKey="revenue" fill="#059669" radius={[6, 6, 0, 0]} name="Collections (₹)" />
+                <Tooltip formatter={(value) => `₹${Number(value).toLocaleString('en-IN')}`} />
+                <Bar dataKey="revenue" fill="#2563eb" radius={[6, 6, 0, 0]} name="जमा उत्पन्न (₹)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Subscription Plan Distribution */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
+        {/* Meal-Wise Today Breakdown */}
+        <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-2xs space-y-4">
           <div>
-            <h3 className="font-bold text-slate-900 text-sm sm:text-base">Active Plan Distribution</h3>
-            <p className="text-xs text-slate-400">Current subscribers per plan</p>
+            <h3 className="font-extrabold text-slate-900 text-sm sm:text-base">
+              आजची वेळनिहाय हजेरी (Meal-Wise Attendance)
+            </h3>
+            <p className="text-xs text-slate-400 font-medium">सकाळ, दुपार आणि रात्रीचे जेवण संख्या</p>
           </div>
 
-          <div className="space-y-3 pt-2">
-            {charts.subscriptionDistribution.map((plan) => (
-              <div key={plan.code} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-800">{plan.name}</span>
-                  <span className="font-extrabold text-emerald-600">{plan.count} subscribers</span>
+          <div className="space-y-4 pt-2">
+            <div className="p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold">
+                  <Coffee className="w-4 h-4" />
                 </div>
-                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full transition-all"
-                    style={{
-                      width: `${kpis.activeCustomers ? (plan.count / kpis.activeCustomers) * 100 : 0}%`,
-                    }}
-                  />
+                <div>
+                  <div className="text-xs font-bold text-orange-950">सकाळचा नाश्ता</div>
+                  <div className="text-[10px] text-orange-700 font-medium">07:30 AM – 10:00 AM</div>
                 </div>
               </div>
-            ))}
+              <div className="text-xl font-black text-orange-700 font-mono">
+                {kpis.todayBreakfast} <span className="text-xs font-bold">ताट</span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+                  <Utensils className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-emerald-950">दुपारचे जेवण</div>
+                  <div className="text-[10px] text-emerald-700 font-medium">12:00 PM – 03:00 PM</div>
+                </div>
+              </div>
+              <div className="text-xl font-black text-emerald-700 font-mono">
+                {kpis.todayLunch} <span className="text-xs font-bold">ताट</span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-blue-50/70 border border-blue-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
+                  <Moon className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-blue-950">रात्रीचे जेवण</div>
+                  <div className="text-[10px] text-blue-700 font-medium">07:30 PM – 10:30 PM</div>
+                </div>
+              </div>
+              <div className="text-xl font-black text-blue-700 font-mono">
+                {kpis.todayDinner} <span className="text-xs font-bold">ताट</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Recent Activities Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Attendance Scans */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h4 className="font-bold text-slate-900 text-sm">Recent Attendance Scans</h4>
-            <Link to="/admin/attendance" className="text-xs text-emerald-600 font-semibold hover:underline">All</Link>
+      {/* Recent Activities & Audit Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Attendance */}
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-sm font-extrabold text-slate-900">अलिकडील हजेरी नोंदी</h3>
+            <Link to="/admin/attendance" className="text-xs font-bold text-blue-600 hover:underline">
+              सर्व पाहा →
+            </Link>
           </div>
-          <div className="space-y-3">
-            {activities.recentAttendance.length > 0 ? (
-              activities.recentAttendance.map((a) => (
-                <div key={a.id} className="flex items-center justify-between text-xs">
-                  <div>
-                    <div className="font-bold text-slate-800">{a.customer?.name}</div>
-                    <div className="text-[10px] text-slate-400">{a.customer?.customerCode} • {a.mealType}</div>
-                  </div>
-                  <span className="text-[10px] font-medium text-slate-500">
-                    {new Date(a.scanTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+          <div className="divide-y divide-slate-100">
+            {activities?.recentAttendance?.map((att) => (
+              <div key={att.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div>
+                  <div className="text-xs font-bold text-slate-900">{att.customer.name}</div>
+                  <div className="text-[10px] text-slate-400 font-mono">{att.customer.customerCode} • {att.date}</div>
                 </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400">No attendance scans recorded today.</p>
-            )}
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  {att.mealType === 'BREAKFAST' ? 'नाश्ता' : att.mealType === 'LUNCH' ? 'दुपारचे' : 'रात्रीचे'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Recent Payments */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h4 className="font-bold text-slate-900 text-sm">Recent Verified Payments</h4>
-            <Link to="/admin/payments" className="text-xs text-emerald-600 font-semibold hover:underline">All</Link>
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="text-sm font-extrabold text-slate-900">अलिकडील पेमेंट नोंदी</h3>
+            <Link to="/admin/payments" className="text-xs font-bold text-blue-600 hover:underline">
+              सर्व पाहा →
+            </Link>
           </div>
-          <div className="space-y-3">
-            {activities.recentPayments.length > 0 ? (
-              activities.recentPayments.map((p) => (
-                <div key={p.id} className="flex items-center justify-between text-xs">
-                  <div>
-                    <div className="font-bold text-slate-800">{p.customer?.name}</div>
-                    <div className="text-[10px] text-slate-400">{p.paymentMethod} • {p.status}</div>
-                  </div>
-                  <span className="font-bold text-emerald-600">
-                    ₹{Number(p.amount).toFixed(0)}
+          <div className="divide-y divide-slate-100">
+            {activities?.recentPayments?.map((p) => (
+              <div key={p.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                <div>
+                  <div className="text-xs font-bold text-slate-900">{p.customer?.name}</div>
+                  <div className="text-[10px] text-slate-400 font-mono">{p.paymentNumber} • {p.paymentMethod}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-bold text-emerald-600 font-mono">₹{p.amount}</div>
+                  <span className={`text-[10px] font-bold ${p.status === 'VERIFIED' ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    {p.status === 'VERIFIED' ? '✓ मंजूर' : 'प्रलंबित'}
                   </span>
                 </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400">No recent payments.</p>
-            )}
-          </div>
-        </div>
-
-        {/* Pending Requests */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-2xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h4 className="font-bold text-slate-900 text-sm">Pending Extra Meals</h4>
-            <Link to="/admin/extra-meals" className="text-xs text-emerald-600 font-semibold hover:underline">All</Link>
-          </div>
-          <div className="space-y-3">
-            {activities.pendingExtraMeals.length > 0 ? (
-              activities.pendingExtraMeals.map((em) => (
-                <div key={em.id} className="flex items-center justify-between text-xs">
-                  <div>
-                    <div className="font-bold text-slate-800">{em.customer?.name}</div>
-                    <div className="text-[10px] text-slate-400">{em.count}x {em.mealType} on {em.date}</div>
-                  </div>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-bold text-[10px]">
-                    Pending
-                  </span>
-                </div>
-              ))
-            ) : (
-              <p className="text-xs text-slate-400">No pending extra meal requests.</p>
-            )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

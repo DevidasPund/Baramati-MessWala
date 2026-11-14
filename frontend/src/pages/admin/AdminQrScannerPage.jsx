@@ -50,7 +50,7 @@ export const AdminQrScannerPage = () => {
         setCountdown(diff);
       }
     } catch (err) {
-      toast.error('Failed to generate Mess QR Session');
+      toast.error('मेस QR सेशन तयार करता आले नाही');
     }
   };
 
@@ -84,17 +84,14 @@ export const AdminQrScannerPage = () => {
         { facingMode: 'environment' },
         config,
         async (decodedText) => {
-          // Scanned successfully!
           await handleProcessScan(decodedText);
           stopCamera();
         },
-        (errorMessage) => {
-          // ignore scan frame errors
-        }
+        (errorMessage) => {}
       );
     } catch (err) {
       console.error('Camera start error:', err);
-      toast.error('Could not access camera. Please enter customer QR token manually below.');
+      toast.error('कॅमेरा सुरू करता आला नाही. कृपया खाली ग्राहकाचा QR टोकन कोड टाका.');
       setScanning(false);
     }
   };
@@ -121,7 +118,7 @@ export const AdminQrScannerPage = () => {
   const handleProcessScan = async (tokenToUse) => {
     const token = tokenToUse || manualToken.trim();
     if (!token) {
-      toast.error('Please scan or enter customer QR token');
+      toast.error('कृपया ग्राहकाचा QR कोड स्कॅन करा किंवा टोकन टाका');
       return;
     }
 
@@ -133,7 +130,7 @@ export const AdminQrScannerPage = () => {
       });
 
       confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
-      toast.success(res.message || 'Attendance marked successfully!');
+      toast.success(res.message || 'हजेरी यशस्वीरित्या नोंदवली गेली!');
       setScanResult({
         success: true,
         message: res.message,
@@ -141,7 +138,7 @@ export const AdminQrScannerPage = () => {
       });
       setManualToken('');
     } catch (err) {
-      toast.error(err.message || 'Attendance validation failed');
+      toast.error(err.message || 'हजेरी पडताळणी अयशस्वी');
       setScanResult({
         success: false,
         message: err.message,
@@ -159,12 +156,12 @@ export const AdminQrScannerPage = () => {
           onClick={() => { stopCamera(); setMode('SCAN_CUSTOMER'); }}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all ${
             mode === 'SCAN_CUSTOMER'
-              ? 'bg-emerald-600 text-white shadow-xs'
+              ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
           <Scan className="w-4 h-4" />
-          <span>Method B: Scan Customer QR</span>
+          <span>पद्धत २: ग्राहकाचा वैयक्तिक QR स्कॅन करा</span>
         </button>
 
         <button
@@ -176,18 +173,18 @@ export const AdminQrScannerPage = () => {
           }`}
         >
           <Tv className="w-4 h-4" />
-          <span>Method A: Display Mess QR Screen</span>
+          <span>पद्धत १: काउंटरवर मेस QR स्क्रीन दाखवा</span>
         </button>
       </div>
 
       {/* Meal Category Selector */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between gap-4 flex-wrap">
-        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Active Meal Timing:</span>
+        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">सध्याची जेवणाची वेळ:</span>
         <div className="flex items-center gap-2">
           {[
-            { id: 'BREAKFAST', label: 'Breakfast', icon: Coffee },
-            { id: 'LUNCH', label: 'Lunch', icon: Utensils },
-            { id: 'DINNER', label: 'Dinner', icon: Moon },
+            { id: 'BREAKFAST', label: 'नाश्ता', icon: Coffee },
+            { id: 'LUNCH', label: 'दुपारचे जेवण', icon: Utensils },
+            { id: 'DINNER', label: 'रात्रीचे जेवण', icon: Moon },
           ].map((m) => {
             const Icon = m.icon;
             return (
@@ -196,7 +193,7 @@ export const AdminQrScannerPage = () => {
                 onClick={() => setMealType(m.id)}
                 className={`px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all ${
                   mealType === m.id
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                    ? 'bg-blue-100 text-blue-800 border border-blue-300'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -214,9 +211,9 @@ export const AdminQrScannerPage = () => {
           {/* Scanner Card */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-sm">Camera Attendance Scanner</h3>
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                {mealType}
+              <h3 className="font-bold text-slate-900 text-sm">कॅमेरा हजेरी स्कॅनर</h3>
+              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                {mealType === 'LUNCH' ? 'दुपार' : mealType === 'DINNER' ? 'रात्र' : 'नाश्ता'}
               </span>
             </div>
 
@@ -227,7 +224,7 @@ export const AdminQrScannerPage = () => {
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
                   <Camera className="w-10 h-10 text-slate-500" />
                   <p className="text-xs font-medium text-slate-300">
-                    Camera is standby. Click below to start scanning customer passes.
+                    कॅमेरा स्टँडबाय आहे. ग्राहकाचा पास स्कॅन करण्यासाठी खाली क्लिक करा.
                   </p>
                 </div>
               )}
@@ -237,40 +234,40 @@ export const AdminQrScannerPage = () => {
               {!scanning ? (
                 <button
                   onClick={startCamera}
-                  className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-colors shadow-xs"
+                  className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
                 >
                   <Camera className="w-4 h-4" />
-                  <span>Start Camera Scanner</span>
+                  <span>कॅमेरा सुरू करा</span>
                 </button>
               ) : (
                 <button
                   onClick={stopCamera}
                   className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-colors"
                 >
-                  <span>Stop Camera</span>
+                  <span>कॅमेरा थांबवा</span>
                 </button>
               )}
             </div>
 
             {/* Manual token input fallback */}
             <div className="pt-4 border-t border-slate-100 space-y-2">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Or Enter / Paste Customer QR Token:
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                किंवा थेट ग्राहकाचा QR टोकन कोड टाका:
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="e.g. bmw_qr_..."
+                  placeholder="उदा. bmw_qr_..."
                   value={manualToken}
                   onChange={(e) => setManualToken(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500"
+                  className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-mono"
                 />
                 <button
                   onClick={() => handleProcessScan()}
                   disabled={loading}
                   className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl disabled:opacity-50"
                 >
-                  {loading ? '...' : 'Verify'}
+                  {loading ? '...' : 'तपासा'}
                 </button>
               </div>
             </div>
@@ -279,8 +276,8 @@ export const AdminQrScannerPage = () => {
           {/* Result Card */}
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs space-y-4 flex flex-col justify-between">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm mb-1">Scan Verification Output</h3>
-              <p className="text-xs text-slate-400">Real-time attendance validation results</p>
+              <h3 className="font-bold text-slate-900 text-sm mb-1">स्कॅन पडताळणी निकाल</h3>
+              <p className="text-xs text-slate-400">रिअल-टाइम हजेरी पडताळणी</p>
             </div>
 
             {scanResult ? (
@@ -294,21 +291,21 @@ export const AdminQrScannerPage = () => {
                     <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                     <div>
                       <h4 className="text-base font-black text-slate-900">{scanResult.data?.customer?.name}</h4>
-                      <p className="text-xs font-bold text-emerald-700">{scanResult.data?.customer?.code}</p>
+                      <p className="text-xs font-bold font-mono text-emerald-700">{scanResult.data?.customer?.code}</p>
                     </div>
                     <div className="p-3 bg-white rounded-xl text-xs border border-emerald-100 text-left space-y-1">
-                      <div className="text-slate-500">Plan: <strong>{scanResult.data?.plan}</strong></div>
-                      <div className="text-slate-500">Meal: <strong>{mealType}</strong></div>
-                      <div className="text-slate-500">Time: <strong>{new Date().toLocaleTimeString()}</strong></div>
+                      <div className="text-slate-500">योजना: <strong>{scanResult.data?.plan}</strong></div>
+                      <div className="text-slate-500">जेवण: <strong>{mealType === 'LUNCH' ? 'दुपारचे जेवण' : mealType === 'DINNER' ? 'रात्रीचे जेवण' : 'नाश्ता'}</strong></div>
+                      <div className="text-slate-500">वेळ: <strong className="font-mono">{new Date().toLocaleTimeString('mr-IN')}</strong></div>
                     </div>
                     <span className="inline-block px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-full">
-                      Attendance Marked ✓
+                      हजेरी नोंदवली गेली ✓
                     </span>
                   </>
                 ) : (
                   <>
                     <AlertCircle className="w-12 h-12 text-rose-600 mx-auto" />
-                    <h4 className="text-base font-bold text-rose-900">Attendance Rejected</h4>
+                    <h4 className="text-base font-bold text-rose-900">हजेरी नाकारली गेली</h4>
                     <p className="text-xs font-medium text-rose-700 leading-relaxed">
                       {scanResult.message}
                     </p>
@@ -318,13 +315,13 @@ export const AdminQrScannerPage = () => {
             ) : (
               <div className="p-10 border border-dashed border-slate-200 rounded-2xl text-center text-slate-400 space-y-2">
                 <QrCode className="w-8 h-8 mx-auto text-slate-300" />
-                <p className="text-xs font-medium">Ready to scan customer barcode or QR.</p>
+                <p className="text-xs font-medium">ग्राहकाचा QR कोड स्कॅन करण्यासाठी सज्ज.</p>
               </div>
             )}
 
             <div className="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 space-y-1">
-              <div>• Only 1 attendance per meal per member is allowed.</div>
-              <div>• Duplicate scans within the same meal session are blocked.</div>
+              <div>• एका वेळेच्या जेवणासाठी फक्त एकदाच हजेरी ग्राह्य धरली जाते.</div>
+              <div>• एकाच जेवणाच्या सत्रात पुन्हा स्कॅन केल्यास सिस्टीम आपोआप ब्लॉक करते.</div>
             </div>
           </div>
         </div>
@@ -334,14 +331,14 @@ export const AdminQrScannerPage = () => {
       {mode === 'DISPLAY_MESS_QR' && (
         <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-center space-y-6">
           <div className="space-y-1">
-            <span className="text-[11px] font-extrabold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-              Method A: Customer Self-Attendance QR
+            <span className="text-[11px] font-extrabold text-blue-700 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+              पद्धत १: ग्राहकांसाठी स्वयं-हजेरी QR स्क्रीन
             </span>
             <h2 className="text-2xl font-black text-slate-900 pt-2">
-              Scan With MessMate Mobile App
+              मेसमेट मोबाईल ॲपद्वारे स्कॅन करा
             </h2>
             <p className="text-xs text-slate-500">
-              Current Active Meal: <strong className="text-emerald-700">{mealType}</strong> ({new Date().toLocaleDateString()})
+              चालू जेवण सत्र: <strong className="text-blue-700">{mealType === 'LUNCH' ? 'दुपारचे जेवण' : mealType === 'DINNER' ? 'रात्रीचे जेवण' : 'नाश्ता'}</strong> ({new Date().toLocaleDateString('mr-IN')})
             </p>
           </div>
 
@@ -355,17 +352,17 @@ export const AdminQrScannerPage = () => {
                 includeMargin={true}
               />
             ) : (
-              <div className="w-64 h-64 flex items-center justify-center text-slate-400">Loading session...</div>
+              <div className="w-64 h-64 flex items-center justify-center text-slate-400">सेशन लोड होत आहे...</div>
             )}
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-600">
-              <RefreshCw className="w-4 h-4 text-emerald-600 animate-spin" />
-              <span>Auto-refreshes in: <strong className="text-slate-900">{countdown}s</strong></span>
+              <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+              <span>पुढील रिफ्रेश: <strong className="text-slate-900 font-mono">{countdown} सेकंद</strong></span>
             </div>
             <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
-              Dynamic tokens prevent remote scanning or sharing screenshots. Only physically present customers scanning this live screen can claim attendance.
+              डायनॅमिक टोकनमुळे स्क्रीनशॉट शेअर करून परस्पर हजेरी नोंदवणे अशक्य आहे. केवळ प्रत्यक्ष मेसमध्ये उपस्थित राहूनच स्कॅन करता येते.
             </p>
           </div>
 
@@ -374,7 +371,7 @@ export const AdminQrScannerPage = () => {
               onClick={fetchMessSession}
               className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors"
             >
-              Force Refresh QR Now
+              आताच QR रिफ्रेश करा
             </button>
           </div>
         </div>

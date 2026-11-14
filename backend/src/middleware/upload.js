@@ -2,7 +2,11 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
-const uploadDir = path.resolve(process.cwd(), '../uploads');
+const uploadDir = fs.existsSync(path.resolve(process.cwd(), 'uploads'))
+  ? path.resolve(process.cwd(), 'uploads')
+  : fs.existsSync(path.resolve(process.cwd(), '../uploads'))
+  ? path.resolve(process.cwd(), '../uploads')
+  : path.resolve(process.cwd(), process.env.UPLOAD_DIR || 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

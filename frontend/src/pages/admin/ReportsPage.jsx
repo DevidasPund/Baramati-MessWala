@@ -32,7 +32,7 @@ export const ReportsPage = () => {
         setReport(res.data);
       }
     } catch (err) {
-      toast.error('Failed to load report');
+      toast.error('अहवाल माहिती लोड करता आली नाही');
     } finally {
       setLoading(false);
     }
@@ -50,29 +50,32 @@ export const ReportsPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Reports & Analytics Engine</h2>
-          <p className="text-xs text-slate-500">
-            Generate operational and financial summaries with one-click Excel exports
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <BarChart3 className="w-6 h-6 text-blue-600" />
+            <span>मेस व्यवसाय अहवाल व ॲनालिटिक्स (Reports)</span>
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
+            बारामती मेसवाला • उत्पन्न, दैनिक हजेरी, अतिरिक्त जेवण आणि एक्सेल (.xlsx) निर्यात
           </p>
         </div>
 
         {/* Date Range Picker */}
         <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs">
-          <Calendar className="w-4 h-4 text-emerald-600" />
+          <Calendar className="w-4 h-4 text-blue-600" />
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold"
+            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-semibold"
           />
-          <span className="text-xs text-slate-400">to</span>
+          <span className="text-xs text-slate-400 font-semibold">ते</span>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold"
+            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono font-semibold"
           />
         </div>
       </div>
@@ -83,37 +86,37 @@ export const ReportsPage = () => {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Revenue Collected</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">एकूण जमा महसूल</span>
             <div className="text-2xl font-black text-emerald-600">
-              ₹{Number(report.summary.totalRevenue).toFixed(0)}
+              ₹{Number(report.summary.totalRevenue).toLocaleString('en-IN')}
             </div>
-            <p className="text-[10px] text-slate-400">Verified cash + UPI in selected period</p>
+            <p className="text-[10px] text-slate-400 font-medium">निवडलेल्या कालावधीतील रोख + UPI</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Attendance Scans</span>
-            <div className="text-2xl font-black text-slate-900">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">एकूण हजेरी नोंदी</span>
+            <div className="text-2xl font-black text-slate-900 font-mono">
               {report.summary.totalAttendance}
             </div>
-            <p className="text-[10px] text-slate-400">
-              B: {report.summary.breakfastCount} | L: {report.summary.lunchCount} | D: {report.summary.dinnerCount}
+            <p className="text-[10px] text-slate-400 font-medium">
+              नाश्ता: {report.summary.breakfastCount} | दुपार: {report.summary.lunchCount} | रात्र: {report.summary.dinnerCount}
             </p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Approved Extra Meals</span>
-            <div className="text-2xl font-black text-teal-700">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">मंजूर अतिरिक्त जेवणे</span>
+            <div className="text-2xl font-black text-blue-700 font-mono">
               {report.summary.totalExtraMeals}
             </div>
-            <p className="text-[10px] text-slate-400">Billed to customers</p>
+            <p className="text-[10px] text-slate-400 font-medium">बिलिंगमध्ये समाविष्ट केलेले</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">New Registrations</span>
-            <div className="text-2xl font-black text-blue-600">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">नवीन ग्राहक नोंदणी</span>
+            <div className="text-2xl font-black text-indigo-600 font-mono">
               {report.summary.newCustomers}
             </div>
-            <p className="text-[10px] text-slate-400">Joined in this period</p>
+            <p className="text-[10px] text-slate-400 font-medium">या कालावधीत जोडलेले सभासद</p>
           </div>
         </div>
       )}
@@ -121,51 +124,51 @@ export const ReportsPage = () => {
       {/* Export Cards */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xs space-y-6">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Download Excel (.xlsx) Reports</h3>
-          <p className="text-xs text-slate-500">Filtered precisely according to the selected date range</p>
+          <h3 className="text-base font-bold text-slate-900">एक्सेल (.xlsx) अहवाल डाउनलोड करा</h3>
+          <p className="text-xs text-slate-500 font-medium">निवडलेल्या कालावधीनुसार अचूक डेटा एका क्लिकवर निर्यात करा</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
             <div>
-              <FileSpreadsheet className="w-8 h-8 text-emerald-600 mb-2" />
-              <h4 className="font-bold text-slate-900 text-sm">Attendance Report</h4>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Detailed customer scans, meal categories, timestamps, and scanning staff.
+              <FileSpreadsheet className="w-8 h-8 text-blue-600 mb-2" />
+              <h4 className="font-bold text-slate-900 text-sm">हजेरी अहवाल</h4>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                तारीखनिहाय जेवण स्कॅन, दुपार/रात्र नोंदी आणि स्कॅन वेळ.
               </p>
             </div>
             <button
               onClick={() => handleExport('attendance')}
-              className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Attendance</span>
+              <span>हजेरी Excel डाउनलोड</span>
             </button>
           </div>
 
           <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
             <div>
-              <FileSpreadsheet className="w-8 h-8 text-blue-600 mb-2" />
-              <h4 className="font-bold text-slate-900 text-sm">Revenue & Collections</h4>
-              <p className="text-[11px] text-slate-500 mt-1">
-                All payment transactions, UPI UTR numbers, cash entries, and invoices.
+              <FileSpreadsheet className="w-8 h-8 text-emerald-600 mb-2" />
+              <h4 className="font-bold text-slate-900 text-sm">उत्पन्न व वसुली अहवाल</h4>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                सर्व पेमेंट व्यवहार, UPI UTR क्रमांक, रोख नोंदी आणि इनव्हॉइस.
               </p>
             </div>
             <button
               onClick={() => handleExport('revenue')}
-              className="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
+              className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Revenue</span>
+              <span>उत्पन्न Excel डाउनलोड</span>
             </button>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-200 hover:border-purple-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
             <div>
               <FileSpreadsheet className="w-8 h-8 text-purple-600 mb-2" />
-              <h4 className="font-bold text-slate-900 text-sm">Customer Master List</h4>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Complete member directory, active plans, expiry dates, and contact phones.
+              <h4 className="font-bold text-slate-900 text-sm">ग्राहक मास्टर यादी</h4>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                सर्व सभासद, चालू योजना, वैधता समाप्ती आणि संपर्क फोन.
               </p>
             </div>
             <button
@@ -173,16 +176,16 @@ export const ReportsPage = () => {
               className="w-full py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Customers</span>
+              <span>ग्राहक Excel डाउनलोड</span>
             </button>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-200 hover:border-orange-500 hover:shadow-xs transition-all flex flex-col justify-between space-y-4">
             <div>
               <FileSpreadsheet className="w-8 h-8 text-orange-600 mb-2" />
-              <h4 className="font-bold text-slate-900 text-sm">Extra Meals Report</h4>
-              <p className="text-[11px] text-slate-500 mt-1">
-                Extra breakfast, lunch, and dinner bookings with billing status and charges.
+              <h4 className="font-bold text-slate-900 text-sm">अतिरिक्त जेवण अहवाल</h4>
+              <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                पाहुणे व अतिरिक्त जेवण नोंदी, बिलिंग स्थिती आणि आकारलेले शुल्क.
               </p>
             </div>
             <button
@@ -190,7 +193,7 @@ export const ReportsPage = () => {
               className="w-full py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Extra Meals</span>
+              <span>अतिरिक्त जेवण Excel</span>
             </button>
           </div>
         </div>

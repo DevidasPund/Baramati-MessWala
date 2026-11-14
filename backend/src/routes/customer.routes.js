@@ -6,11 +6,13 @@ import {
   updateCustomer,
   deleteCustomer,
   regenerateQrToken,
+  getMyDashboardStats,
 } from '../controllers/customer.controller.js';
 import { authenticate, authorize, verifyCustomerOwnership } from '../middleware/auth.js';
 
 const router = Router();
 
+router.get('/me/dashboard', authenticate, getMyDashboardStats);
 router.get('/', authenticate, authorize(['SUPER_ADMIN', 'ADMIN', 'STAFF']), getCustomers);
 router.post('/', authenticate, authorize(['SUPER_ADMIN', 'ADMIN']), createCustomer);
 router.get('/:id', authenticate, verifyCustomerOwnership, getCustomerById);

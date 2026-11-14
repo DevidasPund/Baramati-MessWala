@@ -9,6 +9,9 @@ import {
   Share2,
   Clock,
   Send,
+  Coffee,
+  Utensils,
+  Moon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
@@ -42,7 +45,7 @@ export const FoodMenuPage = () => {
         setMenus(res.data.menus);
       }
     } catch (err) {
-      toast.error('Failed to load menu');
+      toast.error('मेनू माहिती लोड करण्यात अडचण आली');
     } finally {
       setLoading(false);
     }
@@ -55,14 +58,14 @@ export const FoodMenuPage = () => {
   const handleSaveMenu = async (e) => {
     e.preventDefault();
     if (!menuForm.title || !menuForm.items) {
-      toast.error('Please enter a title and dish items');
+      toast.error('कृपया मेनूचे शीर्षक आणि पदार्थांची नावे भरा');
       return;
     }
 
     setSubmitting(true);
     try {
       const res = await api.post('/menu', menuForm);
-      toast.success(res.message || 'Menu saved successfully');
+      toast.success(res.message || 'मेनू यशस्वीरित्या जतन केला!');
       setModalOpen(false);
       setMenuForm({
         date: selectedDate,
@@ -76,40 +79,43 @@ export const FoodMenuPage = () => {
       });
       fetchMenus();
     } catch (err) {
-      toast.error(err.message || 'Failed to save menu');
+      toast.error(err.message || 'मेनू सेव्ह करता आला नाही');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteMenu = async (id) => {
-    if (!window.confirm('Delete this food menu item?')) return;
+    if (!window.confirm('हा मेनू हटवायचा आहे का?')) return;
     try {
       await api.delete(`/menu/${id}`);
-      toast.success('Menu item deleted');
+      toast.success('मेनू यशस्वीरित्या हटवण्यात आला');
       fetchMenus();
     } catch (err) {
-      toast.error('Failed to delete menu');
+      toast.error('मेनू हटवता आला नाही');
     }
   };
 
   const handleBroadcast = async (id) => {
     try {
       const res = await api.post(`/menu/${id}/broadcast`);
-      toast.success(res.message || 'Broadcast sent to active members');
+      toast.success(res.message || 'सर्व सक्रिय ग्राहकांना WhatsApp ब्रॉडकास्ट पाठवला!');
     } catch (err) {
-      toast.error('Broadcast failed');
+      toast.error('ब्रॉडकास्ट पाठवता आला नाही');
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Food Menu Management</h2>
-          <p className="text-xs text-slate-500">
-            Schedule daily breakfast, lunch, and dinner menus with WhatsApp broadcast
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <UtensilsCrossed className="w-6 h-6 text-blue-600" />
+            <span>दैनिक मेनू व्यवस्थापन (Food Menu)</span>
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
+            बारामती मेसवाला • सकाळचा नाश्ता, दुपारचे व रात्रीचे जेवण नियोजन आणि WhatsApp ब्रॉडकास्ट
           </p>
         </div>
 
@@ -118,32 +124,32 @@ export const FoodMenuPage = () => {
             setMenuForm((prev) => ({ ...prev, date: selectedDate }));
             setModalOpen(true);
           }}
-          className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          <span>Add / Schedule Menu</span>
+          <span>नवीन मेनू जोडा</span>
         </button>
       </div>
 
       {/* Date Selector Bar */}
       <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-emerald-600" />
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Select Menu Date:</span>
+          <Calendar className="w-4 h-4 text-blue-600" />
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">मेनू तारीख:</span>
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500"
+            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 font-mono"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-            className="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs font-bold rounded-lg transition-colors"
+            className="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold rounded-lg transition-colors"
           >
-            Today's Menu
+            आजचा मेनू
           </button>
           <button
             onClick={() => {
@@ -153,41 +159,47 @@ export const FoodMenuPage = () => {
             }}
             className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition-colors"
           >
-            Tomorrow's Menu
+            उद्याचा मेनू
           </button>
         </div>
       </div>
 
       {/* Menus Grid */}
       {loading ? (
-        <div className="text-center py-20 text-xs text-slate-500">Loading food menus...</div>
+        <div className="text-center py-20 text-xs text-slate-500 font-medium">मेनू लोड होत आहे...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {['BREAKFAST', 'LUNCH', 'DINNER'].map((meal) => {
-            const menu = menus.find((m) => m.mealType === meal);
+          {[
+            { id: 'BREAKFAST', label: 'नाश्ता', timing: 'सकाळी ८:०० ते १०:००', icon: Coffee },
+            { id: 'LUNCH', label: 'दुपारचे जेवण', timing: 'दुपारी १२:०० ते ३:००', icon: Utensils },
+            { id: 'DINNER', label: 'रात्रीचे जेवण', timing: 'संध्याकाळी ७:३० ते १०:३०', icon: Moon },
+          ].map((meal) => {
+            const menu = menus.find((m) => m.mealType === meal.id);
+            const Icon = meal.icon;
             return (
               <div
-                key={meal}
+                key={meal.id}
                 className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                        meal === 'BREAKFAST'
+                      className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                        meal.id === 'BREAKFAST'
                           ? 'bg-orange-50 text-orange-700'
-                          : meal === 'LUNCH'
-                          ? 'bg-emerald-50 text-emerald-700'
+                          : meal.id === 'LUNCH'
+                          ? 'bg-blue-50 text-blue-700'
                           : 'bg-indigo-50 text-indigo-700'
                       }`}
                     >
-                      {meal}
+                      <Icon className="w-3.5 h-3.5" />
+                      {meal.label}
                     </span>
 
                     {menu?.isSpecial && (
                       <span className="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-md flex items-center gap-1 border border-amber-200">
                         <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                        Special
+                        विशेष मेजवानी
                       </span>
                     )}
                   </div>
@@ -195,21 +207,21 @@ export const FoodMenuPage = () => {
                   {menu ? (
                     <div className="space-y-3">
                       <h3 className="text-base font-bold text-slate-900">{menu.title}</h3>
-                      <p className="text-xs text-slate-500">{menu.description || 'Prepared fresh daily.'}</p>
+                      <p className="text-xs text-slate-500 font-medium">{menu.description || 'घरगुती सात्त्विक अन्न'}</p>
 
                       <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                          Dishes:
+                          समाविष्ट पदार्थ:
                         </span>
                         {Array.isArray(menu.items) ? (
                           menu.items.map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-xs font-medium text-slate-700">
+                            <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700">
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                               <span>{item}</span>
                             </div>
                           ))
                         ) : (
-                          <div className="text-xs text-slate-700">{menu.items}</div>
+                          <div className="text-xs text-slate-700 font-semibold">{menu.items}</div>
                         )}
                       </div>
 
@@ -222,12 +234,12 @@ export const FoodMenuPage = () => {
                   ) : (
                     <div className="py-12 text-center text-slate-400 space-y-2">
                       <UtensilsCrossed className="w-8 h-8 mx-auto text-slate-300" />
-                      <p className="text-xs">No menu scheduled for {meal} on this date.</p>
+                      <p className="text-xs font-medium">या तारखेला {meal.label} मेनू जोडलेला नाही.</p>
                       <button
                         onClick={() => {
                           setMenuForm({
                             date: selectedDate,
-                            mealType: meal,
+                            mealType: meal.id,
                             title: '',
                             items: '',
                             description: '',
@@ -237,9 +249,9 @@ export const FoodMenuPage = () => {
                           });
                           setModalOpen(true);
                         }}
-                        className="text-xs font-bold text-emerald-600 hover:underline"
+                        className="text-xs font-bold text-blue-600 hover:underline"
                       >
-                        + Create {meal} Menu
+                        + {meal.label} मेनू तयार करा
                       </button>
                     </div>
                   )}
@@ -250,10 +262,10 @@ export const FoodMenuPage = () => {
                     <button
                       onClick={() => handleBroadcast(menu.id)}
                       className="px-2.5 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold rounded-lg flex items-center gap-1.5 transition-colors"
-                      title="Send WhatsApp update to all active members"
+                      title="सर्व सक्रिय सदस्यांना WhatsApp वर पाठवा"
                     >
                       <Send className="w-3 h-3" />
-                      <span>Broadcast WhatsApp</span>
+                      <span>WhatsApp ब्रॉडकास्ट</span>
                     </button>
 
                     <button
@@ -275,71 +287,71 @@ export const FoodMenuPage = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-slate-200 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">Schedule Food Menu</h3>
+              <h3 className="text-base font-bold text-slate-900">मेनू तयार करा / शेड्यूल करा</h3>
               <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
             <form onSubmit={handleSaveMenu} className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Meal Date</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">तारीख</label>
                   <input
                     type="date"
                     required
                     value={menuForm.date}
                     onChange={(e) => setMenuForm({ ...menuForm, date: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Meal Category</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">जेवणाची वेळ</label>
                   <select
                     value={menuForm.mealType}
                     onChange={(e) => setMenuForm({ ...menuForm, mealType: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-semibold"
                   >
-                    <option value="BREAKFAST">Breakfast</option>
-                    <option value="LUNCH">Lunch</option>
-                    <option value="DINNER">Dinner</option>
+                    <option value="BREAKFAST">सकाळचा नाश्ता</option>
+                    <option value="LUNCH">दुपारचे जेवण</option>
+                    <option value="DINNER">रात्रीचे जेवण</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Menu Title *</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">मेनू नाव / शीर्षक *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Special Maharashtrian Thali / Khandeshi Sev Bhaji"
+                  placeholder="उदा. खान्देशी शेवभाजी व बासमती भात किंवा रविवार स्पेशल"
                   value={menuForm.title}
                   onChange={(e) => setMenuForm({ ...menuForm, title: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-medium"
                 />
               </div>
 
               <div>
                 <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Dishes Included (Comma separated) *
+                  समाविष्ट पदार्थ (स्वल्पविराम देऊन लिहा) *
                 </label>
                 <textarea
                   rows={3}
                   required
-                  placeholder="e.g. Paneer Kolhapuri, Bhendi Fry, Chapati (4 pcs), Dal Tadka, Steamed Rice, Gulab Jamun"
+                  placeholder="उदा. चपाती (४ नग), शेवभाजी, मुगाची डाळ, जिरा राईस, कोशिंबीर, पापड"
                   value={menuForm.items}
                   onChange={(e) => setMenuForm({ ...menuForm, items: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-medium"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Description (Optional)</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">वर्णन (ऐच्छिक)</label>
                 <input
                   type="text"
-                  placeholder="e.g. Pure cow ghee preparation, farm fresh veggies"
+                  placeholder="उदा. अस्सल घरगुती मसाल्यात बनवलेले रुचकर जेवण"
                   value={menuForm.description}
                   onChange={(e) => setMenuForm({ ...menuForm, description: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -349,22 +361,22 @@ export const FoodMenuPage = () => {
                   id="specialFeast"
                   checked={menuForm.isSpecial}
                   onChange={(e) => setMenuForm({ ...menuForm, isSpecial: e.target.checked })}
-                  className="w-4 h-4 text-emerald-600 rounded"
+                  className="w-4 h-4 text-blue-600 rounded"
                 />
                 <label htmlFor="specialFeast" className="font-bold text-slate-700">
-                  Mark as Special Feast (Highlight with Star)
+                  विशेष मेजवानी म्हणून चिन्हांकित करा (Special Feast)
                 </label>
               </div>
 
               {menuForm.isSpecial && (
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Special Feast Note</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">विशेष नोंद</label>
                   <input
                     type="text"
-                    placeholder="e.g. Includes Unlimited Gulab Jamun & Basundi"
+                    placeholder="उदा. अमर्यादित गुलाबजाम व बासुंदी समाविष्ट"
                     value={menuForm.specialNote}
                     onChange={(e) => setMenuForm({ ...menuForm, specialNote: e.target.value })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500"
                   />
                 </div>
               )}
@@ -375,14 +387,14 @@ export const FoodMenuPage = () => {
                   onClick={() => setModalOpen(false)}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-slate-700"
                 >
-                  Cancel
+                  रद्द करा
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xs disabled:opacity-50"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-xs disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : 'Save & Publish Menu'}
+                  {submitting ? 'जतन होत आहे...' : 'मेनू प्रसिद्ध करा'}
                 </button>
               </div>
             </form>

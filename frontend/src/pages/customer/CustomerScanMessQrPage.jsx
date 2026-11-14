@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { Scan, Camera, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { Scan, Camera, CheckCircle2, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 import api from '../../services/api';
@@ -31,7 +31,7 @@ export const CustomerScanMessQrPage = () => {
         (error) => {}
       );
     } catch (err) {
-      toast.error('Could not access camera. You can enter the session token below.');
+      toast.error('कॅमेरा ॲक्सेस मिळाला नाही. तुम्ही खालील इनपुटमध्ये कोड टाकू शकता.');
       setScanning(false);
     }
   };
@@ -48,37 +48,38 @@ export const CustomerScanMessQrPage = () => {
 
   useEffect(() => {
     return () => {
-      if (scannerRef.current) {
-        try { scannerRef.current.clear(); } catch (e) {}
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(() => {});
       }
     };
   }, []);
 
-  const submitMessScan = async (tokenToUse) => {
-    const sessionToken = tokenToUse || manualSessionToken.trim();
+  const submitMessScan = async (sessionToken) => {
     if (!sessionToken) {
-      toast.error('Please scan or enter session token');
+      toast.error('कृपया व्हॅलिड QR कोड स्कॅन करा किंवा कोड टाका');
       return;
     }
 
     setLoading(true);
     try {
-      const res = await api.post('/attendance/scan-mess-qr', { sessionToken });
-      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-      toast.success(res.message || 'Attendance marked successfully!');
+      const res = await api.post('/attendance/scan/mess-qr', { sessionToken });
       setResult({
         success: true,
-        message: res.message,
-        plan: res.data?.plan,
-        attendance: res.data?.attendance,
+        message: res.message || 'हजेरी यशस्वीरित्या नोंदवली गेली!',
+        data: res.data,
       });
-      setManualSessionToken('');
+      toast.success(res.message || 'हजेरी यशस्वी!');
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 },
+      });
     } catch (err) {
-      toast.error(err.message || 'Scan failed');
       setResult({
         success: false,
-        message: err.message,
+        message: err.message || 'हजेरी नोंदवता आली नाही. कृपया पुन्हा प्रयत्न करा.',
       });
+      toast.error(err.message || 'हजेरी अयशस्वी!');
     } finally {
       setLoading(false);
     }
@@ -87,84 +88,103 @@ export const CustomerScanMessQrPage = () => {
   return (
     <div className="max-w-md mx-auto space-y-6">
       <div className="text-center space-y-1">
-        <h2 className="text-xl font-bold text-slate-900">Scan Mess Counter QR</h2>
-        <p className="text-xs text-slate-500">Method A: Point your camera at the live QR screen on counter</p>
+        <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center justify-center gap-2">
+          <Scan className="w-6 h-6 text-blue-600" />
+          <span>मेस QR स्कॅनर (पद्धत १)</span>
+        </h1>
+        <p className="text-xs text-slate-500 font-medium">
+          मेसच्या काऊंटरवरील डायनॅमिक QR कोड स्कॅन करून तात्काळ हजेरी नोंदवा
+        </p>
       </div>
 
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-5">
-        {/* Viewport */}
-        <div className="w-full h-64 bg-slate-900 rounded-2xl overflow-hidden relative flex items-center justify-center text-slate-400">
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xl space-y-6">
+        {/* Camera Scanner Viewport */}
+        <div className="relative overflow-hidden rounded-2xl bg-slate-900 min-h-[280px] flex items-center justify-center border border-slate-800">
           <div id="mess-qr-reader" className="w-full h-full"></div>
-          {!scanning && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
-              <Camera className="w-10 h-10 text-slate-500" />
-              <p className="text-xs text-slate-300">Tap below to scan the Mess QR on counter display</p>
+
+          {!scanning && !result && (
+            <div className="text-center p-6 space-y-3 z-10">
+              <div className="w-16 h-16 rounded-full bg-white/10 text-white flex items-center justify-center mx-auto backdrop-blur-xs">
+                <Camera className="w-8 h-8 text-blue-400" />
+              </div>
+              <p className="text-xs text-slate-300 font-medium">
+                कॅमेरा सुरू करण्यासाठी खालील बटण दाबा
+              </p>
+            </div>
+          )}
+
+          {scanning && (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="w-56 h-56 border-2 border-blue-400 border-dashed rounded-2xl animate-pulse"></div>
             </div>
           )}
         </div>
 
-        <div>
+        {/* Scan Actions */}
+        <div className="flex gap-3">
           {!scanning ? (
             <button
               onClick={startCamera}
-              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-600/20"
+              className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-600/20"
             >
               <Camera className="w-4 h-4" />
-              <span>Start Camera Scanner</span>
+              <span>कॅमेरा सुरू करा</span>
             </button>
           ) : (
             <button
               onClick={stopCamera}
-              className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors"
+              className="flex-1 py-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-rose-600/20"
             >
-              Stop Camera
+              <span>कॅमेरा थांबवा</span>
             </button>
           )}
         </div>
 
-        {/* Manual Entry Fallback */}
-        <div className="pt-3 border-t border-slate-100 space-y-2">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Or Paste Live Mess Token:
+        {/* Manual Token Input Fallback */}
+        <div className="pt-4 border-t border-slate-100 space-y-3">
+          <label className="block text-xs font-bold text-slate-700">
+            किंवा थेट टोकन / कोड टाका:
           </label>
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="bmw_sess_..."
+              placeholder="मेस सेशन कोड प्रविष्ट करा..."
               value={manualSessionToken}
               onChange={(e) => setManualSessionToken(e.target.value)}
-              className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500"
+              className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-mono"
             />
             <button
-              onClick={() => submitMessScan()}
-              disabled={loading}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl disabled:opacity-50"
+              onClick={() => submitMessScan(manualSessionToken)}
+              disabled={loading || !manualSessionToken}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-all"
             >
-              {loading ? '...' : 'Claim Meal'}
+              {loading ? 'नोंद होत आहे...' : 'सादर करा'}
             </button>
           </div>
         </div>
 
-        {/* Result Box */}
+        {/* Scan Result Alert */}
         {result && (
-          <div className={`p-4 rounded-2xl border text-center space-y-2 text-xs ${
-            result.success
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
-              : 'bg-rose-50 border-rose-200 text-rose-900'
-          }`}>
-            {result.success ? (
-              <>
-                <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                <h4 className="font-bold text-sm">Meal Confirmed!</h4>
-                <p className="text-emerald-700 text-[11px]">{result.message}</p>
-                <div className="text-[10px] text-slate-500">Plan: <strong>{result.plan}</strong></div>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
-                <h4 className="font-bold text-sm">Scan Rejected</h4>
-                <p className="text-rose-700 text-[11px]">{result.message}</p>
-              </>
+          <div
+            className={`p-4 rounded-2xl border ${
+              result.success
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-rose-50 border-rose-200 text-rose-900'
+            } space-y-2`}
+          >
+            <div className="flex items-center gap-2 font-bold text-sm">
+              {result.success ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-rose-600" />
+              )}
+              <span>{result.message}</span>
+            </div>
+            {result.data && (
+              <div className="text-xs space-y-1 pt-1 text-slate-700">
+                <p>जेवणाचा प्रकार: <strong>{result.data.mealType}</strong></p>
+                <p>तारीख: <strong>{new Date(result.data.date).toLocaleDateString('mr-IN')}</strong></p>
+              </div>
             )}
           </div>
         )}

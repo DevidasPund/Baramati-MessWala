@@ -8,30 +8,66 @@ import { whatsappService } from '../integrations/whatsapp.js';
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return errorResponse(res, 'Email and password are required.', 400);
+    const identifier = (req.body.email || req.body.phone || req.body.mobileNumber || req.body.username || '').trim();
+    const { password } = req.body;
+    if (!identifier || !password) {
+      return errorResponse(res, 'Email/Mobile number and password are required.', 400);
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
-      include: {
-        customer: {
-          include: {
-            subscriptions: {
-              where: { status: 'ACTIVE' },
-              include: { plan: true },
-              orderBy: { createdAt: 'desc' },
-              take: 1,
+    let user = null;
+    if (identifier.includes('@')) {
+      user = await prisma.user.findUnique({
+        where: { email: identifier.toLowerCase() },
+        include: {
+          customer: {
+            include: {
+              subscriptions: {
+                where: { status: 'ACTIVE' },
+                include: { plan: true },
+                orderBy: { createdAt: 'desc' },
+                take: 1,
+              },
+            },
+          },
+          staff: true,
+        },
+      });
+    } else {
+      // Support login via Customer Mobile Number or Customer Code
+      const cleanPhone = identifier.replace(/[^0-9]/g, '');
+      const cust = await prisma.customer.findFirst({
+        where: {
+          OR: [
+            { phone: identifier },
+            ...(cleanPhone ? [{ phone: { contains: cleanPhone.slice(-10) } }] : []),
+            { customerCode: identifier.toUpperCase() },
+          ],
+        },
+        include: {
+          user: {
+            include: {
+              customer: {
+                include: {
+                  subscriptions: {
+                    where: { status: 'ACTIVE' },
+                    include: { plan: true },
+                    orderBy: { createdAt: 'desc' },
+                    take: 1,
+                  },
+                },
+              },
+              staff: true,
             },
           },
         },
-        staff: true,
-      },
-    });
+      });
+      if (cust?.user) {
+        user = cust.user;
+      }
+    }
 
     if (!user) {
-      return errorResponse(res, 'Invalid email or password.', 401);
+      return errorResponse(res, 'Invalid mobile number/email or password.', 401);
     }
 
     if (!user.isActive) {

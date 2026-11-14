@@ -33,7 +33,7 @@ export const AttendancePage = () => {
     customerId: '',
     mealType: 'LUNCH',
     date: new Date().toISOString().split('T')[0],
-    notes: 'Manually marked by admin',
+    notes: 'प्रशासकाद्वारे मॅन्युअल नोंद',
   });
   const [submittingManual, setSubmittingManual] = useState(false);
 
@@ -54,7 +54,7 @@ export const AttendancePage = () => {
         setPagination(res.data.pagination);
       }
     } catch (err) {
-      toast.error('Failed to load attendance');
+      toast.error('हजेरी नोंदी लोड करण्यात अडचण आली');
     } finally {
       setLoading(false);
     }
@@ -81,31 +81,31 @@ export const AttendancePage = () => {
   const handleManualSubmit = async (e) => {
     e.preventDefault();
     if (!manualData.customerId) {
-      toast.error('Please select a customer');
+      toast.error('कृपया ग्राहक निवडा');
       return;
     }
 
     setSubmittingManual(true);
     try {
       const res = await api.post('/attendance/manual', manualData);
-      toast.success(res.message || 'Attendance marked successfully');
+      toast.success(res.message || 'हजेरी यशस्वीरित्या नोंदवली गेली!');
       setManualModalOpen(false);
       fetchAttendance();
     } catch (err) {
-      toast.error(err.message || 'Failed to mark attendance');
+      toast.error(err.message || 'हजेरी नोंदवता आली नाही');
     } finally {
       setSubmittingManual(false);
     }
   };
 
   const handleDelete = async (id, name, meal) => {
-    if (!window.confirm(`Delete attendance record for ${name} (${meal})?`)) return;
+    if (!window.confirm(`${name} (${meal}) ची हजेरी नोंद हटवायची आहे का?`)) return;
     try {
       await api.delete(`/attendance/${id}`);
-      toast.success('Attendance record deleted');
+      toast.success('हजेरी नोंद हटवण्यात आली');
       fetchAttendance();
     } catch (err) {
-      toast.error('Failed to delete attendance');
+      toast.error('हजेरी हटवता आली नाही');
     }
   };
 
@@ -118,21 +118,24 @@ export const AttendancePage = () => {
   return (
     <div className="space-y-6">
       {/* Page Title & Main Actions */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Attendance Records</h2>
-          <p className="text-xs text-slate-500">
-            Real-time meal scan logs with duplicate prevention and audit records
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <CalendarCheck className="w-6 h-6 text-blue-600" />
+            <span>दैनिक हजेरी व्यवस्थापन (Attendance)</span>
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
+            बारामती मेसवाला • रियल-टाइम QR स्कॅन व हजेरी नोंदी (डुप्लिकेट स्कॅन प्रतिबंधक)
           </p>
         </div>
 
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
           <Link
             to="/admin/qr-scanner"
-            className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 transition-colors"
+            className="flex-1 sm:flex-none px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center justify-center gap-2 transition-all"
           >
             <Scan className="w-3.5 h-3.5" />
-            <span>Launch QR Scanner</span>
+            <span>QR स्कॅनर उघडा</span>
           </Link>
 
           <button
@@ -140,16 +143,16 @@ export const AttendancePage = () => {
             className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-2xs flex items-center gap-1.5 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Manual Entry</span>
+            <span>मॅन्युअल हजेरी</span>
           </button>
 
           <button
             onClick={handleExportExcel}
             className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl border border-slate-200 shadow-2xs flex items-center gap-1.5 transition-colors"
-            title="Download Excel Report"
+            title="Excel अहवाल डाउनलोड करा"
           >
             <Download className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Export Excel</span>
+            <span className="hidden md:inline">Excel निर्यात</span>
           </button>
         </div>
       </div>
@@ -158,34 +161,39 @@ export const AttendancePage = () => {
       <div className="bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Date Selector */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
+          <Calendar className="w-4 h-4 text-blue-600 shrink-0" />
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => { setSelectedDate(e.target.value); setPage(1); }}
-            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500"
+            className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-blue-500 font-mono"
           />
           <button
             onClick={() => { setSelectedDate(new Date().toISOString().split('T')[0]); setPage(1); }}
-            className="px-2.5 py-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors"
+            className="px-2.5 py-1.5 text-[11px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
           >
-            Today
+            आज
           </button>
         </div>
 
         {/* Meal Filter Tabs */}
         <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl w-full sm:w-auto justify-center">
-          {['ALL', 'BREAKFAST', 'LUNCH', 'DINNER'].map((tab) => (
+          {[
+            { id: 'ALL', label: 'सर्व जेवणे' },
+            { id: 'BREAKFAST', label: 'नाश्ता' },
+            { id: 'LUNCH', label: 'दुपार' },
+            { id: 'DINNER', label: 'रात्र' },
+          ].map((tab) => (
             <button
-              key={tab}
-              onClick={() => { setMealType(tab); setPage(1); }}
+              key={tab.id}
+              onClick={() => { setMealType(tab.id); setPage(1); }}
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                mealType === tab
-                  ? 'bg-white text-emerald-700 shadow-2xs'
+                mealType === tab.id
+                  ? 'bg-white text-blue-700 shadow-2xs'
                   : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              {tab === 'ALL' ? 'All Meals' : tab.charAt(0) + tab.slice(1).toLowerCase()}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -195,10 +203,10 @@ export const AttendancePage = () => {
           <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder="Search member name/code..."
+            placeholder="नाव किंवा कोडने शोधा..."
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-emerald-500"
+            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-blue-500 font-medium"
           />
         </div>
       </div>
@@ -206,25 +214,25 @@ export const AttendancePage = () => {
       {/* Attendance Records Table */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
-          <div className="text-center py-20 text-xs text-slate-500 font-medium">Loading attendance records...</div>
+          <div className="text-center py-20 text-xs text-slate-500 font-medium">हजेरी नोंदी लोड होत आहेत...</div>
         ) : records.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                 <tr>
-                  <th className="py-3 px-5">Customer Code</th>
-                  <th className="py-3 px-5">Member Name</th>
-                  <th className="py-3 px-5">Meal Category</th>
-                  <th className="py-3 px-5">Scan Time</th>
-                  <th className="py-3 px-5">Scan Method</th>
-                  <th className="py-3 px-5">Scanned By</th>
-                  <th className="py-3 px-5 text-right">Action</th>
+                  <th className="py-3 px-5">ग्राहक कोड</th>
+                  <th className="py-3 px-5">सभासदाचे नाव</th>
+                  <th className="py-3 px-5">जेवणाचा प्रकार</th>
+                  <th className="py-3 px-5">स्कॅन वेळ</th>
+                  <th className="py-3 px-5">पद्धत</th>
+                  <th className="py-3 px-5">नोंदणीकर्ता</th>
+                  <th className="py-3 px-5 text-right">कृती</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                 {records.map((r) => (
                   <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-5 font-bold text-emerald-700">
+                    <td className="py-3.5 px-5 font-bold font-mono text-blue-700">
                       <Link to={`/admin/customers/${r.customer?.id}`} className="hover:underline">
                         {r.customer?.customerCode}
                       </Link>
@@ -237,29 +245,29 @@ export const AttendancePage = () => {
                         r.mealType === 'BREAKFAST'
                           ? 'bg-orange-50 text-orange-700'
                           : r.mealType === 'LUNCH'
-                          ? 'bg-emerald-50 text-emerald-700'
+                          ? 'bg-blue-50 text-blue-700'
                           : 'bg-indigo-50 text-indigo-700'
                       }`}>
                         {r.mealType === 'BREAKFAST' && <Coffee className="w-3 h-3" />}
                         {r.mealType === 'LUNCH' && <Utensils className="w-3 h-3" />}
                         {r.mealType === 'DINNER' && <Moon className="w-3 h-3" />}
-                        {r.mealType}
+                        {r.mealType === 'BREAKFAST' ? 'नाश्ता' : r.mealType === 'LUNCH' ? 'दुपार' : 'रात्र'}
                       </span>
                     </td>
-                    <td className="py-3.5 px-5 text-slate-600">
-                      {new Date(r.scanTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    <td className="py-3.5 px-5 text-slate-600 font-mono">
+                      {new Date(r.scanTime).toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </td>
-                    <td className="py-3.5 px-5 text-slate-500 font-mono text-[11px]">
-                      {r.method === 'CUSTOMER_SCANS_MESS' ? 'Self Mess QR' : r.method === 'STAFF_SCANS_CUSTOMER' ? 'Staff Scanner' : 'Admin Manual'}
+                    <td className="py-3.5 px-5 text-slate-500 text-[11px]">
+                      {r.method === 'CUSTOMER_SCANS_MESS' ? 'मेस QR स्कॅन' : r.method === 'STAFF_SCANS_CUSTOMER' ? 'काउंटर स्कॅन' : 'मॅन्युअल नोंद'}
                     </td>
                     <td className="py-3.5 px-5 text-slate-500">
-                      {r.scannedByStaff ? `${r.scannedByStaff.name}` : 'Self / System'}
+                      {r.scannedByStaff ? `${r.scannedByStaff.name}` : 'स्वयं / सिस्टीम'}
                     </td>
                     <td className="py-3.5 px-5 text-right">
                       <button
                         onClick={() => handleDelete(r.id, r.customer?.name, r.mealType)}
                         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="Delete / Correct record"
+                        title="हजेरी नोंद हटवा"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -273,7 +281,7 @@ export const AttendancePage = () => {
           <div className="text-center py-16 space-y-2">
             <CalendarCheck className="w-8 h-8 text-slate-300 mx-auto" />
             <p className="text-xs font-semibold text-slate-500">
-              No attendance records found for {selectedDate} ({mealType}).
+              {selectedDate} रोजीच्या ({mealType}) हजेरी नोंदी आढळल्या नाहीत.
             </p>
           </div>
         )}
@@ -281,21 +289,21 @@ export const AttendancePage = () => {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>Page {page} of {pagination.totalPages}</span>
+            <span>पान {page} / {pagination.totalPages}</span>
             <div className="flex items-center gap-2">
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
                 className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 rounded-lg font-semibold"
               >
-                Previous
+                मागे
               </button>
               <button
                 disabled={page >= pagination.totalPages}
                 onClick={() => setPage(page + 1)}
                 className="px-3 py-1 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 rounded-lg font-semibold"
               >
-                Next
+                पुढे
               </button>
             </div>
           </div>
@@ -307,17 +315,17 @@ export const AttendancePage = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-slate-200 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">Manual Attendance Entry</h3>
+              <h3 className="text-base font-bold text-slate-900">मॅन्युअल हजेरी नोंदवा</h3>
               <button onClick={() => setManualModalOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
             <form onSubmit={handleManualSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Select Customer *</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">ग्राहक निवडा *</label>
                 <select
                   value={manualData.customerId}
                   onChange={(e) => setManualData({ ...manualData, customerId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-semibold"
                 >
                   {customersList.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -329,37 +337,37 @@ export const AttendancePage = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Meal Type</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">जेवणाचा प्रकार</label>
                   <select
                     value={manualData.mealType}
                     onChange={(e) => setManualData({ ...manualData, mealType: e.target.value })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-semibold"
                   >
-                    <option value="BREAKFAST">Breakfast</option>
-                    <option value="LUNCH">Lunch</option>
-                    <option value="DINNER">Dinner</option>
+                    <option value="BREAKFAST">सकाळचा नाश्ता</option>
+                    <option value="LUNCH">दुपारचे जेवण</option>
+                    <option value="DINNER">रात्रीचे जेवण</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Date</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">तारीख</label>
                   <input
                     type="date"
                     value={manualData.date}
                     onChange={(e) => setManualData({ ...manualData, date: e.target.value })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Admin Notes / Reason</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">नोंद / कारण</label>
                 <input
                   type="text"
-                  placeholder="e.g. Phone battery died, marked manually by manager"
+                  placeholder="उदा. फोन बंद होता, व्यवस्थापकाने प्रत्यक्ष नोंदवले"
                   value={manualData.notes}
                   onChange={(e) => setManualData({ ...manualData, notes: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -369,14 +377,14 @@ export const AttendancePage = () => {
                   onClick={() => setManualModalOpen(false)}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-slate-700"
                 >
-                  Cancel
+                  रद्द करा
                 </button>
                 <button
                   type="submit"
                   disabled={submittingManual}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xs disabled:opacity-50"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-xs disabled:opacity-50"
                 >
-                  {submittingManual ? 'Saving...' : 'Record Attendance'}
+                  {submittingManual ? 'नोंद होत आहे...' : 'हजेरी जतन करा'}
                 </button>
               </div>
             </form>

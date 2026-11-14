@@ -15,7 +15,7 @@ export const StaffManagementPage = () => {
     phone: '',
     email: '',
     password: '',
-    designation: 'Attendance Incharge & Floor Staff',
+    designation: 'मेस हजेरी व व्यवस्थापन कर्मचारी',
     role: 'STAFF',
     permissions: ['scan_attendance', 'view_menu', 'customer_search', 'mark_attendance'],
   });
@@ -28,7 +28,7 @@ export const StaffManagementPage = () => {
         setStaff(res.data.staff);
       }
     } catch (err) {
-      toast.error('Failed to load staff');
+      toast.error('कर्मचारी माहिती लोड करता आली नाही');
     } finally {
       setLoading(false);
     }
@@ -52,27 +52,27 @@ export const StaffManagementPage = () => {
   const handleCreateStaff = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.email || !formData.password) {
-      toast.error('All fields are required');
+      toast.error('सर्व माहिती भरणे आवश्यक आहे');
       return;
     }
 
     setSubmitting(true);
     try {
       const res = await api.post('/staff', formData);
-      toast.success(res.message || 'Staff member created successfully');
+      toast.success(res.message || 'नवीन कर्मचारी खाते यशस्वीरित्या तयार केले!');
       setModalOpen(false);
       setFormData({
         name: '',
         phone: '',
         email: '',
         password: '',
-        designation: 'Attendance Incharge & Floor Staff',
+        designation: 'मेस हजेरी व व्यवस्थापन कर्मचारी',
         role: 'STAFF',
         permissions: ['scan_attendance', 'view_menu', 'customer_search'],
       });
       fetchStaff();
     } catch (err) {
-      toast.error(err.message || 'Failed to create staff');
+      toast.error(err.message || 'कर्मचारी खाते तयार करता आले नाही');
     } finally {
       setSubmitting(false);
     }
@@ -81,73 +81,82 @@ export const StaffManagementPage = () => {
   const handleToggleActive = async (id, currentStatus) => {
     try {
       await api.put(`/staff/${id}`, { isActive: !currentStatus });
-      toast.success(`Staff status updated`);
+      toast.success(`कर्मचारी स्थिती अद्यतनित केली`);
       fetchStaff();
     } catch (err) {
-      toast.error('Failed to update status');
+      toast.error('स्थिती बदलता आली नाही');
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Staff Management</h2>
-          <p className="text-xs text-slate-500">
-            Create employee accounts with restricted permissions (Scanning & Member verification)
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 text-blue-600" />
+            <span>कर्मचारी व्यवस्थापन (Staff Management)</span>
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
+            बारामती मेस कर्मचारी खाती आणि भूमिका (QR स्कॅनिंग, हजेरी नोंदणी व मेनू व्यवस्थापन)
           </p>
         </div>
 
         <button
           onClick={() => setModalOpen(true)}
-          className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Staff Member</span>
+          <span>नवीन कर्मचारी जोडा</span>
         </button>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
-          <div className="text-center py-20 text-xs text-slate-500">Loading staff...</div>
+          <div className="text-center py-20 text-xs text-slate-500 font-medium">कर्मचारी माहिती लोड होत आहे...</div>
         ) : staff.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
                 <tr>
-                  <th className="py-3 px-5">Staff Code</th>
-                  <th className="py-3 px-5">Name & Phone</th>
-                  <th className="py-3 px-5">Designation</th>
-                  <th className="py-3 px-5">Role</th>
-                  <th className="py-3 px-5">Permissions</th>
-                  <th className="py-3 px-5">Status</th>
-                  <th className="py-3 px-5 text-right">Actions</th>
+                  <th className="py-3 px-5">कर्मचारी कोड</th>
+                  <th className="py-3 px-5">नाव आणि संपर्क</th>
+                  <th className="py-3 px-5">पद (Designation)</th>
+                  <th className="py-3 px-5">भूमिका</th>
+                  <th className="py-3 px-5">परवानग्या</th>
+                  <th className="py-3 px-5">स्थिती</th>
+                  <th className="py-3 px-5 text-right">कृती</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                 {staff.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-5 font-bold text-emerald-700">{s.staffCode}</td>
+                    <td className="py-3.5 px-5 font-bold font-mono text-blue-700">{s.staffCode}</td>
                     <td className="py-3.5 px-5">
                       <div className="font-bold text-slate-900">{s.name}</div>
-                      <div className="text-[10px] text-slate-400">{s.phone}</div>
+                      <div className="text-[10px] font-mono text-slate-400">{s.phone}</div>
                     </td>
-                    <td className="py-3.5 px-5 text-slate-600">{s.designation}</td>
+                    <td className="py-3.5 px-5 text-slate-600 font-medium">{s.designation}</td>
                     <td className="py-3.5 px-5">
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700">
-                        {s.role}
+                        {s.role === 'STAFF' ? 'कर्मचारी' : s.role}
                       </span>
                     </td>
                     <td className="py-3.5 px-5">
                       <div className="flex flex-wrap gap-1">
                         {Array.isArray(s.permissions) ? (
                           s.permissions.map((p) => (
-                            <span key={p} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px]">
-                              {p.replace(/_/g, ' ')}
+                            <span key={p} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-medium">
+                              {p === 'scan_attendance'
+                                ? 'QR स्कॅनिंग'
+                                : p === 'customer_search'
+                                ? 'ग्राहक शोध'
+                                : p === 'view_menu'
+                                ? 'मेनू'
+                                : 'हजेरी'}
                             </span>
                           ))
                         ) : (
-                          <span className="text-slate-400 text-[10px]">Standard</span>
+                          <span className="text-slate-400 text-[10px]">मानक</span>
                         )}
                       </div>
                     </td>
@@ -155,7 +164,7 @@ export const StaffManagementPage = () => {
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         s.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
                       }`}>
-                        {s.isActive ? 'Active' : 'Deactivated'}
+                        {s.isActive ? 'सक्रिय' : 'निष्क्रिय'}
                       </span>
                     </td>
                     <td className="py-3.5 px-5 text-right">
@@ -167,7 +176,7 @@ export const StaffManagementPage = () => {
                             : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                         }`}
                       >
-                        {s.isActive ? 'Deactivate' : 'Activate'}
+                        {s.isActive ? 'निष्क्रिय करा' : 'सक्रिय करा'}
                       </button>
                     </td>
                   </tr>
@@ -178,7 +187,7 @@ export const StaffManagementPage = () => {
         ) : (
           <div className="text-center py-16 space-y-2">
             <ShieldCheck className="w-8 h-8 text-slate-300 mx-auto" />
-            <p className="text-xs font-semibold text-slate-500">No staff members created yet.</p>
+            <p className="text-xs font-semibold text-slate-500">कोणताही कर्मचारी नोंदवलेला नाही.</p>
           </div>
         )}
       </div>
@@ -188,87 +197,87 @@ export const StaffManagementPage = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-slate-200 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base font-bold text-slate-900">Add Staff Account</h3>
+              <h3 className="text-base font-bold text-slate-900">नवीन कर्मचारी खाते तयार करा</h3>
               <button onClick={() => setModalOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
             </div>
 
             <form onSubmit={handleCreateStaff} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Full Name *</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">पूर्ण नाव *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Ramesh Shinde"
+                  placeholder="उदा. रमेश शिंदे"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-medium"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Mobile Number *</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">मोबाईल क्रमांक *</label>
                   <input
                     type="tel"
                     required
                     placeholder="9822334411"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-mono"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Designation</label>
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">पद (Designation)</label>
                   <input
                     type="text"
-                    placeholder="Floor Manager"
+                    placeholder="मेस मॅनेजर"
                     value={formData.designation}
                     onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Login Email *</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">लॉगिन ईमेल *</label>
                 <input
                   type="email"
                   required
                   placeholder="staff@baramatimesswala.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 font-mono"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Password *</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">पासवर्ड *</label>
                 <input
                   type="password"
                   required
-                  placeholder="Min 6 characters"
+                  placeholder="किमान ६ अक्षरे"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">Granted Permissions</label>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">दिलेल्या परवानग्या</label>
                 <div className="grid grid-cols-2 gap-2 pt-1">
                   {[
-                    { id: 'scan_attendance', label: 'Scan QR Attendance' },
-                    { id: 'customer_search', label: 'Search Members' },
-                    { id: 'view_menu', label: 'View Food Menus' },
-                    { id: 'mark_attendance', label: 'Manual Attendance' },
+                    { id: 'scan_attendance', label: 'QR कोड हजेरी स्कॅन' },
+                    { id: 'customer_search', label: 'ग्राहक शोधा' },
+                    { id: 'view_menu', label: 'दैनिक मेनू पहा' },
+                    { id: 'mark_attendance', label: 'मॅन्युअल हजेरी नोंदवा' },
                   ].map((p) => (
                     <label key={p.id} className="flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={formData.permissions.includes(p.id)}
                         onChange={() => handleTogglePermission(p.id)}
-                        className="rounded text-emerald-600 focus:ring-emerald-500"
+                        className="rounded text-blue-600 focus:ring-blue-500"
                       />
                       <span className="text-[11px] font-semibold text-slate-700">{p.label}</span>
                     </label>
@@ -282,14 +291,14 @@ export const StaffManagementPage = () => {
                   onClick={() => setModalOpen(false)}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-slate-700"
                 >
-                  Cancel
+                  रद्द करा
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-xs disabled:opacity-50"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-xs disabled:opacity-50"
                 >
-                  {submitting ? 'Creating...' : 'Create Staff Member'}
+                  {submitting ? 'नोंद होत आहे...' : 'कर्मचारी जोडा'}
                 </button>
               </div>
             </form>
