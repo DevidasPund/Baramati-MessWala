@@ -27,6 +27,10 @@ import settingsRoutes from './routes/settings.routes.js';
 
 const app = express();
 
+// Trust reverse proxy (Render, Cloudflare, AWS ALB)
+// Required for accurate client IP detection in express-rate-limit, logs, and security headers
+app.set('trust proxy', 1);
+
 // Security Headers with Helmet
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
