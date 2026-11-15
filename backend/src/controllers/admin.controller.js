@@ -22,21 +22,12 @@ export const getDashboardStats = async (req, res, next) => {
     // 6 months date range
     const sixMonthsAgo = new Date(currentYear, currentMonth - 6, 1);
 
-    // Execute all queries concurrently in a single parallel batch
+    // Execute queries in structured batches to prevent connection pool exhaustion
     const [
       customerCounts,
       todayAttendances,
       recent7DaysAttendance,
       monthlyVerifiedPayments,
-      last6MonthsPayments,
-      unpaidInvoices,
-      expiringSubscriptions,
-      plansWithSubs,
-      recentAttendance,
-      recentPayments,
-      recentCustomers,
-      pendingExtraMeals,
-      pendingComplaints,
     ] = await Promise.all([
       // 1. Customer Counts grouped by status
       prisma.customer.groupBy({
@@ -65,7 +56,14 @@ export const getDashboardStats = async (req, res, next) => {
         },
         _sum: { amount: true },
       }),
+    ]);
 
+    const [
+      last6MonthsPayments,
+      unpaidInvoices,
+      expiringSubscriptions,
+      plansWithSubs,
+    ] = await Promise.all([
       // 5. Last 6 months payments batch
       prisma.payment.findMany({
         where: {
@@ -99,7 +97,17 @@ export const getDashboardStats = async (req, res, next) => {
           },
         },
       }),
+    ]);
 
+    const [
+      recentAttendance,
+      recentPayments,
+      recentCustomers,
+      pendingExtraMeals,
+      pendingComplaints,
+      outstandingInvoicesList,
+      newCustomersThisMonthCount,
+    ] = await Promise.all([
       // 9. Recent activities (5 of each)
       prisma.attendance.findMany({
         take: 5,
@@ -127,6 +135,36 @@ export const getDashboardStats = async (req, res, next) => {
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: { customer: { select: { name: true, customerCode: true } } },
+      }),
+      // 14. Outstanding Invoices with customer and plan details for dashboard table
+      prisma.invoice.findMany({
+        where: {
+          status: { in: ['PENDING', 'PARTIALLY_PAID', 'OVERDUE'] },
+          balanceDue: { gt: 0 },
+        },
+        take: 10,
+        orderBy: { balanceDue: 'desc' },
+        include: {
+          customer: {
+            select: {
+              id: true,
+              name: true,
+              customerCode: true,
+              phone: true,
+              subscriptions: {
+                where: { status: 'ACTIVE' },
+                take: 1,
+                include: { plan: { select: { name: true } } },
+              },
+            },
+          },
+        },
+      }),
+      // 15. New Customers registered this month
+      prisma.customer.count({
+        where: {
+          createdAt: { gte: startOfMonth, lte: endOfMonth },
+        },
       }),
     ]);
 
@@ -229,10 +267,25 @@ export const getDashboardStats = async (req, res, next) => {
         monthlyRevenue,
         todayRevenue,
         pendingPayments,
+        pendingCustomersCount: outstandingInvoicesList?.length || 0,
+        newCustomersThisMonth: newCustomersThisMonthCount || 0,
         activeSubscriptions,
         expiringSubscriptions,
         totalExtraMeals,
       },
+      outstandingCustomers: (outstandingInvoicesList || []).map((inv) => ({
+        id: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        customerId: inv.customer?.id,
+        customerName: inv.customer?.name || 'अज्ञात ग्राहक',
+        customerCode: inv.customer?.customerCode || '',
+        phone: inv.customer?.phone || '',
+        planName: inv.customer?.subscriptions?.[0]?.plan?.name || 'नियमित मासिक मेस',
+        balanceDue: Number(inv.balanceDue || 0),
+        totalAmount: Number(inv.totalAmount || 0),
+        dueDate: inv.dueDate,
+        status: inv.status,
+      })),
       charts: {
         dailyAttendanceTrend,
         revenueTrend,
