@@ -343,7 +343,9 @@ export const getMyDashboardStats = async (req, res, next) => {
     const startOfMonthStr = startOfMonth.toISOString().split('T')[0];
     const endOfMonthStr = endOfMonth.toISOString().split('T')[0];
 
-    const [customer, totalMealsCount, monthlyAttendance, allInvoices, payments, extraMeals] = await Promise.all([
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    const [customer, totalMealsCount, monthlyAttendance, allInvoices, payments, extraMeals, todayMenu, todayDabbas, recentDabbas] = await Promise.all([
       prisma.customer.findUnique({
         where: { id: customerId },
         include: {
@@ -379,6 +381,17 @@ export const getMyDashboardStats = async (req, res, next) => {
           customerId,
           date: { gte: startOfMonthStr, lte: endOfMonthStr },
         },
+      }),
+      prisma.foodMenu.findMany({
+        where: { date: todayStr },
+      }),
+      prisma.dailyDabba.findMany({
+        where: { customerId, date: todayStr },
+      }),
+      prisma.dailyDabba.findMany({
+        where: { customerId },
+        orderBy: { date: 'desc' },
+        take: 15,
       }),
     ]);
 
@@ -426,7 +439,122 @@ export const getMyDashboardStats = async (req, res, next) => {
       payments,
       invoices: allInvoices,
       activeSubscription: currentSub || null,
+      todayMenu,
+      todayDabbas,
+      recentDabbas,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Owner Customer Verification Action: Approve, Reject, Suspend, Reactivate
+export const verifyCustomerStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status, reason } = req.body;
+
+    const validStatuses = ['PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'SUSPENDED', 'ACTIVE'];
+    if (!status || !validStatuses.includes(status)) {
+      return errorResponse(res, `Invalid status. Allowed: ${validStatuses.join(', ')}`, 400);
+    }
+
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!customer) {
+      return errorResponse(res, 'Customer not found.', 404);
+    }
+
+    const isApproved = status === 'APPROVED' || status === 'ACTIVE';
+    const isDeactivated = status === 'REJECTED' || status === 'SUSPENDED';
+
+    const result = await prisma.$transaction(async (tx) => {
+      const updatedCustomer = await tx.customer.update({
+        where: { id },
+        data: {
+          status,
+          ...(isApproved && {
+            approvedById: req.user.id,
+            approvedAt: new Date(),
+            rejectionReason: null,
+          }),
+          ...(isDeactivated && {
+            rejectionReason: reason || `Action marked as ${status} by owner`,
+          }),
+        },
+      });
+
+      if (customer.user) {
+        await tx.user.update({
+          where: { id: customer.user.id },
+          data: {
+            isActive: !isDeactivated,
+          },
+        });
+      }
+
+      return updatedCustomer;
+    });
+
+    await logAudit(req.user.id, `CUSTOMER_${status}`, 'Customer', id, {
+      status,
+      reason,
+      approvedById: isApproved ? req.user.id : null,
+    }, req);
+
+    return successResponse(res, `ग्राहकाची स्थिती ${status} म्हणून नोंदवली गेली.`, { customer: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Owner Manual Verify Phone Number
+export const manualVerifyPhone = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const customer = await prisma.customer.update({
+      where: { id },
+      data: { phoneVerified: true },
+    });
+
+    await logAudit(req.user.id, 'MANUAL_PHONE_VERIFIED', 'Customer', id, null, req);
+    return successResponse(res, 'ग्राहकाचा मोबाइल नंबर प्रमाणित करण्यात आला.', { customer });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Owner Reset Customer Password / PIN
+export const ownerResetCustomerPassword = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 4) {
+      return errorResponse(res, 'नवीन पासवर्ड किंवा पिन किमान ४ अक्षरांचा असणे आवश्यक आहे.', 400);
+    }
+
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!customer || !customer.user) {
+      return errorResponse(res, 'Customer or associated user account not found.', 404);
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: customer.user.id },
+      data: { passwordHash },
+    });
+
+    await logAudit(req.user.id, 'OWNER_RESET_CUSTOMER_PASSWORD', 'Customer', id, null, req);
+
+    return successResponse(res, 'ग्राहकाचा पासवर्ड यशस्वीरीत्या बदलण्यात आला.');
   } catch (error) {
     next(error);
   }

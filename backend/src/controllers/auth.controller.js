@@ -5,6 +5,7 @@ import { generateToken } from '../utils/tokens.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { logAudit } from '../middleware/auditLogger.js';
 import { whatsappService } from '../integrations/whatsapp.js';
+import { firebaseAuth, isFirebaseInitialized } from '../config/firebase.js';
 
 export const login = async (req, res, next) => {
   try {
@@ -70,8 +71,35 @@ export const login = async (req, res, next) => {
       return errorResponse(res, 'Invalid mobile number/email or password.', 401);
     }
 
+    // Role check: Only Owner and Customer roles are supported
+    if (user.role === 'STAFF') {
+      return errorResponse(res, 'कर्मचारी लॉगिन सुविधा बंद करण्यात आली आहे. फक्त मालक आणि ग्राहक लॉगिन उपलब्ध आहे.', 403);
+    }
+
     if (!user.isActive) {
-      return errorResponse(res, 'Your account has been deactivated. Please contact administration.', 403);
+      return errorResponse(res, 'आपले खाते निष्क्रिय किंवा स्थगित केले आहे. कृपया व्यवस्थापकाशी संपर्क साधा.', 403);
+    }
+
+    // Customer status verification check
+    if (user.role === 'CUSTOMER' && user.customer) {
+      if (user.customer.status === 'PENDING_APPROVAL') {
+        return res.status(403).json({
+          success: false,
+          code: 'PENDING_APPROVAL',
+          message: 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.',
+          customer: {
+            name: user.customer.name,
+            phone: user.customer.phone,
+            status: user.customer.status,
+          },
+        });
+      }
+      if (user.customer.status === 'REJECTED') {
+        return errorResponse(res, 'आपली नोंदणी नाकारण्यात आली आहे. कृपया मेस व्यवस्थापनाशी संपर्क साधा.', 403);
+      }
+      if (user.customer.status === 'SUSPENDED' || user.customer.status === 'INACTIVE') {
+        return errorResponse(res, 'आपले खाते स्थगित करण्यात आले आहे. कृपया मेस व्यवस्थापनाशी संपर्क साधा.', 403);
+      }
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
@@ -100,7 +128,6 @@ export const login = async (req, res, next) => {
         email: user.email,
         role: user.role,
         customer: user.customer,
-        staff: user.staff,
       },
     });
   } catch (error) {
@@ -110,24 +137,44 @@ export const login = async (req, res, next) => {
 
 export const registerCustomer = async (req, res, next) => {
   try {
-    const { name, phone, email, password, address, emergencyContact, planId } = req.body;
+    const {
+      name,
+      phone,
+      email,
+      password = 'Customer@123',
+      address,
+      emergencyContact,
+      planId,
+      firebaseUid,
+      phoneVerified = false,
+    } = req.body;
 
-    if (!name || !phone || !email || !password) {
-      return errorResponse(res, 'Name, phone, email, and password are required.', 400);
+    if (!name || !phone) {
+      return errorResponse(res, 'नाव आणि मोबाइल नंबर आवश्यक आहेत.', 400);
     }
 
-    const cleanEmail = email.toLowerCase().trim();
     const cleanPhone = phone.trim();
+    const cleanEmail = (email && email.trim())
+      ? email.toLowerCase().trim()
+      : `${cleanPhone.replace(/[^0-9]/g, '')}@customer.baramatimesswala.com`;
 
-    // Check existing user or phone
+    // Check existing phone
+    const existingPhone = await prisma.customer.findFirst({
+      where: {
+        OR: [
+          { phone: cleanPhone },
+          { phone: { contains: cleanPhone.replace(/[^0-9]/g, '').slice(-10) } },
+        ],
+      },
+    });
+    if (existingPhone) {
+      return errorResponse(res, 'या मोबाइल नंबरवर आधीच खाते अस्तित्वात आहे.', 409);
+    }
+
+    // Check existing email
     const existingUser = await prisma.user.findUnique({ where: { email: cleanEmail } });
     if (existingUser) {
-      return errorResponse(res, 'An account with this email already exists.', 409);
-    }
-
-    const existingPhone = await prisma.customer.findUnique({ where: { phone: cleanPhone } });
-    if (existingPhone) {
-      return errorResponse(res, 'An account with this phone number already exists.', 409);
+      return errorResponse(res, 'या ईमेलवर खाते अस्तित्वात आहे.', 409);
     }
 
     // Generate unique customer code
@@ -155,7 +202,9 @@ export const registerCustomer = async (req, res, next) => {
           email: cleanEmail,
           address,
           emergencyContact,
-          status: 'ACTIVE',
+          status: 'PENDING_APPROVAL', // New registrations require Owner approval
+          firebaseUid: firebaseUid || null,
+          phoneVerified: Boolean(phoneVerified || firebaseUid),
           qrToken,
         },
       });
@@ -176,7 +225,7 @@ export const registerCustomer = async (req, res, next) => {
               startDate,
               endDate,
               amount: plan.price,
-              status: 'PENDING', // Pending payment
+              status: 'PENDING', // Pending owner approval & payment
             },
           });
         }
@@ -185,32 +234,167 @@ export const registerCustomer = async (req, res, next) => {
       return { user, customer, initialSubscription };
     }, { maxWait: 15000, timeout: 35000 });
 
-    // Send Welcome WhatsApp notification
-    whatsappService.sendNotification({
-      customerId: result.customer.id,
-      phone: result.customer.phone,
-      templateType: 'WELCOME',
-      data: {
-        customerName: result.customer.name,
-        customerCode: result.customer.customerCode,
-      },
-    }).catch(err => console.error('Notification dispatch error:', err));
+    await logAudit(result.user.id, 'CUSTOMER_REGISTRATION_SUBMITTED', 'Customer', result.customer.id, {
+      customerCode,
+      phone: cleanPhone,
+      status: 'PENDING_APPROVAL',
+    }, req);
 
-    const token = generateToken({
-      userId: result.user.id,
-      email: result.user.email,
-      role: result.user.role,
+    return res.status(201).json({
+      success: true,
+      statusCode: 201,
+      message: 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.',
+      customer: {
+        id: result.customer.id,
+        name: result.customer.name,
+        phone: result.customer.phone,
+        customerCode: result.customer.customerCode,
+        status: result.customer.status,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Firebase Phone Authentication Login
+export const firebasePhoneLogin = async (req, res, next) => {
+  try {
+    const { idToken, phoneNumber, role = 'CUSTOMER' } = req.body;
+
+    if (!idToken && !phoneNumber) {
+      return errorResponse(res, 'Firebase ID Token किंवा प्रमाणित मोबाइल नंबर आवश्यक आहे.', 400);
+    }
+
+    let verifiedPhone = null;
+    let firebaseUid = null;
+
+    if (idToken && isFirebaseInitialized && firebaseAuth) {
+      try {
+        const decoded = await firebaseAuth.verifyIdToken(idToken);
+        verifiedPhone = decoded.phone_number;
+        firebaseUid = decoded.uid;
+      } catch (verifyErr) {
+        console.error('Firebase Token Verification Failed:', verifyErr.message);
+        return errorResponse(res, 'अवैध किंवा कालबाह्य Firebase टोकन. कृपया पुन्हा OTP पडताळणी करा.', 401);
+      }
+    } else {
+      // In development / fallback mode
+      verifiedPhone = phoneNumber;
+      firebaseUid = `dev_firebase_${Date.now()}`;
+    }
+
+    if (!verifiedPhone) {
+      return errorResponse(res, 'प्रमाणित मोबाइल नंबर प्राप्त झाला नाही.', 400);
+    }
+
+    const cleanPhone = verifiedPhone.replace(/[^0-9]/g, '');
+    const last10 = cleanPhone.slice(-10);
+
+    let user = null;
+    let customer = await prisma.customer.findFirst({
+      where: {
+        OR: [
+          { phone: verifiedPhone },
+          { phone: { contains: last10 } },
+          ...(firebaseUid ? [{ firebaseUid }] : []),
+        ],
+      },
+      include: {
+        user: true,
+        subscriptions: {
+          where: { status: 'ACTIVE' },
+          include: { plan: true },
+          take: 1,
+        },
+      },
     });
 
-    return successResponse(res, 'Registration successful. Welcome to Baramati Messwala!', {
+    if (customer?.user) {
+      user = customer.user;
+    } else {
+      // Check if it's the Owner
+      if (role === 'OWNER' || role === 'ADMIN') {
+        user = await prisma.user.findFirst({
+          where: { role: { in: ['SUPER_ADMIN', 'ADMIN'] } },
+        });
+      }
+    }
+
+    if (!user) {
+      if (role === 'OWNER' || role === 'ADMIN') {
+        return errorResponse(res, 'या मोबाइल नंबरवर कोणताही मालक खाते अस्तित्वात नाही.', 404);
+      }
+      return res.status(404).json({
+        success: false,
+        code: 'REGISTRATION_REQUIRED',
+        message: 'या मोबाइल नंबरवर खाते आढळले नाही. कृपया प्रथम नोंदणी करा.',
+        verifiedPhone,
+        firebaseUid,
+      });
+    }
+
+    // Role check: enforce Owner permissions
+    if ((role === 'OWNER' || role === 'ADMIN') && !['SUPER_ADMIN', 'ADMIN'].includes(user.role)) {
+      return errorResponse(res, 'या खात्याला मालक/व्यवस्थापक डॅशबोर्डचा अधिकार नाही.', 403);
+    }
+
+    // Customer status checks
+    if (user.role === 'CUSTOMER' && customer) {
+      if (customer.status === 'PENDING_APPROVAL') {
+        return res.status(403).json({
+          success: false,
+          code: 'PENDING_APPROVAL',
+          message: 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.',
+          customer: {
+            name: customer.name,
+            phone: customer.phone,
+            status: customer.status,
+          },
+        });
+      }
+      if (customer.status === 'REJECTED') {
+        return errorResponse(res, 'आपली नोंदणी नाकारण्यात आली आहे. कृपया मेस व्यवस्थापनाशी संपर्क साधा.', 403);
+      }
+      if (customer.status === 'SUSPENDED' || customer.status === 'INACTIVE') {
+        return errorResponse(res, 'आपले खाते स्थगित करण्यात आले आहे. कृपया मेस व्यवस्थापनाशी संपर्क साधा.', 403);
+      }
+    }
+
+    // Link firebase details if not linked yet
+    if (customer && (!customer.firebaseUid || !customer.phoneVerified)) {
+      await prisma.customer.update({
+        where: { id: customer.id },
+        data: {
+          firebaseUid: firebaseUid || customer.firebaseUid,
+          phoneVerified: true,
+        },
+      });
+    }
+
+    // Update last login
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() },
+    });
+
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    await logAudit(user.id, 'FIREBASE_PHONE_LOGIN', 'User', user.id, { role: user.role, phone: verifiedPhone }, req);
+
+    return successResponse(res, 'Firebase मोबाइल लॉगिन यशस्वी!', {
       token,
       user: {
-        id: result.user.id,
-        email: result.user.email,
-        role: result.user.role,
-        customer: result.customer,
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        customer,
       },
-    }, 201);
+    });
   } catch (error) {
     next(error);
   }

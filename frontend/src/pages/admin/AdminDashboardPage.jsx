@@ -17,6 +17,10 @@ import {
   RefreshCw,
   ArrowRight,
   TrendingUp,
+  ShieldCheck,
+  ShoppingBag,
+  RotateCcw,
+  Clock,
 } from 'lucide-react';
 import {
   BarChart,
@@ -324,79 +328,205 @@ export const AdminDashboardPage = () => {
         </div>
       </div>
 
-      {/* 2. Four KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Card 1: एकूण सक्रिय ग्राहक */}
-        <div className="bg-white rounded-2xl border border-[#EAE3D2] p-5 shadow-xs flex flex-col justify-between transition-all hover:border-[#205D48]/40">
+      {/* 2. Complete 8 Owner KPIs Grid (Mobile-Optimized) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* KPI 1: एकूण मंजूर ग्राहक */}
+        <Link
+          to="/admin/customers"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500">एकूण सक्रिय ग्राहक</span>
-            <div className="w-9 h-9 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
+            <span className="text-[11px] font-bold text-stone-500">मंजूर ग्राहक</span>
+            <div className="w-8 h-8 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-[#2D312E] tracking-tight">
-              {kpis?.activeCustomers || 0}
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-[#2D312E]">
+              {kpis?.totalApprovedCustomers || kpis?.activeCustomers || 0}
             </div>
-            <div className="text-[11px] font-medium text-stone-500 mt-1">
-              +{kpis?.newCustomersThisMonth || 0} या महिन्यात नवीन ग्राहक
+            <div className="text-[10px] text-stone-400 mt-0.5">सक्रिय व मंजूर सदस्य</div>
+          </div>
+        </Link>
+
+        {/* KPI 2: पडताळणी प्रलंबित */}
+        <Link
+          to="/admin/customer-verification"
+          className="bg-amber-50/70 rounded-2xl border border-amber-200 p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-amber-400 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-amber-800">पडताळणी प्रलंबित</span>
+            <div className="w-8 h-8 rounded-xl bg-amber-200/60 text-amber-900 flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
-        </div>
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-amber-900">
+              {kpis?.pendingCustomerVerification || 0}
+            </div>
+            <div className="text-[10px] text-amber-700 font-bold mt-0.5">मंजुरी आवश्यक →</div>
+          </div>
+        </Link>
 
-        {/* Card 2: आजची हजेरी */}
-        <div className="bg-white rounded-2xl border border-[#EAE3D2] p-5 shadow-xs flex flex-col justify-between transition-all hover:border-[#205D48]/40">
+        {/* KPI 3: आजचे एकूण डबे */}
+        <Link
+          to="/admin/dabba-management"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500">आजची हजेरी</span>
-            <div className="w-9 h-9 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
+            <span className="text-[11px] font-bold text-stone-500">आजचे डबे</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#205D48] flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-[#2D312E]">
+              {kpis?.todayDabbaCount || 0}
+            </div>
+            <div className="text-[10px] text-stone-400 mt-0.5">नियोजित डबे संख्या</div>
+          </div>
+        </Link>
+
+        {/* KPI 4: दिलेले डबे */}
+        <Link
+          to="/admin/dabba-management"
+          className="bg-emerald-50/60 rounded-2xl border border-emerald-200 p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-emerald-400 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-emerald-800">दिलेले डबे</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-200/60 text-emerald-900 flex items-center justify-center">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-emerald-900">
+              {kpis?.dabbaGiven || 0}
+            </div>
+            <div className="text-[10px] text-emerald-700 mt-0.5">ग्राहकांनी स्वीकारले</div>
+          </div>
+        </Link>
+
+        {/* KPI 5: जमा झालेले डबे */}
+        <Link
+          to="/admin/dabba-management"
+          className="bg-blue-50/60 rounded-2xl border border-blue-200 p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-blue-400 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-blue-800">जमा डबे</span>
+            <div className="w-8 h-8 rounded-xl bg-blue-200/60 text-blue-900 flex items-center justify-center">
+              <RotateCcw className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-blue-900">
+              {kpis?.dabbaReturned || 0}
+            </div>
+            <div className="text-[10px] text-blue-700 mt-0.5">रिकामी डबे परत जमा</div>
+          </div>
+        </Link>
+
+        {/* KPI 6: आजची हजेरी */}
+        <Link
+          to="/admin/attendance"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-stone-500">आजची हजेरी</span>
+            <div className="w-8 h-8 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
               <CalendarCheck className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-[#2D312E] tracking-tight">
-              {kpis?.todayTotalAttendance || 0} / {kpis?.activeCustomers || 0}
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-[#2D312E]">
+              {kpis?.todayAttendance || kpis?.todayTotalAttendance || 0}
             </div>
-            <div className="text-[11px] font-medium text-stone-500 mt-1">
+            <div className="text-[10px] text-stone-400 mt-0.5">
               दुपारी: {kpis?.todayLunch || 0} | रात्री: {kpis?.todayDinner || 0}
             </div>
           </div>
-        </div>
+        </Link>
 
-        {/* Card 3: या महिन्याची कमाई */}
-        <div className="bg-white rounded-2xl border border-[#EAE3D2] p-5 shadow-xs flex flex-col justify-between transition-all hover:border-[#205D48]/40">
+        {/* KPI 7: मासिक जमा (Monthly Collection) */}
+        <Link
+          to="/admin/payment-management"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-stone-500">या महिन्याची कमाई</span>
-            <div className="w-9 h-9 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
+            <span className="text-[11px] font-bold text-stone-500">मासिक जमा</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
               <IndianRupee className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-[#2D312E] tracking-tight">
-              ₹{Number(kpis?.monthlyRevenue || 0).toLocaleString('en-IN')}
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-emerald-900">
+              ₹{Number(kpis?.monthlyCollection || kpis?.monthlyRevenue || 0).toLocaleString('en-IN')}
             </div>
-            <div className="text-[11px] font-medium text-stone-500 mt-1">
-              जमा झालेलं पेमेंट
-            </div>
+            <div className="text-[10px] text-stone-400 mt-0.5">प्रमाणित पेमेंट</div>
           </div>
-        </div>
+        </Link>
 
-        {/* Card 4: थकबाकी (Warning Card: Light Peach) */}
-        <div className="bg-[#FFF2E8] rounded-2xl border border-[#FADCD0] p-5 shadow-xs flex flex-col justify-between transition-all">
+        {/* KPI 8: येणे बाकी (Pending Payments) */}
+        <Link
+          to="/admin/payment-management"
+          className="bg-[#FFF2E8] rounded-2xl border border-[#FADCD0] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-orange-400 transition-all"
+        >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#8C3B14]">थकबाकी</span>
-            <div className="w-9 h-9 rounded-xl bg-[#F6D3C1] text-[#8C3B14] flex items-center justify-center">
+            <span className="text-[11px] font-bold text-[#8C3B14]">बाकी रक्कम</span>
+            <div className="w-8 h-8 rounded-xl bg-[#F6D3C1] text-[#8C3B14] flex items-center justify-center">
               <AlertCircle className="w-4 h-4" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-[#8C3B14] tracking-tight">
+          <div className="mt-2">
+            <div className="text-xl sm:text-2xl font-black text-[#8C3B14]">
               ₹{Number(kpis?.pendingPayments || 0).toLocaleString('en-IN')}
             </div>
-            <div className="text-[11px] font-semibold text-[#A74E21] mt-1">
+            <div className="text-[10px] text-[#A74E21] font-bold mt-0.5">
               {kpis?.pendingCustomersCount || outstandingList.length} ग्राहकांकडे बाकी
             </div>
           </div>
-        </div>
+        </Link>
+      </div>
+
+      {/* 3 Dedicated Owner Quick-Launch Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Link
+          to="/admin/customer-verification"
+          className="p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] transition-all flex items-center gap-3.5 group"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="font-extrabold text-sm text-slate-900">ग्राहक पडताळणी व मंजुरी</div>
+            <div className="text-[11px] text-slate-500">नवीन नोंदणी तपासणी, मंजुरी किंवा नकार</div>
+          </div>
+        </Link>
+
+        <Link
+          to="/admin/dabba-management"
+          className="p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] transition-all flex items-center gap-3.5 group"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-[#205D48] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <ShoppingBag className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="font-extrabold text-sm text-slate-900">दैनिक डबा व हजेरी नोंद</div>
+            <div className="text-[11px] text-slate-500">डबा दिला/जमा केला आणि थेट हजेरी</div>
+          </div>
+        </Link>
+
+        <Link
+          to="/admin/payment-management"
+          className="p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] transition-all flex items-center gap-3.5 group"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <CreditCard className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="font-extrabold text-sm text-slate-900">पेमेंट मॅनेजमेंट (Confirm Paid)</div>
+            <div className="text-[11px] text-slate-500">रोख/UPI पडताळणी व बिल भरणा</div>
+          </div>
+        </Link>
       </div>
 
       {/* 3. Middle Row: Weekly Attendance Chart (2/3) & Today's Menu (1/3) */}

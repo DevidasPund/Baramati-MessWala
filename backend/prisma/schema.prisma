@@ -19,6 +19,16 @@ enum CustomerStatus {
   ACTIVE
   INACTIVE
   PAUSED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum DabbaStatus {
+  PREPARED
+  GIVEN
+  RETURNED
 }
 
 enum PlanType {
@@ -171,12 +181,18 @@ model Customer {
   emergencyContact String?
   profilePhoto     String?
   joiningDate      DateTime        @default(now())
-  status           CustomerStatus  @default(ACTIVE)
+  status           CustomerStatus  @default(PENDING_APPROVAL)
+  approvedById     String?
+  approvedAt       DateTime?
+  rejectionReason  String?
+  firebaseUid      String?         @unique
+  phoneVerified    Boolean         @default(false)
   qrToken          String          @unique // Non-guessable secure token for QR
   notes            String?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
+  dailyDabbas      DailyDabba[]
   subscriptions    Subscription[]
   attendance       Attendance[]
   extraMeals       ExtraMeal[]
@@ -533,4 +549,26 @@ model MessQrSession {
 
   @@index([token])
   @@index([date])
+}
+
+model DailyDabba {
+  id               String      @id @default(uuid())
+  customerId       String
+  customer         Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  date             String      // YYYY-MM-DD
+  mealType         MealType
+  status           DabbaStatus @default(PREPARED)
+  givenAt          DateTime?
+  returnedAt       DateTime?
+  recordedById     String?
+  remarks          String?
+  correctionReason String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@unique([customerId, mealType, date], name: "unique_customer_meal_date_dabba")
+  @@index([date])
+  @@index([mealType])
+  @@index([status])
+  @@index([customerId])
 }

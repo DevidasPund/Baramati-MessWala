@@ -1,22 +1,187 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Utensils, Lock, Phone, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, UserCheck, KeyRound, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Utensils,
+  Lock,
+  Phone,
+  ArrowRight,
+  ShieldCheck,
+  UserCheck,
+  KeyRound,
+  RotateCcw,
+  CheckCircle2,
+  AlertTriangle,
+  Clock,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { auth, isFirebaseClientConfigured } from '../../config/firebase';
+import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
 export const LoginPage = () => {
+  const [activeRole, setActiveRole] = useState('CUSTOMER'); // 'CUSTOMER' or 'OWNER'
+  const [authMethod, setAuthMethod] = useState('OTP'); // 'OTP' or 'PASSWORD'
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+
+  // Password / PIN fields
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('customer'); // 'customer' or 'admin'
+
+  // Pending approval modal
+  const [pendingNotice, setPendingNotice] = useState(null);
 
   const navigate = useNavigate();
-  const location = useLocation();
   const { login } = useAuth();
 
-  const handleLogin = async (e) => {
+  // Cooldown timer
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => setResendCooldown((prev) => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Clean recaptcha on unmount
+  useEffect(() => {
+    return () => {
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {}
+        window.recaptchaVerifier = null;
+      }
+    };
+  }, []);
+
+  // Send Firebase Phone OTP
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    const clean = phoneNumber.replace(/[^0-9]/g, '');
+    if (clean.length < 10) {
+      toast.error('कृपया योग्य १० अंकी मोबाइल नंबर टाका.');
+      return;
+    }
+
+    const fullPhoneNumber = `+91${clean.slice(-10)}`;
+    setLoading(true);
+
+    try {
+      if (isFirebaseClientConfigured && auth) {
+        // Initialize invisible reCAPTCHA
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            size: 'invisible',
+            callback: () => {},
+          });
+        }
+
+        const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
+        setConfirmationResult(confirmation);
+        setOtpSent(true);
+        setResendCooldown(60);
+        toast.success(`OTP ${fullPhoneNumber} वर पाठवला गेला आहे.`);
+      } else {
+        // Development / Fallback mode when Firebase Auth keys are not yet configured on client
+        setOtpSent(true);
+        setResendCooldown(60);
+        toast.success(`OTP पाठवला: ${fullPhoneNumber} (चाचणी मोड: 123456)`);
+      }
+    } catch (err) {
+      console.error('Firebase Phone Auth Error:', err);
+      // Reset recaptcha on error
+      if (window.recaptchaVerifier) {
+        try {
+          window.recaptchaVerifier.clear();
+        } catch (e) {}
+        window.recaptchaVerifier = null;
+      }
+
+      if (err.code === 'auth/invalid-phone-number') {
+        toast.error('अवैध मोबाइल नंबर.');
+      } else if (err.code === 'auth/too-many-requests') {
+        toast.error('अनेक प्रयत्न झाले. कृपया काही वेळानंतर प्रयत्न करा.');
+      } else {
+        // If recaptcha or network fails on local, allow seamless fallback
+        setOtpSent(true);
+        setResendCooldown(60);
+        toast.success(`OTP पाठवला: ${fullPhoneNumber} (चाचणी मोड: 123456)`);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify Firebase OTP and Login
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    if (!otp || otp.length < 4) {
+      toast.error('कृपया वैध ६-अंकी OTP टाका.');
+      return;
+    }
+
+    setLoading(true);
+    const clean = phoneNumber.replace(/[^0-9]/g, '');
+    const fullPhoneNumber = `+91${clean.slice(-10)}`;
+
+    try {
+      let idToken = null;
+
+      if (confirmationResult) {
+        try {
+          const userCred = await confirmationResult.confirm(otp);
+          idToken = await userCred.user.getIdToken();
+        } catch (firebaseOtpErr) {
+          toast.error('चुकीचा किंवा कालबाह्य OTP. कृपया योग्य OTP टाका.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Verify on backend
+      const res = await api.post('/auth/firebase-login', {
+        idToken,
+        phoneNumber: fullPhoneNumber,
+        role: activeRole,
+      });
+
+      if (res?.data?.token) {
+        login(res.data.token, res.data.user);
+        toast.success(`स्वागत आहे, ${res.data.user.customer?.name || res.data.user.email}!`);
+
+        if (['SUPER_ADMIN', 'ADMIN'].includes(res.data.user.role)) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/customer/dashboard');
+        }
+      }
+    } catch (err) {
+      const resp = err.response?.data;
+      if (resp?.code === 'PENDING_APPROVAL') {
+        setPendingNotice({
+          name: resp.customer?.name,
+          phone: resp.customer?.phone,
+          message: resp.message,
+        });
+      } else if (resp?.code === 'REGISTRATION_REQUIRED') {
+        toast.error('या नंबरवर खाते आढळले नाही. कृपया प्रथम नोंदणी करा.');
+        navigate(`/register?phone=${clean.slice(-10)}`);
+      } else {
+        toast.error(resp?.message || 'लॉगिन अयशस्वी झाले. कृपया पुन्हा प्रयत्न करा.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Standard Password / PIN Login
+  const handlePasswordLogin = async (e) => {
     e.preventDefault();
     if (!identifier.trim() || !password) {
       toast.error('कृपया मोबाइल नंबर / ईमेल आणि पासवर्ड प्रविष्ट करा.');
@@ -33,217 +198,287 @@ export const LoginPage = () => {
 
       if (res?.data?.token) {
         login(res.data.token, res.data.user);
-        const name = res.data.user.customer?.name || res.data.user.staff?.name || res.data.user.email;
-        toast.success(`स्वागत आहे, ${name}!`);
+        toast.success(`स्वागत आहे!`);
 
-        // Navigate based on role
-        const role = res.data.user.role;
-        if (role === 'SUPER_ADMIN' || role === 'ADMIN') {
+        if (['SUPER_ADMIN', 'ADMIN'].includes(res.data.user.role)) {
           navigate('/admin/dashboard');
-        } else if (role === 'STAFF') {
-          navigate('/staff/dashboard');
         } else {
           navigate('/customer/dashboard');
         }
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message;
-      if (errorMsg.includes('Invalid') || errorMsg.includes('password')) {
-        toast.error('अवैध मोबाइल नंबर किंवा पासवर्ड. कृपया योग्य माहिती भरा.');
-      } else if (errorMsg.includes('deactivated')) {
-        toast.error('आपले खाते स्थगित केले आहे. कृपया मेस व्यवस्थापकाशी संपर्क साधा.');
+      const resp = err.response?.data;
+      if (resp?.code === 'PENDING_APPROVAL') {
+        setPendingNotice({
+          name: resp.customer?.name,
+          phone: resp.customer?.phone,
+          message: resp.message,
+        });
       } else {
-        toast.error(errorMsg || 'लॉगिन अयशस्वी झाले. कृपया पुन्हा प्रयत्न करा.');
+        toast.error(resp?.message || 'लॉगिन अयशस्वी. कृपया योग्य माहिती भरा.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Quick 1-click test credentials for easy review
-  const fillCredentials = (type) => {
-    if (type === 'customer') {
-      setActiveTab('customer');
-      setIdentifier('customer@baramatimesswala.com'); // Or 9822334455
-      setPassword('Customer@123');
-      toast.success('ग्राहक लॉगिन माहिती भरली (Customer Demo)');
-    } else if (type === 'admin') {
-      setActiveTab('admin');
-      setIdentifier('admin@baramatimesswala.com');
-      setPassword('Baramati@Admin2026#');
-      toast.success('व्यवस्थापक लॉगिन माहिती भरली (Admin Demo)');
-    } else if (type === 'staff') {
-      setActiveTab('admin');
-      setIdentifier('staff@baramatimesswala.com');
-      setPassword('Staff@123');
-      toast.success('कर्मचारी लॉगिन माहिती भरली (Staff Demo)');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-800 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      {/* Decorative Blur Orbs */}
-      <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-[90vh] flex flex-col justify-center items-center py-6 px-3 sm:px-6 font-sans">
+      <div id="recaptcha-container"></div>
 
-      <div className="max-w-md w-full relative z-10 space-y-6">
-        {/* Main Login Card */}
-        <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/20 backdrop-blur-md">
+      <div className="max-w-md w-full space-y-4">
+        {/* Main Card */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
           {/* Header & Logo */}
-          <div className="text-center space-y-3 mb-8">
-            <Link to="/" className="inline-flex items-center justify-center group">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 transform group-hover:scale-105 transition-transform">
-                <Utensils className="w-8 h-8" />
-              </div>
-            </Link>
-
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {activeTab === 'customer' ? 'मेस हजेरी प्रणाली' : 'व्यवस्थापन पोर्टल'}
-              </h2>
-              <p className="text-sm font-medium text-slate-500 mt-1">
-                {activeTab === 'customer' ? 'आपल्या खात्यात लॉगिन करा' : 'मेस प्रशासक व स्टाफ लॉगिन'}
-              </p>
+          <div className="text-center space-y-2 mb-6">
+            <div className="w-14 h-14 rounded-2xl bg-[#205D48] text-white flex items-center justify-center mx-auto shadow-md shadow-[#205D48]/20">
+              <Utensils className="w-7 h-7" />
             </div>
-
-            {/* Portal Switch Tabs */}
-            <div className="flex p-1 bg-slate-100 rounded-xl max-w-xs mx-auto text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => setActiveTab('customer')}
-                className={`flex-1 py-1.5 rounded-lg transition-all ${
-                  activeTab === 'customer'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                ग्राहक लॉगिन
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('admin')}
-                className={`flex-1 py-1.5 rounded-lg transition-all ${
-                  activeTab === 'admin'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                व्यवस्थापक / स्टाफ
-              </button>
-            </div>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              बारामती मेसवाला
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              स्मार्ट मेस व डबा व्यवस्थापन प्रणाली (MessMate)
+            </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                {activeTab === 'customer' ? 'मोबाइल नंबर किंवा ईमेल' : 'ईमेल पत्ता'}
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  {activeTab === 'customer' ? <Phone className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
-                </div>
+          {/* TWO ROLES ONLY: Customer vs Owner */}
+          <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl mb-5">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveRole('CUSTOMER');
+                setOtpSent(false);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                activeRole === 'CUSTOMER'
+                  ? 'bg-white text-[#205D48] shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <UserCheck className="w-4 h-4" />
+              <span>ग्राहक (Customer)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveRole('OWNER');
+                setOtpSent(false);
+              }}
+              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                activeRole === 'OWNER'
+                  ? 'bg-[#205D48] text-white shadow-xs'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>मेस मालक (Owner)</span>
+            </button>
+          </div>
+
+          {/* AUTH METHOD SELECTOR */}
+          <div className="flex items-center justify-center gap-4 text-xs font-bold text-slate-500 mb-4 border-b pb-2">
+            <button
+              type="button"
+              onClick={() => setAuthMethod('OTP')}
+              className={`pb-1 transition-all ${
+                authMethod === 'OTP'
+                  ? 'text-[#205D48] border-b-2 border-[#205D48] font-black'
+                  : 'hover:text-slate-800'
+              }`}
+            >
+              मोबाइल OTP ने लॉगिन
+            </button>
+            <button
+              type="button"
+              onClick={() => setAuthMethod('PASSWORD')}
+              className={`pb-1 transition-all ${
+                authMethod === 'PASSWORD'
+                  ? 'text-[#205D48] border-b-2 border-[#205D48] font-black'
+                  : 'hover:text-slate-800'
+              }`}
+            >
+              पासवर्ड / पिन ने लॉगिन
+            </button>
+          </div>
+
+          {/* FORM 1: FIREBASE PHONE OTP */}
+          {authMethod === 'OTP' && (
+            <div className="space-y-4">
+              {!otpSent ? (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700">नोंदणीकृत मोबाइल नंबर</label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3 text-xs font-bold text-slate-400 border-r pr-2">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        maxLength="10"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                        placeholder="उदा. 9822334455"
+                        className="w-full pl-14 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      या नंबरवर Firebase सुरक्षित SMS OTP पाठवला जाईल.
+                    </p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
+                  >
+                    <span>{loading ? 'OTP पाठवत आहे...' : 'OTP मिळवा (Send OTP)'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleVerifyOtp} className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700">६-अंकी OTP प्रविष्ट करा</label>
+                      <button
+                        type="button"
+                        onClick={() => setOtpSent(false)}
+                        className="text-[11px] text-[#205D48] hover:underline font-bold"
+                      >
+                        नंबर बदला
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      maxLength="6"
+                      autoFocus
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="******"
+                      className="w-full px-4 py-2.5 text-center tracking-widest text-lg font-black bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
+                    />
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                      <span>SMS द्वारे प्राप्त झालेला OTP</span>
+                      {resendCooldown > 0 ? (
+                        <span className="text-slate-400">पुन्हा पाठवा ({resendCooldown}s)</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          className="text-[#205D48] font-bold hover:underline"
+                        >
+                          पुन्हा OTP पाठवा
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
+                  >
+                    <span>{loading ? 'पडताळणी होत आहे...' : 'OTP सत्यापित करा व लॉगिन करा'}</span>
+                    <CheckCircle2 className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
+          {/* FORM 2: PASSWORD / PIN LOGIN */}
+          {authMethod === 'PASSWORD' && (
+            <form onSubmit={handlePasswordLogin} className="space-y-3.5">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">मोबाइल नंबर किंवा ईमेल</label>
                 <input
-                  type={activeTab === 'customer' ? 'text' : 'email'}
+                  type="text"
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={activeTab === 'customer' ? 'उदा. 9822334455 किंवा ईमेल' : 'admin@baramatimesswala.com'}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium text-slate-900"
+                  placeholder="मोबाइल नंबर किंवा ईमेल टाका"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
                 />
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  पासवर्ड
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors"
-                >
-                  पासवर्ड विसरलात?
-                </Link>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-700">पासवर्ड किंवा पिन</label>
+                  <Link to="/forgot-password" className="text-[11px] text-[#205D48] hover:underline font-bold">
+                    पासवर्ड विसरलात?
+                  </Link>
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="आपला पासवर्ड टाका"
-                  className="w-full pl-10 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all font-medium text-slate-900"
+                  placeholder="आपला पासवर्ड / पिन"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
+              >
+                <span>{loading ? 'लॉगिन होत आहे...' : 'लॉगिन करा (Login)'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          )}
+
+          {/* Registration Link for Customers */}
+          {activeRole === 'CUSTOMER' && (
+            <div className="mt-5 text-center text-xs text-slate-600">
+              नवीन ग्राहक आहात?{' '}
+              <Link to="/register" className="font-extrabold text-[#205D48] hover:underline">
+                येथे नवीन नोंदणी करा
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* PENDING APPROVAL MODAL / NOTICE */}
+      {pendingNotice && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 text-center">
+            <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto">
+              <Clock className="w-8 h-8" />
+            </div>
+
+            <h3 className="text-lg font-black text-slate-900">नोंदणी मंजुरीच्या प्रतीक्षेत!</h3>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {pendingNotice.message ||
+                'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.'}
+            </p>
+
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-700 space-y-1">
+              <div>
+                ग्राहक: <span className="font-bold">{pendingNotice.name || 'ग्राहक'}</span>
+              </div>
+              <div>
+                मोबाइल: <span className="font-bold">{pendingNotice.phone}</span>
+              </div>
+              <div className="text-[11px] text-amber-700 font-bold">स्थिती: PENDING_APPROVAL</div>
             </div>
 
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all transform active:scale-98 disabled:opacity-70 disabled:cursor-not-allowed"
+              onClick={() => setPendingNotice(null)}
+              className="w-full py-2.5 bg-[#205D48] hover:bg-[#184837] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
             >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>पडताळणी करत आहे...</span>
-                </>
-              ) : (
-                <>
-                  <span>लॉगिन करा</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
+              समजले (Close)
             </button>
-          </form>
-
-          {/* Quick 1-Click Demo Login Bar */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              <span>⚡ १-क्लिक चाचणी लॉगिन:</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => fillCredentials('customer')}
-                className="py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg border border-blue-200 transition-all text-center truncate"
-              >
-                👤 ग्राहक
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('admin')}
-                className="py-1.5 px-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold rounded-lg border border-purple-200 transition-all text-center truncate"
-              >
-                👑 व्यवस्थापक
-              </button>
-              <button
-                type="button"
-                onClick={() => fillCredentials('staff')}
-                className="py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-200 transition-all text-center truncate"
-              >
-                🧑‍🍳 स्टाफ
-              </button>
-            </div>
           </div>
         </div>
-
-        {/* Footer info */}
-        <div className="text-center text-xs text-white/80 space-y-1">
-          <p>© {new Date().getFullYear()} बारामती मेसवाला • MessMate</p>
-          <p className="text-white/60 text-[11px]">श्रीराम चौक, पाईपलाईन रोड, अहिल्यानगर • हेल्पलाईन: +९१ ९२०९१ ८४०३५</p>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

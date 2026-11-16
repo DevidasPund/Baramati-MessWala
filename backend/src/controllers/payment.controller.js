@@ -218,3 +218,246 @@ export const getPayments = async (req, res, next) => {
     next(error);
   }
 };
+
+// Owner Payment Management Statistics
+export const getPaymentManagementStats = async (req, res, next) => {
+  try {
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+    const startOfMonth = new Date(currentYear, currentMonth - 1, 1);
+    const endOfMonth = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+
+    const [monthlyCollectionResult, unpaidInvoicesResult, pendingVerifications, allInvoices, customersCount] = await Promise.all([
+      // Monthly verified collection
+      prisma.payment.aggregate({
+        where: {
+          status: 'VERIFIED',
+          createdAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+        _sum: { amount: true },
+      }),
+      // Pending payments sum
+      prisma.invoice.aggregate({
+        where: {
+          status: { in: ['PENDING', 'PARTIALLY_PAID', 'OVERDUE'] },
+        },
+        _sum: { balanceDue: true },
+      }),
+      // Pending payment verification requests from customers
+      prisma.payment.count({
+        where: { status: 'PENDING' },
+      }),
+      // Invoices grouped for paid / unpaid customer metrics
+      prisma.invoice.findMany({
+        select: {
+          customerId: true,
+          status: true,
+          balanceDue: true,
+        },
+      }),
+      // Approved customers count
+      prisma.customer.count({
+        where: { status: { in: ['ACTIVE', 'APPROVED'] } },
+      }),
+    ]);
+
+    const unpaidCustomerIds = new Set(
+      allInvoices
+        .filter((inv) => inv.status !== 'PAID' && Number(inv.balanceDue) > 0)
+        .map((inv) => inv.customerId)
+    );
+
+    const unpaidCustomersCount = unpaidCustomerIds.size;
+    const paidCustomersCount = Math.max(0, customersCount - unpaidCustomersCount);
+
+    return successResponse(res, 'Payment stats fetched', {
+      totalMonthlyCollection: Number(monthlyCollectionResult._sum.amount || 0),
+      pendingPaymentAmount: Number(unpaidInvoicesResult._sum.balanceDue || 0),
+      paidCustomersCount,
+      unpaidCustomersCount,
+      totalApprovedCustomers: customersCount,
+      pendingVerificationsCount: pendingVerifications,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Owner Record Cash or UPI Payment (Direct Verification)
+export const recordManualOwnerPayment = async (req, res, next) => {
+  try {
+    const { customerId, invoiceId, amount, paymentMethod = 'CASH', transactionRef, remarks } = req.body;
+
+    if (!customerId || !amount || Number(amount) <= 0) {
+      return errorResponse(res, 'ग्राहक आणि योग्य रक्कम आवश्यक आहे.', 400);
+    }
+
+    const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+    if (!customer) {
+      return errorResponse(res, 'Customer not found.', 404);
+    }
+
+    let invoice = null;
+    if (invoiceId) {
+      invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
+    }
+
+    const count = await prisma.payment.count();
+    const paymentNumber = `PAY-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+
+    const result = await prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.create({
+        data: {
+          paymentNumber,
+          customerId,
+          invoiceId: invoice?.id || null,
+          amount: Number(amount),
+          paymentMethod,
+          transactionRef: transactionRef || null,
+          status: 'VERIFIED',
+          verifiedById: req.user.id,
+          verifiedAt: new Date(),
+          notes: remarks ? `नोंद: ${remarks}` : `थेट मालकाद्वारे नोंदवलेले ${paymentMethod} पेमेंट`,
+        },
+      });
+
+      if (invoice) {
+        const newPaidAmount = Number(invoice.paidAmount) + Number(amount);
+        const newBalance = Math.max(0, Number(invoice.totalAmount) - newPaidAmount);
+        const newStatus = newBalance <= 0 ? 'PAID' : 'PARTIALLY_PAID';
+
+        await tx.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            paidAmount: newPaidAmount,
+            balanceDue: newBalance,
+            status: newStatus,
+          },
+        });
+      }
+
+      return payment;
+    }, { maxWait: 15000, timeout: 35000 });
+
+    await logAudit(req.user.id, 'OWNER_RECORD_PAYMENT', 'Payment', result.id, {
+      customerId,
+      amount,
+      paymentMethod,
+      invoiceId,
+    }, req);
+
+    return successResponse(res, 'पेमेंट यशस्वीरीत्या नोंदवले व प्रमाणित केले गेले.', { payment: result }, 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Owner Toggle Invoice Status (Mark PAID / UNPAID)
+export const toggleInvoiceStatus = async (req, res, next) => {
+  try {
+    const { invoiceId } = req.params;
+    const { status, remarks } = req.body;
+
+    if (!['PAID', 'UNPAID', 'PENDING'].includes(status)) {
+      return errorResponse(res, 'Status must be PAID or UNPAID', 400);
+    }
+
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: { customer: true },
+    });
+
+    if (!invoice) {
+      return errorResponse(res, 'Invoice not found', 404);
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      if (status === 'PAID') {
+        const remainingDue = Number(invoice.balanceDue);
+        if (remainingDue > 0) {
+          const count = await tx.payment.count();
+          const paymentNumber = `PAY-${new Date().getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+          await tx.payment.create({
+            data: {
+              paymentNumber,
+              invoiceId: invoice.id,
+              customerId: invoice.customerId,
+              amount: remainingDue,
+              paymentMethod: 'CASH',
+              status: 'VERIFIED',
+              verifiedById: req.user.id,
+              verifiedAt: new Date(),
+              notes: remarks ? `मालकाने PAID केले: ${remarks}` : 'मालकाद्वारे थेट PAID केले गेले',
+            },
+          });
+        }
+
+        return await tx.invoice.update({
+          where: { id: invoiceId },
+          data: {
+            paidAmount: invoice.totalAmount,
+            balanceDue: 0.00,
+            status: 'PAID',
+            notes: remarks ? `${invoice.notes || ''} | ${remarks}` : invoice.notes,
+          },
+        });
+      } else {
+        // Mark UNPAID / PENDING
+        return await tx.invoice.update({
+          where: { id: invoiceId },
+          data: {
+            paidAmount: 0.00,
+            balanceDue: invoice.totalAmount,
+            status: 'PENDING',
+            notes: remarks ? `${invoice.notes || ''} | UNPAID: ${remarks}` : invoice.notes,
+          },
+        });
+      }
+    }, { maxWait: 15000, timeout: 35000 });
+
+    await logAudit(req.user.id, `INVOICE_MARKED_${status}`, 'Invoice', invoiceId, { remarks }, req);
+
+    return successResponse(res, `बिल यशस्वीरीत्या ${status} म्हणून चिन्हांकित केले गेले.`, { invoice: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Customer-wise Payment History for Owner
+export const getCustomerPaymentHistory = async (req, res, next) => {
+  try {
+    const { customerId } = req.params;
+
+    const [customer, payments, invoices] = await Promise.all([
+      prisma.customer.findUnique({
+        where: { id: customerId },
+        select: { id: true, name: true, phone: true, customerCode: true, status: true },
+      }),
+      prisma.payment.findMany({
+        where: { customerId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          invoice: { select: { invoiceNumber: true, totalAmount: true } },
+        },
+      }),
+      prisma.invoice.findMany({
+        where: { customerId },
+        orderBy: { createdAt: 'desc' },
+        include: { items: true },
+      }),
+    ]);
+
+    if (!customer) {
+      return errorResponse(res, 'Customer not found', 404);
+    }
+
+    return successResponse(res, 'Customer payment history fetched', {
+      customer,
+      payments,
+      invoices,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

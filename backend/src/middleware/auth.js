@@ -60,12 +60,7 @@ export const authorize = (allowedRoles = []) => {
 // Customer Ownership Verification: prevents ID tampering in URL
 export const verifyCustomerOwnership = (req, res, next) => {
   if (['SUPER_ADMIN', 'ADMIN'].includes(req.user.role)) {
-    return next(); // Admins can manage any customer
-  }
-
-  if (req.user.role === 'STAFF') {
-    // Staff can view customer profiles for verification / scan, but cannot modify sensitive fields
-    return next();
+    return next(); // Owner / Admin can manage any customer
   }
 
   if (req.user.role === 'CUSTOMER') {
@@ -78,5 +73,5 @@ export const verifyCustomerOwnership = (req, res, next) => {
     return next();
   }
 
-  return errorResponse(res, 'Unauthorized access.', 403);
+  return errorResponse(res, 'Unauthorized access. Only Owner and Customer roles are permitted.', 403);
 };

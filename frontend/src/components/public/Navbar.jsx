@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { user, logout, isAdmin, isStaff, isCustomer } = useAuth();
+  const { user, logout, isAdmin, isCustomer } = useAuth();
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -18,7 +18,6 @@ export const Navbar = () => {
 
   const getDashboardLink = () => {
     if (isAdmin) return '/admin/dashboard';
-    if (isStaff) return '/staff/dashboard';
     if (isCustomer) return '/customer/dashboard';
     return '/login';
   };

@@ -29,11 +29,12 @@ export const AdminLayout = () => {
   // Exactly the 8 screenshot navigation items
   const navItems = [
     { name: 'डॅशबोर्ड', path: '/admin/dashboard', icon: LayoutDashboard },
-    { name: 'ग्राहक', path: '/admin/customers', icon: Users },
-    { name: 'हजेरी (QR)', path: '/admin/attendance', icon: QrCode },
-    { name: 'बिलिंग / पेमेंट', path: '/admin/billing', icon: Receipt },
+    { name: 'ग्राहक पडताळणी', path: '/admin/customer-verification', icon: ShieldCheck },
+    { name: 'ग्राहक यादी', path: '/admin/customers', icon: Users },
+    { name: 'डबा व हजेरी', path: '/admin/dabba-management', icon: ShoppingBag },
+    { name: 'पेमेंट मॅनेजमेंट', path: '/admin/payment-management', icon: CreditCard },
     { name: 'आजचा मेनू', path: '/admin/menu', icon: UtensilsCrossed },
-    { name: 'खर्च व किराणा', path: '/admin/extra-meals', icon: ShoppingBag },
+    { name: 'बिलिंग / इन्व्हॉइस', path: '/admin/billing', icon: Receipt },
     { name: 'अहवाल', path: '/admin/reports', icon: BarChart3 },
     { name: 'सेटिंग्ज', path: '/admin/settings', icon: Settings },
   ];
@@ -188,12 +189,12 @@ export const AdminLayout = () => {
           {/* Quick Header Navigation for Other Modules */}
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
-              to="/admin/staff"
+              to="/admin/customer-verification"
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 hover:text-[#205D48] hover:bg-white/70 rounded-xl transition-colors border border-transparent hover:border-[#EAE3D2]"
-              title="कर्मचारी"
+              title="ग्राहक पडताळणी"
             >
               <ShieldCheck className="w-4 h-4 text-[#205D48]" />
-              <span>कर्मचारी</span>
+              <span>पडताळणी</span>
             </Link>
 
             <Link
@@ -226,9 +227,35 @@ export const AdminLayout = () => {
         </header>
 
         {/* Page Body */}
-        <main className="flex-1 p-4 sm:p-7 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-3 sm:p-7 max-w-7xl mx-auto w-full pb-20 lg:pb-7">
           <Outlet />
         </main>
+
+        {/* Mobile Bottom Navigation for Owner (Quick Thumb Access) */}
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl px-1 py-1 flex items-center justify-around h-16">
+          {[
+            { name: 'डॅशबोर्ड', path: '/admin/dashboard', icon: LayoutDashboard },
+            { name: 'पडताळणी', path: '/admin/customer-verification', icon: ShieldCheck },
+            { name: 'डबा/हजेरी', path: '/admin/dabba-management', icon: ShoppingBag },
+            { name: 'पेमेंट', path: '/admin/payment-management', icon: CreditCard },
+            { name: 'मेनू', path: '/admin/menu', icon: UtensilsCrossed },
+          ].map((item) => {
+            const isActive = location.pathname === item.path;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`min-h-[44px] min-w-[48px] flex flex-col items-center justify-center py-1 px-1.5 rounded-xl transition-all ${
+                  isActive ? 'text-[#205D48] font-black scale-105' : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <Icon className="w-5 h-5 transition-transform" />
+                <span className="text-[10px] mt-0.5">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );

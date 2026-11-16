@@ -22,7 +22,9 @@ import { AdminLayout } from './layouts/AdminLayout';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage';
 import { CustomersPage } from './pages/admin/CustomersPage';
 import { CustomerDetailsPage } from './pages/admin/CustomerDetailsPage';
-import { StaffManagementPage } from './pages/admin/StaffManagementPage';
+import { CustomerVerificationPage } from './pages/admin/CustomerVerificationPage';
+import { DabbaManagementPage } from './pages/admin/DabbaManagementPage';
+import { PaymentManagementPage } from './pages/admin/PaymentManagementPage';
 import { SubscriptionPlansPage as AdminPlansPage } from './pages/admin/SubscriptionPlansPage';
 import { SubscriptionsPage } from './pages/admin/SubscriptionsPage';
 import { AttendancePage } from './pages/admin/AttendancePage';
@@ -49,13 +51,6 @@ import { CustomerProfilePage } from './pages/customer/CustomerProfilePage';
 import { CustomerSubscriptionPage } from './pages/customer/CustomerSubscriptionPage';
 import { CustomerMenuPage } from './pages/customer/CustomerMenuPage';
 import { CustomerNotificationsPage } from './pages/customer/CustomerNotificationsPage';
-
-// Staff
-import { StaffLayout } from './layouts/StaffLayout';
-import { StaffDashboardPage } from './pages/staff/StaffDashboardPage';
-import { StaffQrScannerPage } from './pages/staff/StaffQrScannerPage';
-import { StaffAttendancePage } from './pages/staff/StaffAttendancePage';
-import { StaffCustomerSearchPage } from './pages/staff/StaffCustomerSearchPage';
 
 // Layout wrapper for public website with Navbar & Footer
 const PublicLayout = ({ children }) => (
@@ -94,7 +89,9 @@ function App() {
           <Route path="dashboard" element={<AdminDashboardPage />} />
           <Route path="customers" element={<CustomersPage />} />
           <Route path="customers/:id" element={<CustomerDetailsPage />} />
-          <Route path="staff" element={<StaffManagementPage />} />
+          <Route path="customer-verification" element={<CustomerVerificationPage />} />
+          <Route path="dabba-management" element={<DabbaManagementPage />} />
+          <Route path="payment-management" element={<PaymentManagementPage />} />
           <Route path="plans" element={<AdminPlansPage />} />
           <Route path="subscriptions" element={<SubscriptionsPage />} />
           <Route path="attendance" element={<AttendancePage />} />
@@ -132,21 +129,8 @@ function App() {
           <Route path="profile" element={<CustomerProfilePage />} />
         </Route>
 
-        {/* Staff Dashboard */}
-        <Route
-          path="/staff"
-          element={
-            <ProtectedRoute allowedRoles={['STAFF', 'SUPER_ADMIN', 'ADMIN']}>
-              <StaffLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/staff/dashboard" replace />} />
-          <Route path="dashboard" element={<StaffDashboardPage />} />
-          <Route path="qr-scanner" element={<StaffQrScannerPage />} />
-          <Route path="attendance" element={<StaffAttendancePage />} />
-          <Route path="search" element={<StaffCustomerSearchPage />} />
-        </Route>
+        {/* Redirect any legacy staff paths */}
+        <Route path="/staff/*" element={<Navigate to="/login" replace />} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />

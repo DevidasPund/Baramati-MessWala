@@ -147,8 +147,8 @@ export const CustomerLayout = () => {
         <Outlet />
       </main>
 
-      {/* Mobile-First Bottom Floating Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl px-2 py-1 flex items-center justify-around">
+      {/* Mobile-First Bottom Floating Navigation Bar (Min 44px Touch Targets) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl px-2 py-1 flex items-center justify-around h-16">
         {[
           { name: 'डॅशबोर्ड', path: '/customer/dashboard', icon: LayoutDashboard },
           { name: 'हजेरी', path: '/customer/attendance', icon: CalendarCheck },
@@ -162,11 +162,11 @@ export const CustomerLayout = () => {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
-                isActive ? 'text-blue-600 font-bold' : 'text-slate-400 hover:text-slate-600'
+              className={`min-h-[44px] min-w-[48px] flex flex-col items-center justify-center py-1 px-2 rounded-xl transition-all ${
+                isActive ? 'text-[#205D48] font-bold scale-105' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
-              <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
+              <Icon className="w-5 h-5 transition-transform" />
               <span className="text-[10px] mt-0.5">{item.name}</span>
             </Link>
           );

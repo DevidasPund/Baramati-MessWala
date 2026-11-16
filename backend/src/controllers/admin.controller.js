@@ -28,6 +28,7 @@ export const getDashboardStats = async (req, res, next) => {
       todayAttendances,
       recent7DaysAttendance,
       monthlyVerifiedPayments,
+      todayDabbasGroup,
     ] = await Promise.all([
       // 1. Customer Counts grouped by status
       prisma.customer.groupBy({
@@ -55,6 +56,13 @@ export const getDashboardStats = async (req, res, next) => {
           createdAt: { gte: startOfMonth, lte: endOfMonth },
         },
         _sum: { amount: true },
+      }),
+
+      // 5. Today's dabbas grouped by status
+      prisma.dailyDabba.groupBy({
+        by: ['status'],
+        where: { date: todayStr },
+        _count: { id: true },
       }),
     ]);
 
@@ -172,12 +180,29 @@ export const getDashboardStats = async (req, res, next) => {
     let activeCustomers = 0;
     let inactiveCustomers = 0;
     let pausedCustomers = 0;
+    let pendingApprovalCustomers = 0;
+    let approvedCustomers = 0;
     let totalCustomers = 0;
     for (const c of customerCounts) {
       totalCustomers += c._count.id;
       if (c.status === 'ACTIVE') activeCustomers = c._count.id;
+      if (c.status === 'APPROVED') approvedCustomers = c._count.id;
+      if (c.status === 'PENDING_APPROVAL') pendingApprovalCustomers = c._count.id;
       if (c.status === 'INACTIVE') inactiveCustomers = c._count.id;
       if (c.status === 'PAUSED') pausedCustomers = c._count.id;
+    }
+    const totalApprovedCustomers = activeCustomers + approvedCustomers;
+
+    // Process Today's Dabbas in-memory
+    let dabbaPrepared = 0;
+    let dabbaGiven = 0;
+    let dabbaReturned = 0;
+    let todayDabbaCount = 0;
+    for (const d of todayDabbasGroup) {
+      todayDabbaCount += d._count.id;
+      if (d.status === 'PREPARED') dabbaPrepared = d._count.id;
+      if (d.status === 'GIVEN') dabbaGiven = d._count.id;
+      if (d.status === 'RETURNED') dabbaReturned = d._count.id;
     }
 
     // Process Today's Attendance in-memory
@@ -257,6 +282,15 @@ export const getDashboardStats = async (req, res, next) => {
     return successResponse(res, 'Dashboard metrics retrieved', {
       kpis: {
         totalCustomers,
+        totalApprovedCustomers,
+        pendingCustomerVerification: pendingApprovalCustomers,
+        todayDabbaCount,
+        dabbaPrepared,
+        dabbaGiven,
+        dabbaReturned,
+        todayAttendance: todayTotalAttendance,
+        monthlyCollection: monthlyRevenue,
+        pendingPayments,
         activeCustomers,
         inactiveCustomers,
         pausedCustomers,
@@ -266,7 +300,6 @@ export const getDashboardStats = async (req, res, next) => {
         todayDinner,
         monthlyRevenue,
         todayRevenue,
-        pendingPayments,
         pendingCustomersCount: outstandingInvoicesList?.length || 0,
         newCustomersThisMonth: newCustomersThisMonthCount || 0,
         activeSubscriptions,
