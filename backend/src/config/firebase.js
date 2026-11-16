@@ -15,7 +15,16 @@ try {
   let credential = null;
   const serviceAccountPath = path.resolve(__dirname, '../../firebase-service-account.json');
 
-  if (fs.existsSync(serviceAccountPath)) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    console.log('[Firebase Admin] Initializing via FIREBASE_SERVICE_ACCOUNT_KEY environment variable.');
+    const rawKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY.trim();
+    if (rawKey.startsWith('{')) {
+      credential = admin.credential.cert(JSON.parse(rawKey));
+    } else {
+      const decoded = Buffer.from(rawKey, 'base64').toString('utf8');
+      credential = admin.credential.cert(JSON.parse(decoded));
+    }
+  } else if (fs.existsSync(serviceAccountPath)) {
     console.log('[Firebase Admin] Found local firebase-service-account.json file.');
     const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
     credential = admin.credential.cert(serviceAccount);

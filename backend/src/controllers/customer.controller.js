@@ -504,7 +504,7 @@ export const verifyCustomerStatus = async (req, res, next) => {
       }
 
       return updatedCustomer;
-    });
+    }, { maxWait: 15000, timeout: 35000 });
 
     await logAudit(req.user.id, `CUSTOMER_${status}`, 'Customer', id, {
       status,

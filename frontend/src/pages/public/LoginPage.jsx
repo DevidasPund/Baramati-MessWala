@@ -70,29 +70,33 @@ export const LoginPage = () => {
     }
 
     const fullPhoneNumber = `+91${clean.slice(-10)}`;
+
+    if (!isFirebaseClientConfigured || !auth) {
+      toast.error('Firebase SMS OTP सक्रिय करण्यासाठी Firebase क्रेडेंशियल्स आवश्यक आहेत. कृपया पासवर्ड/पिन ने लॉगिन करा.');
+      setAuthMethod('PASSWORD');
+      setIdentifier(clean.slice(-10));
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (isFirebaseClientConfigured && auth) {
-        // Initialize invisible reCAPTCHA
-        if (!window.recaptchaVerifier) {
-          window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-            size: 'invisible',
-            callback: () => {},
-          });
-        }
-
-        const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
-        setConfirmationResult(confirmation);
-        setOtpSent(true);
-        setResendCooldown(60);
-        toast.success(`OTP ${fullPhoneNumber} वर पाठवला गेला आहे.`);
-      } else {
-        // Development / Fallback mode when Firebase Auth keys are not yet configured on client
-        setOtpSent(true);
-        setResendCooldown(60);
-        toast.success(`OTP पाठवला: ${fullPhoneNumber} (चाचणी मोड: 123456)`);
+      // Initialize invisible reCAPTCHA
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => {},
+          'expired-callback': () => {
+            toast.error('reCAPTCHA कालबाह्य झाले. कृपया पुन्हा प्रयत्न करा.');
+          },
+        });
       }
+
+      const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
+      setConfirmationResult(confirmation);
+      setOtpSent(true);
+      setResendCooldown(60);
+      toast.success(`SMS OTP ${fullPhoneNumber} वर पाठवला गेला आहे.`);
     } catch (err) {
       console.error('Firebase Phone Auth Error:', err);
       // Reset recaptcha on error
@@ -104,14 +108,15 @@ export const LoginPage = () => {
       }
 
       if (err.code === 'auth/invalid-phone-number') {
-        toast.error('अवैध मोबाइल नंबर.');
+        toast.error('अवैध मोबाइल नंबर. कृपया योग्य १० अंकी नंबर टाका.');
       } else if (err.code === 'auth/too-many-requests') {
-        toast.error('अनेक प्रयत्न झाले. कृपया काही वेळानंतर प्रयत्न करा.');
+        toast.error('खूप जास्त विनंत्या झाल्या आहेत. कृपया काही वेळाने प्रयत्न करा किंवा पासवर्डने लॉगिन करा.');
+      } else if (err.code === 'auth/quota-exceeded') {
+        toast.error('SMS कोटा संपला आहे. कृपया पासवर्डने लॉगिन करा.');
+      } else if (err.code === 'auth/captcha-check-failed') {
+        toast.error('reCAPTCHA पडताळणी अयशस्वी झाली. कृपया पृष्ठ रीफ्रेश करा.');
       } else {
-        // If recaptcha or network fails on local, allow seamless fallback
-        setOtpSent(true);
-        setResendCooldown(60);
-        toast.success(`OTP पाठवला: ${fullPhoneNumber} (चाचणी मोड: 123456)`);
+        toast.error(err.message || 'SMS पाठवताना त्रुटी आली. कृपया पासवर्डने लॉगिन करा.');
       }
     } finally {
       setLoading(false);
@@ -121,8 +126,14 @@ export const LoginPage = () => {
   // Verify Firebase OTP and Login
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (!otp || otp.length < 4) {
-      toast.error('कृपया वैध ६-अंकी OTP टाका.');
+    const cleanOtp = otp.trim();
+    if (!cleanOtp || cleanOtp.length < 6) {
+      toast.error('कृपया एसएमएस मध्ये आलेला वैध ६-अंकी OTP टाका.');
+      return;
+    }
+
+    if (!confirmationResult) {
+      toast.error('प्रथम "OTP मिळवा" बटणावर क्लिक करा.');
       return;
     }
 
@@ -132,16 +143,22 @@ export const LoginPage = () => {
 
     try {
       let idToken = null;
-
-      if (confirmationResult) {
-        try {
-          const userCred = await confirmationResult.confirm(otp);
-          idToken = await userCred.user.getIdToken();
-        } catch (firebaseOtpErr) {
-          toast.error('चुकीचा किंवा कालबाह्य OTP. कृपया योग्य OTP टाका.');
-          setLoading(false);
-          return;
+      try {
+        const userCred = await confirmationResult.confirm(cleanOtp);
+        idToken = await userCred.user.getIdToken();
+      } catch (firebaseOtpErr) {
+        console.error('OTP confirmation error:', firebaseOtpErr);
+        if (firebaseOtpErr.code === 'auth/invalid-verification-code') {
+          toast.error('चुकीचा OTP कोड! कृपया एसएमएस मध्ये आलेला ६-अंकी OTP तपासून टाका.');
+        } else if (firebaseOtpErr.code === 'auth/code-expired') {
+          toast.error('हा OTP कालबाह्य झाला आहे. कृपया नवीन OTP मागवा.');
+        } else if (firebaseOtpErr.code === 'auth/too-many-requests') {
+          toast.error('खूप जास्त चुकीचे प्रयत्न झाले. कृपया थोड्या वेळाने प्रयत्न करा.');
+        } else {
+          toast.error(firebaseOtpErr.message || 'चुकीचा OTP कोड.');
         }
+        setLoading(false);
+        return;
       }
 
       // Verify on backend

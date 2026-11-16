@@ -42,3 +42,13 @@ services:
         value: v21.0
       - key: UPLOAD_DIR
         value: uploads
+      - key: FIREBASE_SERVICE_ACCOUNT_KEY
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: OWNER_PHONE
+        value: "+919822334455"

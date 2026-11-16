@@ -266,14 +266,18 @@ export const firebasePhoneLogin = async (req, res, next) => {
   try {
     const { idToken, phoneNumber, role = 'CUSTOMER' } = req.body;
 
-    if (!idToken && !phoneNumber) {
-      return errorResponse(res, 'Firebase ID Token किंवा प्रमाणित मोबाइल नंबर आवश्यक आहे.', 400);
+    // Disallow STAFF role
+    if (role === 'STAFF') {
+      return errorResponse(res, 'कर्मचारी लॉगिन सुविधा बंद करण्यात आली आहे. फक्त मालक आणि ग्राहक लॉगिन उपलब्ध आहे.', 403);
     }
 
     let verifiedPhone = null;
     let firebaseUid = null;
 
-    if (idToken && isFirebaseInitialized && firebaseAuth) {
+    if (isFirebaseInitialized && firebaseAuth) {
+      if (!idToken) {
+        return errorResponse(res, 'Firebase ID Token आवश्यक आहे. कृपया SMS OTP पडताळणी पूर्ण करा.', 400);
+      }
       try {
         const decoded = await firebaseAuth.verifyIdToken(idToken);
         verifiedPhone = decoded.phone_number;
@@ -283,9 +287,12 @@ export const firebasePhoneLogin = async (req, res, next) => {
         return errorResponse(res, 'अवैध किंवा कालबाह्य Firebase टोकन. कृपया पुन्हा OTP पडताळणी करा.', 401);
       }
     } else {
-      // In development / fallback mode
-      verifiedPhone = phoneNumber;
-      firebaseUid = `dev_firebase_${Date.now()}`;
+      // If Firebase Admin credentials are not yet configured on server
+      if (idToken) {
+        // Token received but server lacks Admin credentials
+        return errorResponse(res, 'सर्व्हरवर Firebase Admin क्रेडेंशियल्स कॉन्फिगर केलेली नाहीत. कृपया Render सेटिंग्ज तपासा किंवा पासवर्ड/पिन ने लॉगिन करा.', 503);
+      }
+      return errorResponse(res, 'Firebase SMS OTP पडताळणीसाठी Firebase क्रेडेंशियल्स आवश्यक आहेत. कृपया पासवर्ड/पिन ने लॉगिन करा.', 400);
     }
 
     if (!verifiedPhone) {
@@ -319,9 +326,22 @@ export const firebasePhoneLogin = async (req, res, next) => {
     } else {
       // Check if it's the Owner
       if (role === 'OWNER' || role === 'ADMIN') {
-        user = await prisma.user.findFirst({
+        const ownerUser = await prisma.user.findFirst({
           where: { role: { in: ['SUPER_ADMIN', 'ADMIN'] } },
         });
+        const settings = await prisma.businessSettings.findFirst();
+        const allowedOwnerPhones = [
+          process.env.OWNER_PHONE,
+          settings?.phone,
+          '9822334455',
+          '9876543210',
+        ].filter(Boolean).map((p) => p.replace(/[^0-9]/g, '').slice(-10));
+
+        if (allowedOwnerPhones.some((p) => last10 === p)) {
+          user = ownerUser;
+        } else if (customer?.user && ['SUPER_ADMIN', 'ADMIN'].includes(customer.user.role)) {
+          user = customer.user;
+        }
       }
     }
 
