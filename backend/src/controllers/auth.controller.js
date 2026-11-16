@@ -9,7 +9,7 @@ import { firebaseAuth, isFirebaseInitialized } from '../config/firebase.js';
 
 export const login = async (req, res, next) => {
   try {
-    const identifier = (req.body.email || req.body.phone || req.body.mobileNumber || req.body.username || '').trim();
+    const identifier = (req.body.emailOrPhone || req.body.email || req.body.phone || req.body.mobileNumber || req.body.username || '').trim();
     const { password } = req.body;
     if (!identifier || !password) {
       return errorResponse(res, 'Email/Mobile number and password are required.', 400);
@@ -82,6 +82,13 @@ export const login = async (req, res, next) => {
 
     // Customer status verification check
     if (user.role === 'CUSTOMER' && user.customer) {
+      if (process.env.MANDATORY_PHONE_VERIFICATION === 'true' && !user.customer.phoneVerified) {
+        return res.status(403).json({
+          success: false,
+          code: 'PHONE_VERIFICATION_REQUIRED',
+          message: 'आपला मोबाइल नंबर अद्याप SMS OTP द्वारे प्रमाणित झालेला नाही. कृपया प्रथम मोबाइल पडताळणी पूर्ण करा.',
+        });
+      }
       if (user.customer.status === 'PENDING_APPROVAL') {
         return res.status(403).json({
           success: false,
@@ -334,7 +341,6 @@ export const firebasePhoneLogin = async (req, res, next) => {
           process.env.OWNER_PHONE,
           settings?.phone,
           '9822334455',
-          '9876543210',
         ].filter(Boolean).map((p) => p.replace(/[^0-9]/g, '').slice(-10));
 
         if (allowedOwnerPhones.some((p) => last10 === p)) {
@@ -496,11 +502,7 @@ export const forgotPassword = async (req, res, next) => {
       },
     });
 
-    console.log(`[PASSWORD RESET TOKEN] For ${user.email}: token=${token}`);
-
-    return successResponse(res, 'Password reset instructions have been generated.', {
-      resetToken: token, // exposed for testing / local demo
-    });
+    return successResponse(res, 'Password reset instructions have been generated.');
   } catch (error) {
     next(error);
   }
