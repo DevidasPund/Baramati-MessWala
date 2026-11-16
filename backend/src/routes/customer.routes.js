@@ -16,6 +16,7 @@ import { authenticate, authorize, verifyCustomerOwnership } from '../middleware/
 const router = Router();
 
 router.get('/me/dashboard', authenticate, getMyDashboardStats);
+router.get('/my/dashboard', authenticate, getMyDashboardStats);
 router.get('/', authenticate, authorize(['SUPER_ADMIN', 'ADMIN']), getCustomers);
 router.post('/', authenticate, authorize(['SUPER_ADMIN', 'ADMIN']), createCustomer);
 router.get('/:id', authenticate, verifyCustomerOwnership, getCustomerById);

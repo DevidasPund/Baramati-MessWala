@@ -251,6 +251,10 @@ export const registerCustomer = async (req, res, next) => {
         customerCode: result.customer.customerCode,
         status: result.customer.status,
       },
+      data: {
+        customer: result.customer,
+        user: { id: result.user.id, email: result.user.email, role: result.user.role },
+      },
     });
   } catch (error) {
     next(error);

@@ -452,7 +452,14 @@ export const getMyDashboardStats = async (req, res, next) => {
 export const verifyCustomerStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { status, reason } = req.body;
+    let { status, action, reason } = req.body;
+
+    if (!status && action) {
+      if (action === 'APPROVE') status = 'APPROVED';
+      else if (action === 'REJECT') status = 'REJECTED';
+      else if (action === 'SUSPEND') status = 'SUSPENDED';
+      else if (action === 'REACTIVATE') status = 'APPROVED';
+    }
 
     const validStatuses = ['PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'SUSPENDED', 'ACTIVE'];
     if (!status || !validStatuses.includes(status)) {

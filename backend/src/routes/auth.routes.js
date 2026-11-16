@@ -14,6 +14,7 @@ const router = Router();
 
 router.post('/login', login);
 router.post('/firebase-login', firebasePhoneLogin);
+router.post('/register', registerCustomer);
 router.post('/register-customer', registerCustomer);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
