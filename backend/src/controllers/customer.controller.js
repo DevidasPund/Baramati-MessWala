@@ -375,6 +375,15 @@ export const getMyDashboardStats = async (req, res, next) => {
       prisma.payment.findMany({
         where: { customerId },
         orderBy: { createdAt: 'desc' },
+        include: {
+          invoice: {
+            select: {
+              invoiceNumber: true,
+              balanceDue: true,
+              totalAmount: true,
+            },
+          },
+        },
       }),
       prisma.extraMeal.findMany({
         where: {
@@ -401,6 +410,15 @@ export const getMyDashboardStats = async (req, res, next) => {
     const extraMealsCost = extraMeals.reduce((acc, em) => acc + Number(em.totalAmount || 0), 0);
     const monthlyTotalExpense = basePlanPrice + extraMealsCost;
 
+    const totalAdvancePaid = payments
+      .filter((p) => p.status === 'VERIFIED')
+      .reduce((acc, p) => acc + Number(p.amount || 0), 0);
+
+    const enrichedPayments = payments.map((p) => ({
+      ...p,
+      remainingBalance: p.invoice?.balanceDue !== undefined ? Number(p.invoice.balanceDue) : totalBalanceDue,
+    }));
+
     const daysInMonth = new Date(targetYear, targetMonth, 0).getDate();
     const dailyRecords = [];
     const mealPricePerMeal = currentSub?.plan?.price ? Math.round(Number(currentSub.plan.price) / (daysInMonth * (currentSub.plan.mealsPerDay || 2))) : 70;
@@ -411,7 +429,9 @@ export const getMyDashboardStats = async (req, res, next) => {
       const hasBreakfast = dayAttendances.some((a) => a.mealType === 'BREAKFAST');
       const hasLunch = dayAttendances.some((a) => a.mealType === 'LUNCH');
       const hasDinner = dayAttendances.some((a) => a.mealType === 'DINNER');
-      const attendedCount = (hasBreakfast ? 1 : 0) + (hasLunch ? 1 : 0) + (hasDinner ? 1 : 0);
+      const sakal = hasBreakfast || hasLunch;
+      const sandhyakal = hasDinner;
+      const attendedCount = (sakal ? 1 : 0) + (sandhyakal ? 1 : 0);
       const dayAmount = attendedCount * mealPricePerMeal;
 
       if (new Date(dayStr) <= new Date() || dayAttendances.length > 0) {
@@ -420,6 +440,8 @@ export const getMyDashboardStats = async (req, res, next) => {
           breakfast: hasBreakfast,
           lunch: hasLunch,
           dinner: hasDinner,
+          sakal,
+          sandhyakal,
           rate: mealPricePerMeal,
           amount: dayAmount,
           attendedCount,
@@ -434,9 +456,10 @@ export const getMyDashboardStats = async (req, res, next) => {
         currentMonthMealsAttended: monthlyAttendance.length,
         outstandingBalance: totalBalanceDue,
         monthlyTotalExpense,
+        totalAdvancePaid,
       },
       dailyRecords,
-      payments,
+      payments: enrichedPayments,
       invoices: allInvoices,
       activeSubscription: currentSub || null,
       todayMenu,
