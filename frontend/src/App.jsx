@@ -72,7 +72,7 @@ function App() {
         <Route path="/menu" element={<PublicLayout><MenuPage /></PublicLayout>} />
         <Route path="/plans" element={<PublicLayout><PublicPlansPage /></PublicLayout>} />
         <Route path="/contact" element={<PublicLayout><ContactPage /></PublicLayout>} />
-        <Route path="/login" element={<PublicLayout><LoginPage /></PublicLayout>} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<PublicLayout><RegisterPage /></PublicLayout>} />
         <Route path="/forgot-password" element={<PublicLayout><ForgotPasswordPage /></PublicLayout>} />
 

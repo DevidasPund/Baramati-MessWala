@@ -1,17 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Utensils,
-  Lock,
-  Phone,
-  ArrowRight,
-  ShieldCheck,
-  UserCheck,
-  KeyRound,
-  RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
+  Eye,
+  EyeOff,
+  Loader2,
   Clock,
+  ArrowRight,
+  CheckCircle2,
+  Phone,
+  ShieldCheck,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
@@ -20,26 +17,25 @@ import { auth, isFirebaseClientConfigured } from '../../config/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
 export const LoginPage = () => {
-  const [activeRole, setActiveRole] = useState('CUSTOMER'); // 'CUSTOMER' or 'OWNER'
-  const [authMethod, setAuthMethod] = useState('OTP'); // 'OTP' or 'PASSWORD'
+  const [authMode, setAuthMode] = useState('PASSWORD'); // 'PASSWORD' or 'OTP'
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Firebase OTP specific states
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
 
-  // Password / PIN fields
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-
-  // Pending approval modal
+  // Pending approval notice modal
   const [pendingNotice, setPendingNotice] = useState(null);
 
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // Cooldown timer
+  // 60-second cooldown timer for SMS OTP
   useEffect(() => {
     let timer;
     if (resendCooldown > 0) {
@@ -48,7 +44,7 @@ export const LoginPage = () => {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  // Clean recaptcha on unmount
+  // Clean up reCAPTCHA verifier on unmount
   useEffect(() => {
     return () => {
       if (window.recaptchaVerifier) {
@@ -60,28 +56,80 @@ export const LoginPage = () => {
     };
   }, []);
 
-  // Send Firebase Phone OTP
-  const handleSendOtp = async (e) => {
-    if (e) e.preventDefault();
-    const clean = phoneNumber.replace(/[^0-9]/g, '');
-    if (clean.length < 10) {
-      toast.error('कृपया योग्य १० अंकी मोबाइल नंबर टाका.');
+  // Standard Password / PIN Login
+  const handlePasswordLogin = async (e) => {
+    e.preventDefault();
+    const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+
+    if (cleanPhone.length !== 10) {
+      toast.error('कृपया वैध १०-अंकी भारतीय मोबाइल नंबर प्रविष्ट करा.');
       return;
     }
 
-    const fullPhoneNumber = `+91${clean.slice(-10)}`;
-
-    if (!isFirebaseClientConfigured || !auth) {
-      toast.error('Firebase SMS OTP सक्रिय करण्यासाठी Firebase क्रेडेंशियल्स आवश्यक आहेत. कृपया पासवर्ड/पिन ने लॉगिन करा.');
-      setAuthMethod('PASSWORD');
-      setIdentifier(clean.slice(-10));
+    if (!password) {
+      toast.error('कृपया आपला पासवर्ड किंवा PIN प्रविष्ट करा.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Initialize invisible reCAPTCHA
+      const res = await api.post('/auth/login', {
+        phone: cleanPhone,
+        emailOrPhone: cleanPhone,
+        password: password,
+      });
+
+      if (res?.data?.token) {
+        login(res.data.token, res.data.user);
+        toast.success(`स्वागत आहे, ${res.data.user.customer?.name || 'वापरकर्ता'}!`);
+
+        // Automatic Role Redirection: OWNER (SUPER_ADMIN/ADMIN) vs CUSTOMER
+        if (['SUPER_ADMIN', 'ADMIN'].includes(res.data.user.role)) {
+          navigate('/admin/dashboard');
+        } else {
+          navigate('/customer/dashboard');
+        }
+      }
+    } catch (err) {
+      const resp = err.response?.data;
+      if (resp?.code === 'PENDING_APPROVAL') {
+        setPendingNotice({
+          name: resp.customer?.name,
+          phone: resp.customer?.phone,
+          message: resp.message,
+        });
+      } else if (resp?.code === 'PHONE_VERIFICATION_REQUIRED') {
+        toast.error(resp.message || 'आपला मोबाइल नंबर अद्याप SMS OTP द्वारे प्रमाणित नाही.');
+        setAuthMode('OTP');
+      } else {
+        toast.error(resp?.message || 'मोबाइल नंबर किंवा पासवर्ड चुकीचा आहे.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Send Firebase SMS OTP
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    const clean = phoneNumber.replace(/[^0-9]/g, '');
+    if (clean.length !== 10) {
+      toast.error('कृपया वैध १०-अंकी भारतीय मोबाइल नंबर प्रविष्ट करा.');
+      return;
+    }
+
+    const fullPhoneNumber = `+91${clean}`;
+
+    if (!isFirebaseClientConfigured || !auth) {
+      toast.error('Firebase SMS OTP अद्याप कॉन्फिगर केलेले नाही. कृपया पासवर्ड / PIN ने लॉगिन करा.');
+      setAuthMode('PASSWORD');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
       if (!window.recaptchaVerifier) {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
@@ -99,7 +147,6 @@ export const LoginPage = () => {
       toast.success(`SMS OTP ${fullPhoneNumber} वर पाठवला गेला आहे.`);
     } catch (err) {
       console.error('Firebase Phone Auth Error:', err);
-      // Reset recaptcha on error
       if (window.recaptchaVerifier) {
         try {
           window.recaptchaVerifier.clear();
@@ -108,22 +155,20 @@ export const LoginPage = () => {
       }
 
       if (err.code === 'auth/invalid-phone-number') {
-        toast.error('अवैध मोबाइल नंबर. कृपया योग्य १० अंकी नंबर टाका.');
+        toast.error('अवैध मोबाइल नंबर. कृपया योग्य १०-अंकी नंबर टाका.');
       } else if (err.code === 'auth/too-many-requests') {
-        toast.error('खूप जास्त विनंत्या झाल्या आहेत. कृपया काही वेळाने प्रयत्न करा किंवा पासवर्डने लॉगिन करा.');
+        toast.error('खूप जास्त विनंत्या झाल्या आहेत. कृपया थोड्या वेळाने प्रयत्न करा किंवा पासवर्डने लॉगिन करा.');
       } else if (err.code === 'auth/quota-exceeded') {
         toast.error('SMS कोटा संपला आहे. कृपया पासवर्डने लॉगिन करा.');
-      } else if (err.code === 'auth/captcha-check-failed') {
-        toast.error('reCAPTCHA पडताळणी अयशस्वी झाली. कृपया पृष्ठ रीफ्रेश करा.');
       } else {
-        toast.error(err.message || 'SMS पाठवताना त्रुटी आली. कृपया पासवर्डने लॉगिन करा.');
+        toast.error(err.message || 'SMS OTP पाठवण्यात त्रुटी आली.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Verify Firebase OTP and Login
+  // Verify Firebase SMS OTP
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const cleanOtp = otp.trim();
@@ -133,13 +178,13 @@ export const LoginPage = () => {
     }
 
     if (!confirmationResult) {
-      toast.error('प्रथम "OTP मिळवा" बटणावर क्लिक करा.');
+      toast.error('कृपया प्रथम "OTP मिळवा" बटणावर क्लिक करा.');
       return;
     }
 
     setLoading(true);
     const clean = phoneNumber.replace(/[^0-9]/g, '');
-    const fullPhoneNumber = `+91${clean.slice(-10)}`;
+    const fullPhoneNumber = `+91${clean}`;
 
     try {
       let idToken = null;
@@ -152,8 +197,6 @@ export const LoginPage = () => {
           toast.error('चुकीचा OTP कोड! कृपया एसएमएस मध्ये आलेला ६-अंकी OTP तपासून टाका.');
         } else if (firebaseOtpErr.code === 'auth/code-expired') {
           toast.error('हा OTP कालबाह्य झाला आहे. कृपया नवीन OTP मागवा.');
-        } else if (firebaseOtpErr.code === 'auth/too-many-requests') {
-          toast.error('खूप जास्त चुकीचे प्रयत्न झाले. कृपया थोड्या वेळाने प्रयत्न करा.');
         } else {
           toast.error(firebaseOtpErr.message || 'चुकीचा OTP कोड.');
         }
@@ -161,16 +204,16 @@ export const LoginPage = () => {
         return;
       }
 
-      // Verify on backend
+      // Backend token verification
       const res = await api.post('/auth/firebase-login', {
         idToken,
         phoneNumber: fullPhoneNumber,
-        role: activeRole,
+        role: 'CUSTOMER', // Default to Customer; backend resolves Owner automatically if authorized phone
       });
 
       if (res?.data?.token) {
         login(res.data.token, res.data.user);
-        toast.success(`स्वागत आहे, ${res.data.user.customer?.name || res.data.user.email}!`);
+        toast.success(`स्वागत आहे, ${res.data.user.customer?.name || 'वापरकर्ता'}!`);
 
         if (['SUPER_ADMIN', 'ADMIN'].includes(res.data.user.role)) {
           navigate('/admin/dashboard');
@@ -188,7 +231,7 @@ export const LoginPage = () => {
         });
       } else if (resp?.code === 'REGISTRATION_REQUIRED') {
         toast.error('या नंबरवर खाते आढळले नाही. कृपया प्रथम नोंदणी करा.');
-        navigate(`/register?phone=${clean.slice(-10)}`);
+        navigate(`/register?phone=${clean}`);
       } else {
         toast.error(resp?.message || 'लॉगिन अयशस्वी झाले. कृपया पुन्हा प्रयत्न करा.');
       }
@@ -197,282 +240,274 @@ export const LoginPage = () => {
     }
   };
 
-  // Standard Password / PIN Login
-  const handlePasswordLogin = async (e) => {
-    e.preventDefault();
-    if (!identifier.trim() || !password) {
-      toast.error('कृपया मोबाइल नंबर / ईमेल आणि पासवर्ड प्रविष्ट करा.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await api.post('/auth/login', {
-        email: identifier.trim(),
-        phone: identifier.trim(),
-        password,
-      });
-
-      if (res?.data?.token) {
-        login(res.data.token, res.data.user);
-        toast.success(`स्वागत आहे!`);
-
-        if (['SUPER_ADMIN', 'ADMIN'].includes(res.data.user.role)) {
-          navigate('/admin/dashboard');
-        } else {
-          navigate('/customer/dashboard');
-        }
-      }
-    } catch (err) {
-      const resp = err.response?.data;
-      if (resp?.code === 'PENDING_APPROVAL') {
-        setPendingNotice({
-          name: resp.customer?.name,
-          phone: resp.customer?.phone,
-          message: resp.message,
-        });
-      } else {
-        toast.error(resp?.message || 'लॉगिन अयशस्वी. कृपया योग्य माहिती भरा.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="min-h-[90vh] flex flex-col justify-center items-center py-6 px-3 sm:px-6 font-sans">
+    <div
+      className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 font-['Noto_Sans_Devanagari',sans-serif] selection:bg-[#2864ED] selection:text-white"
+      style={{
+        background: 'linear-gradient(135deg, #5865F2 0%, #7B2FE8 100%)',
+      }}
+    >
       <div id="recaptcha-container"></div>
 
-      <div className="max-w-md w-full space-y-4">
-        {/* Main Card */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200">
-          {/* Header & Logo */}
-          <div className="text-center space-y-2 mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-[#205D48] text-white flex items-center justify-center mx-auto shadow-md shadow-[#205D48]/20">
-              <Utensils className="w-7 h-7" />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              बारामती मेसवाला
-            </h2>
-            <p className="text-xs text-slate-500 font-medium">
-              स्मार्ट मेस व डबा व्यवस्थापन प्रणाली (MessMate)
-            </p>
+      {/* Login Card */}
+      <div className="w-full max-w-[450px] bg-white rounded-[20px] p-6 sm:p-8 shadow-2xl shadow-indigo-950/25 border border-white/20 transition-all">
+        {/* Header */}
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-3xl mb-3 shadow-xs">
+            <span role="img" aria-label="mess-icon">
+              🍽️
+            </span>
           </div>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-gray-900 tracking-tight leading-snug">
+            मेस हजेरी प्रणाली
+          </h1>
+          <p className="text-sm text-gray-500 font-medium mt-1">
+            Login to continue
+          </p>
+        </div>
 
-          {/* TWO ROLES ONLY: Customer vs Owner */}
-          <div className="grid grid-cols-2 gap-2 bg-slate-100 p-1 rounded-2xl mb-5">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveRole('CUSTOMER');
-                setOtpSent(false);
-              }}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeRole === 'CUSTOMER'
-                  ? 'bg-white text-[#205D48] shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <UserCheck className="w-4 h-4" />
-              <span>ग्राहक (Customer)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setActiveRole('OWNER');
-                setOtpSent(false);
-              }}
-              className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeRole === 'OWNER'
-                  ? 'bg-[#205D48] text-white shadow-xs'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>मेस मालक (Owner)</span>
-            </button>
-          </div>
-
-          {/* AUTH METHOD SELECTOR */}
-          <div className="flex items-center justify-center gap-4 text-xs font-bold text-slate-500 mb-4 border-b pb-2">
-            <button
-              type="button"
-              onClick={() => setAuthMethod('OTP')}
-              className={`pb-1 transition-all ${
-                authMethod === 'OTP'
-                  ? 'text-[#205D48] border-b-2 border-[#205D48] font-black'
-                  : 'hover:text-slate-800'
-              }`}
-            >
-              मोबाइल OTP ने लॉगिन
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMethod('PASSWORD')}
-              className={`pb-1 transition-all ${
-                authMethod === 'PASSWORD'
-                  ? 'text-[#205D48] border-b-2 border-[#205D48] font-black'
-                  : 'hover:text-slate-800'
-              }`}
-            >
-              पासवर्ड / पिन ने लॉगिन
-            </button>
-          </div>
-
-          {/* FORM 1: FIREBASE PHONE OTP */}
-          {authMethod === 'OTP' && (
-            <div className="space-y-4">
-              {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-700">नोंदणीकृत मोबाइल नंबर</label>
-                    <div className="relative flex items-center">
-                      <span className="absolute left-3 text-xs font-bold text-slate-400 border-r pr-2">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        required
-                        maxLength="10"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
-                        placeholder="उदा. 9822334455"
-                        className="w-full pl-14 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
-                      />
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      या नंबरवर Firebase सुरक्षित SMS OTP पाठवला जाईल.
-                    </p>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
-                  >
-                    <span>{loading ? 'OTP पाठवत आहे...' : 'OTP मिळवा (Send OTP)'}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              ) : (
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-slate-700">६-अंकी OTP प्रविष्ट करा</label>
-                      <button
-                        type="button"
-                        onClick={() => setOtpSent(false)}
-                        className="text-[11px] text-[#205D48] hover:underline font-bold"
-                      >
-                        नंबर बदला
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      maxLength="6"
-                      autoFocus
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                      placeholder="******"
-                      className="w-full px-4 py-2.5 text-center tracking-widest text-lg font-black bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
-                    />
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                      <span>SMS द्वारे प्राप्त झालेला OTP</span>
-                      {resendCooldown > 0 ? (
-                        <span className="text-slate-400">पुन्हा पाठवा ({resendCooldown}s)</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleSendOtp}
-                          className="text-[#205D48] font-bold hover:underline"
-                        >
-                          पुन्हा OTP पाठवा
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
-                  >
-                    <span>{loading ? 'पडताळणी होत आहे...' : 'OTP सत्यापित करा व लॉगिन करा'}</span>
-                    <CheckCircle2 className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
-            </div>
-          )}
-
-          {/* FORM 2: PASSWORD / PIN LOGIN */}
-          {authMethod === 'PASSWORD' && (
-            <form onSubmit={handlePasswordLogin} className="space-y-3.5">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">मोबाइल नंबर किंवा ईमेल</label>
-                <input
-                  type="text"
-                  required
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="मोबाइल नंबर किंवा ईमेल टाका"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700">पासवर्ड किंवा पिन</label>
-                  <Link to="/forgot-password" className="text-[11px] text-[#205D48] hover:underline font-bold">
-                    पासवर्ड विसरलात?
-                  </Link>
+        {/* PRIMARY FORM: MOBILE NUMBER + PASSWORD / PIN */}
+        {authMode === 'PASSWORD' ? (
+          <form onSubmit={handlePasswordLogin} className="space-y-5">
+            {/* Mobile Number */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                मोबाइल नंबर
+              </label>
+              <div className="relative flex items-center">
+                <div className="absolute left-0 inset-y-0 flex items-center pl-3.5 pr-2.5 border-r border-gray-200 pointer-events-none text-gray-600 font-bold text-sm bg-gray-100/60 rounded-l-xl">
+                  +91
                 </div>
                 <input
-                  type="password"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={10}
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="आपला पासवर्ड / पिन"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
+                  autoComplete="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="१०-अंकी मोबाइल नंबर प्रविष्ट करा"
+                  className="w-full pl-16 pr-4 h-[50px] bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm font-medium placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2864ED]/30 focus:border-[#2864ED] transition-all"
                 />
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
-              >
-                <span>{loading ? 'लॉगिन होत आहे...' : 'लॉगिन करा (Login)'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
-          )}
-
-          {/* Registration Link for Customers */}
-          {activeRole === 'CUSTOMER' && (
-            <div className="mt-5 text-center text-xs text-slate-600">
-              नवीन ग्राहक आहात?{' '}
-              <Link to="/register" className="font-extrabold text-[#205D48] hover:underline">
-                येथे नवीन नोंदणी करा
-              </Link>
             </div>
-          )}
+
+            {/* Password / PIN */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-semibold text-gray-700">
+                  पासवर्ड / PIN
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-semibold text-[#2864ED] hover:underline transition-colors"
+                >
+                  पासवर्ड विसरलात?
+                </Link>
+              </div>
+              <div className="relative flex items-center">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="आपला पासवर्ड किंवा PIN टाका"
+                  className="w-full pl-4 pr-11 h-[50px] bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm font-medium placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2864ED]/30 focus:border-[#2864ED] transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 p-1.5 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors"
+                  aria-label={showPassword ? 'पासवर्ड लपवा' : 'पासवर्ड दाखवा'}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-[50px] bg-[#2864ED] hover:bg-[#1e54cc] active:scale-[0.99] text-white font-bold text-base rounded-xl transition-all shadow-md shadow-[#2864ED]/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>लॉगिन होत आहे...</span>
+                </>
+              ) : (
+                <span>🔐 Login</span>
+              )}
+            </button>
+
+            {/* Optional OTP Switch */}
+            <div className="text-center pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode('OTP');
+                  setOtpSent(false);
+                }}
+                className="text-xs font-semibold text-gray-500 hover:text-[#2864ED] transition-colors"
+              >
+                किंवा SMS OTP द्वारे लॉगिन करा →
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* OPTIONAL FIREBASE PHONE OTP FORM */
+          <div className="space-y-5">
+            {!otpSent ? (
+              <form onSubmit={handleSendOtp} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                    नोंदणीकृत मोबाइल नंबर
+                  </label>
+                  <div className="relative flex items-center">
+                    <div className="absolute left-0 inset-y-0 flex items-center pl-3.5 pr-2.5 border-r border-gray-200 pointer-events-none text-gray-600 font-bold text-sm bg-gray-100/60 rounded-l-xl">
+                      +91
+                    </div>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={10}
+                      required
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
+                      placeholder="१०-अंकी मोबाइल नंबर टाका"
+                      className="w-full pl-16 pr-4 h-[50px] bg-gray-50 border border-gray-200 rounded-xl text-gray-900 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2864ED]/30 focus:border-[#2864ED] transition-all"
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    या नंबरवर सुरक्षित SMS OTP पाठवला जाईल.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-[50px] bg-[#2864ED] hover:bg-[#1e54cc] active:scale-[0.99] text-white font-bold text-base rounded-xl transition-all shadow-md shadow-[#2864ED]/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>OTP पाठवत आहे...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>OTP मिळवा (Send OTP)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      ६-अंकी OTP प्रविष्ट करा
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setOtpSent(false)}
+                      className="text-xs text-[#2864ED] hover:underline font-semibold"
+                    >
+                      नंबर बदला
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={6}
+                    required
+                    autoFocus
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                    placeholder="******"
+                    className="w-full h-[50px] px-4 text-center tracking-widest text-xl font-bold bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#2864ED]/30 focus:border-[#2864ED] transition-all"
+                  />
+                  <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
+                    <span>SMS द्वारे आलेला OTP</span>
+                    {resendCooldown > 0 ? (
+                      <span className="text-gray-400">पुन्हा पाठवा ({resendCooldown}s)</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        className="text-[#2864ED] font-bold hover:underline"
+                      >
+                        पुन्हा OTP पाठवा
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-[50px] bg-[#2864ED] hover:bg-[#1e54cc] active:scale-[0.99] text-white font-bold text-base rounded-xl transition-all shadow-md shadow-[#2864ED]/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>सत्यापित होत आहे...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🔐 OTP सत्यापित करा व लॉगिन करा</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
+
+            <div className="text-center pt-1">
+              <button
+                type="button"
+                onClick={() => setAuthMode('PASSWORD')}
+                className="text-xs font-semibold text-gray-500 hover:text-[#2864ED] transition-colors"
+              >
+                ← पासवर्ड / PIN ने लॉगिन करा
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer Text */}
+        <div className="mt-6 pt-5 border-t border-gray-100 text-center space-y-2.5">
+          <p className="text-xs font-medium text-gray-500">
+            मालक किंवा ग्राहक – एकाच Login पेजवरून
+          </p>
+
+          <div className="text-xs text-gray-600">
+            नवीन ग्राहक आहात?{' '}
+            <Link
+              to="/register"
+              className="font-bold text-[#2864ED] hover:underline transition-colors"
+            >
+              येथे नोंदणी करा
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* PENDING APPROVAL MODAL / NOTICE */}
+      {/* PENDING APPROVAL MODAL */}
       {pendingNotice && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 text-center">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200 text-center animate-in fade-in zoom-in-95 duration-200">
             <div className="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto">
               <Clock className="w-8 h-8" />
             </div>
 
-            <h3 className="text-lg font-black text-slate-900">नोंदणी मंजुरीच्या प्रतीक्षेत!</h3>
+            <h3 className="text-lg font-bold text-gray-900">नोंदणी मंजुरीच्या प्रतीक्षेत!</h3>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-gray-600 leading-relaxed">
               {pendingNotice.message ||
                 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.'}
             </p>
@@ -488,8 +523,9 @@ export const LoginPage = () => {
             </div>
 
             <button
+              type="button"
               onClick={() => setPendingNotice(null)}
-              className="w-full py-2.5 bg-[#205D48] hover:bg-[#184837] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+              className="w-full h-11 bg-[#2864ED] hover:bg-[#1e54cc] text-white rounded-xl text-xs font-bold transition-all shadow-xs"
             >
               समजले (Close)
             </button>

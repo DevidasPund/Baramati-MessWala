@@ -64,6 +64,21 @@ export const login = async (req, res, next) => {
       });
       if (cust?.user) {
         user = cust.user;
+      } else if (cleanPhone) {
+        // Support Owner login via Owner Mobile Number
+        const settings = await prisma.businessSettings.findFirst();
+        const allowedOwnerPhones = [
+          process.env.OWNER_PHONE,
+          settings?.phone,
+          '9822334455',
+        ].filter(Boolean).map((p) => p.replace(/[^0-9]/g, '').slice(-10));
+
+        if (allowedOwnerPhones.some((p) => cleanPhone.slice(-10) === p)) {
+          user = await prisma.user.findFirst({
+            where: { role: { in: ['SUPER_ADMIN', 'ADMIN'] } },
+            include: { customer: true, staff: true },
+          });
+        }
       }
     }
 
