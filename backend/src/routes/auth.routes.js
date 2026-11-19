@@ -2,7 +2,6 @@ import { Router } from 'express';
 import {
   login,
   registerCustomer,
-  firebasePhoneLogin,
   getMe,
   updateProfile,
   changePassword,
@@ -14,7 +13,6 @@ import { authenticate } from '../middleware/auth.js';
 const router = Router();
 
 router.post('/login', login);
-router.post('/firebase-login', firebasePhoneLogin);
 router.post('/register', registerCustomer);
 router.post('/register-customer', registerCustomer);
 router.post('/change-password', authenticate, changePassword);

@@ -1,5 +1,4 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 import { getFirestore, onSnapshot, doc, collection, query, where, orderBy, limit } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -18,14 +17,12 @@ const isFirebaseClientConfigured = Boolean(
 );
 
 let app = null;
-let auth = null;
 let db = null;
 let storage = null;
 
 if (isFirebaseClientConfigured) {
   try {
     app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-    auth = getAuth(app);
     db = getFirestore(app);
     storage = getStorage(app);
     console.log('[Firebase Client] Initialized successfully for project:', firebaseConfig.projectId);
@@ -38,7 +35,6 @@ if (isFirebaseClientConfigured) {
 
 export {
   app,
-  auth,
   db,
   storage,
   isFirebaseClientConfigured,

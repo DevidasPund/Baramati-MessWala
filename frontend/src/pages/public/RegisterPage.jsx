@@ -5,19 +5,14 @@ import {
   User,
   Phone,
   Mail,
-  Lock,
   MapPin,
-  AlertCircle,
   ArrowRight,
-  CheckCircle2,
   Clock,
-  ShieldCheck,
   KeyRound,
+  CheckCircle2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import { auth, isFirebaseClientConfigured } from '../../config/firebase';
-import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 
 export const RegisterPage = () => {
   const [searchParams] = useSearchParams();
@@ -27,34 +22,16 @@ export const RegisterPage = () => {
     name: '',
     phone: searchParams.get('phone') || '',
     email: '',
-    password: '',
-    confirmPassword: '',
     address: '',
     emergencyContact: '',
     planId: preselectedPlanId,
   });
-
-  // Phone OTP state
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [firebaseUid, setFirebaseUid] = useState(null);
-  const [otp, setOtp] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [confirmationResult, setConfirmationResult] = useState(null);
 
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submittedCustomer, setSubmittedCustomer] = useState(null);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    let timer;
-    if (resendCooldown > 0) {
-      timer = setInterval(() => setResendCooldown((prev) => prev - 1), 1000);
-    }
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -73,119 +50,29 @@ export const RegisterPage = () => {
     fetchPlans();
   }, [preselectedPlanId]);
 
-  // Send OTP to customer phone
-  const handleSendPhoneOtp = async () => {
-    const clean = formData.phone.replace(/[^0-9]/g, '');
-    if (clean.length < 10) {
-      toast.error('कृपया योग्य १० अंकी मोबाइल नंबर टाका.');
-      return;
-    }
-
-    const fullPhoneNumber = `+91${clean.slice(-10)}`;
-
-    if (!isFirebaseClientConfigured || !auth) {
-      toast('Firebase SMS OTP सेवा सक्रिय नसल्यामुळे थेट पासवर्डसह नोंदणी करा. मेस मालक पडताळणी करतील.', {
-        icon: 'ℹ️',
-        duration: 4000,
-      });
-      setPhoneVerified(false);
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-reg-container', {
-          size: 'invisible',
-          callback: () => {},
-          'expired-callback': () => {
-            toast.error('reCAPTCHA कालबाह्य झाले. कृपया पुन्हा प्रयत्न करा.');
-          },
-        });
-      }
-      const confirmation = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
-      setConfirmationResult(confirmation);
-      setOtpSent(true);
-      setResendCooldown(60);
-      toast.success(`SMS OTP ${fullPhoneNumber} वर पाठवला.`);
-    } catch (err) {
-      console.error('Firebase Auth error:', err);
-      if (window.recaptchaVerifier) {
-        try {
-          window.recaptchaVerifier.clear();
-        } catch (e) {}
-        window.recaptchaVerifier = null;
-      }
-      if (err.code === 'auth/invalid-phone-number') {
-        toast.error('अवैध मोबाइल नंबर.');
-      } else if (err.code === 'auth/too-many-requests') {
-        toast.error('खूप जास्त प्रयत्न झाले. कृपया थोड्या वेळाने प्रयत्न करा.');
-      } else {
-        toast.error(err.message || 'SMS OTP पाठवण्यात त्रुटी आली.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Verify OTP
-  const handleVerifyPhoneOtp = async () => {
-    const cleanOtp = otp.trim();
-    if (!cleanOtp || cleanOtp.length < 6) {
-      toast.error('कृपया वैध ६-अंकी OTP टाका.');
-      return;
-    }
-
-    if (!confirmationResult) {
-      toast.error('कृपया प्रथम OTP मागवा.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const userCred = await confirmationResult.confirm(cleanOtp);
-      setFirebaseUid(userCred.user.uid);
-      setPhoneVerified(true);
-      toast.success('मोबाइल नंबर यशस्वीरीत्या प्रमाणित झाला! ✅');
-    } catch (err) {
-      console.error('OTP confirmation error:', err);
-      if (err.code === 'auth/invalid-verification-code') {
-        toast.error('चुकीचा OTP कोड! कृपया एसएमएस मध्ये आलेला ६-अंकी OTP तपासून टाका.');
-      } else if (err.code === 'auth/code-expired') {
-        toast.error('हा OTP कालबाह्य झाला आहे. कृपया नवीन OTP मागवा.');
-      } else {
-        toast.error('चुकीचा OTP. कृपया योग्य OTP टाका.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Submit Registration
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.phone) {
-      toast.error('नाव आणि मोबाइल नंबर आवश्यक आहेत.');
+    const cleanPhone = formData.phone.replace(/[^0-9]/g, '');
+    if (!formData.name.trim() || cleanPhone.length !== 10) {
+      toast.error('कृपया आपले नाव आणि वैध १०-अंकी भारतीय मोबाइल नंबर प्रविष्ट करा.');
       return;
     }
 
     setLoading(true);
     try {
       const res = await api.post('/auth/register-customer', {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email || undefined,
+        name: formData.name.trim(),
+        phone: cleanPhone,
+        email: formData.email ? formData.email.trim() : undefined,
         address: formData.address,
         emergencyContact: formData.emergencyContact,
         planId: formData.planId || undefined,
-        firebaseUid,
-        phoneVerified,
       });
 
       if (res?.data?.customer || res?.data?.status === 'PENDING_APPROVAL') {
-        setSubmittedCustomer(res.data.customer || { name: formData.name, phone: formData.phone });
+        setSubmittedCustomer(res.data.customer || { name: formData.name, phone: cleanPhone });
         toast.success('नोंदणी यशस्वीरीत्या प्राप्त झाली!');
       }
     } catch (err) {
@@ -197,8 +84,6 @@ export const RegisterPage = () => {
 
   return (
     <div className="min-h-[90vh] flex items-center justify-center py-6 px-3 sm:px-6 font-sans">
-      <div id="recaptcha-reg-container"></div>
-
       <div className="max-w-lg w-full bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-200 space-y-5">
         {/* If submitted, show the pending approval confirmation */}
         {submittedCustomer ? (
@@ -259,21 +144,20 @@ export const RegisterPage = () => {
             </div>
           </div>
         ) : (
+          /* REGISTRATION FORM */
           <>
-            {/* Header */}
             <div className="text-center space-y-1">
-              <div className="w-12 h-12 rounded-2xl bg-[#205D48] text-white flex items-center justify-center mx-auto shadow-sm">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-800 rounded-2xl flex items-center justify-center mx-auto mb-2">
                 <Utensils className="w-6 h-6" />
               </div>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                नवीन ग्राहक नोंदणी (Customer Registration)
-              </h2>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                नवीन ग्राहक नोंदणी
+              </h1>
               <p className="text-xs text-slate-500 font-medium">
-                बारामती मेसवाला – घरगुती, शुद्ध व चविष्ट जेवणाची मेस
+                बारामती मेसवाला (MessMate) मेस व डबा सेवेसाठी नोंदणी करा
               </p>
             </div>
 
-            {/* Registration Form */}
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {/* Full Name */}
               <div className="space-y-1">
@@ -291,66 +175,27 @@ export const RegisterPage = () => {
                 </div>
               </div>
 
-              {/* Mobile Number & Firebase OTP Verification */}
+              {/* Mobile Number */}
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700">मोबाइल नंबर *</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      maxLength="10"
-                      disabled={phoneVerified}
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value.replace(/[^0-9]/g, '') })
-                      }
-                      placeholder="१० अंकी मोबाइल नंबर"
-                      className="w-full pl-11 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
-                    />
-                  </div>
-
-                  {!phoneVerified ? (
-                    <button
-                      type="button"
-                      disabled={loading || formData.phone.length < 10}
-                      onClick={handleSendPhoneOtp}
-                      className="px-3 py-2 bg-[#205D48] text-white rounded-xl text-xs font-bold hover:bg-[#184837] shrink-0 disabled:opacity-50 min-h-[44px]"
-                    >
-                      {otpSent ? 'पुन्हा पाठवा' : 'OTP मिळवा'}
-                    </button>
-                  ) : (
-                    <span className="px-3 py-2 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1 shrink-0">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>प्रमाणित</span>
-                    </span>
-                  )}
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    required
+                    maxLength="10"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value.replace(/[^0-9]/g, '') })
+                    }
+                    placeholder="१०-अंकी मोबाइल नंबर"
+                    className="w-full pl-11 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
+                  />
                 </div>
-
-                {/* OTP Input box if OTP is sent & not verified */}
-                {otpSent && !phoneVerified && (
-                  <div className="flex items-center gap-2 pt-1.5">
-                    <input
-                      type="text"
-                      maxLength="6"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                      placeholder="६-अंकी SMS OTP टाका"
-                      className="flex-1 px-3 py-1.5 text-xs bg-amber-50 border border-amber-300 rounded-xl font-bold text-center"
-                    />
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={handleVerifyPhoneOtp}
-                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shrink-0"
-                    >
-                      सत्यापित करा
-                    </button>
-                  </div>
-                )}
               </div>
 
               {/* Address */}
@@ -364,6 +209,28 @@ export const RegisterPage = () => {
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     placeholder="उदा. रूम नं ४, विद्यानगरी, बारामती"
+                    className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
+                  />
+                </div>
+              </div>
+
+              {/* Optional Emergency Contact */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-700">आणीबाणी संपर्क / पालकांचा फोन</label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength="10"
+                    value={formData.emergencyContact}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        emergencyContact: e.target.value.replace(/[^0-9]/g, ''),
+                      })
+                    }
+                    placeholder="पालक / रूममेटचा फोन"
                     className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
                   />
                 </div>
@@ -398,42 +265,33 @@ export const RegisterPage = () => {
               {/* Meal Plan Preference */}
               {plans.length > 0 && (
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">इच्छित मेस प्लॅन</label>
+                  <label className="text-xs font-bold text-slate-700">पसंतीचा मेस प्लॅन</label>
                   <select
                     value={formData.planId}
                     onChange={(e) => setFormData({ ...formData, planId: e.target.value })}
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl font-bold focus:bg-white min-h-[44px]"
+                    className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#205D48]/30 min-h-[44px]"
                   >
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.name} - ₹{p.price}/महिना
+                        {p.nameMarathi || p.name} – ₹{p.price} ({p.durationDays} दिवस)
                       </option>
                     ))}
                   </select>
                 </div>
               )}
 
-              {/* Notice */}
-              <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-[11px] text-amber-800 flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <span>
-                  नोंदणीनंतर मेस मालक आपले खाते तपासून मंजूर करतील. मंजुरीनंतर आपण डॅशबोर्डमध्ये लॉगिन करू शकाल.
-                </span>
-              </div>
-
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
+                className="w-full py-3 bg-[#205D48] hover:bg-[#184837] active:scale-98 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 min-h-[48px] disabled:opacity-50 mt-4"
               >
-                <span>{loading ? 'नोंदणी होत आहे...' : 'नोंदणी अर्ज सादर करा'}</span>
+                <span>{loading ? 'नोंदणी सादर करत आहे...' : 'नोंदणी करा (Register Now)'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
 
-            <div className="text-center text-xs text-slate-600 pt-2 border-t">
-              आधीच नोंदणीकृत आहात?{' '}
+            <div className="text-center text-xs text-slate-600 pt-2">
+              आधीच नोंदणी केली आहे?{' '}
               <Link to="/login" className="font-extrabold text-[#205D48] hover:underline">
                 येथे लॉगिन करा
               </Link>

@@ -8,7 +8,6 @@ const __dirname = path.dirname(__filename);
 
 let isFirebaseInitialized = false;
 let firestoreDb = null;
-let firebaseAuth = null;
 let firebaseStorage = null;
 
 try {
@@ -55,7 +54,6 @@ try {
     }
 
     firestoreDb = admin.firestore();
-    firebaseAuth = admin.auth();
     firebaseStorage = admin.storage();
     isFirebaseInitialized = true;
     console.log('âœ” [Firebase Admin] Firebase Admin SDK successfully connected & initialized!');
@@ -66,5 +64,5 @@ try {
   console.warn('âš  [Firebase Admin] Initialization warning:', error.message);
 }
 
-export { admin, firestoreDb, firebaseAuth, firebaseStorage, isFirebaseInitialized };
+export { admin, firestoreDb, firebaseStorage, isFirebaseInitialized };
 export default admin;

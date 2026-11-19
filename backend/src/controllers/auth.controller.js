@@ -5,7 +5,6 @@ import { generateToken } from '../utils/tokens.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { logAudit } from '../middleware/auditLogger.js';
 import { whatsappService } from '../integrations/whatsapp.js';
-import { firebaseAuth, isFirebaseInitialized } from '../config/firebase.js';
 
 export const login = async (req, res, next) => {
   try {
@@ -97,13 +96,6 @@ export const login = async (req, res, next) => {
 
     // Customer status verification check
     if (user.role === 'CUSTOMER' && user.customer) {
-      if (process.env.MANDATORY_PHONE_VERIFICATION === 'true' && !user.customer.phoneVerified) {
-        return res.status(403).json({
-          success: false,
-          code: 'PHONE_VERIFICATION_REQUIRED',
-          message: 'आपला मोबाइल नंबर अद्याप SMS OTP द्वारे प्रमाणित झालेला नाही. कृपया प्रथम मोबाइल पडताळणी पूर्ण करा.',
-        });
-      }
       if (user.customer.status === 'PENDING_APPROVAL') {
         return res.status(403).json({
           success: false,
@@ -307,168 +299,6 @@ export const registerCustomer = async (req, res, next) => {
       data: {
         customer: result.customer,
         user: { id: result.user.id, email: result.user.email, role: result.user.role },
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Firebase Phone Authentication Login
-export const firebasePhoneLogin = async (req, res, next) => {
-  try {
-    const { idToken, phoneNumber, role = 'CUSTOMER' } = req.body;
-
-    // Disallow STAFF role
-    if (role === 'STAFF') {
-      return errorResponse(res, 'कर्मचारी लॉगिन सुविधा बंद करण्यात आली आहे. फक्त मालक आणि ग्राहक लॉगिन उपलब्ध आहे.', 403);
-    }
-
-    let verifiedPhone = null;
-    let firebaseUid = null;
-
-    if (isFirebaseInitialized && firebaseAuth) {
-      if (!idToken) {
-        return errorResponse(res, 'Firebase ID Token आवश्यक आहे. कृपया SMS OTP पडताळणी पूर्ण करा.', 400);
-      }
-      try {
-        const decoded = await firebaseAuth.verifyIdToken(idToken);
-        verifiedPhone = decoded.phone_number;
-        firebaseUid = decoded.uid;
-      } catch (verifyErr) {
-        console.error('Firebase Token Verification Failed:', verifyErr.message);
-        return errorResponse(res, 'अवैध किंवा कालबाह्य Firebase टोकन. कृपया पुन्हा OTP पडताळणी करा.', 401);
-      }
-    } else {
-      // If Firebase Admin credentials are not yet configured on server
-      if (idToken) {
-        // Token received but server lacks Admin credentials
-        return errorResponse(res, 'सर्व्हरवर Firebase Admin क्रेडेंशियल्स कॉन्फिगर केलेली नाहीत. कृपया Render सेटिंग्ज तपासा किंवा पासवर्ड/पिन ने लॉगिन करा.', 503);
-      }
-      return errorResponse(res, 'Firebase SMS OTP पडताळणीसाठी Firebase क्रेडेंशियल्स आवश्यक आहेत. कृपया पासवर्ड/पिन ने लॉगिन करा.', 400);
-    }
-
-    if (!verifiedPhone) {
-      return errorResponse(res, 'प्रमाणित मोबाइल नंबर प्राप्त झाला नाही.', 400);
-    }
-
-    const cleanPhone = verifiedPhone.replace(/[^0-9]/g, '');
-    const last10 = cleanPhone.slice(-10);
-
-    let user = null;
-    let customer = await prisma.customer.findFirst({
-      where: {
-        OR: [
-          { phone: verifiedPhone },
-          { phone: { contains: last10 } },
-          ...(firebaseUid ? [{ firebaseUid }] : []),
-        ],
-      },
-      include: {
-        user: true,
-        subscriptions: {
-          where: { status: 'ACTIVE' },
-          include: { plan: true },
-          take: 1,
-        },
-      },
-    });
-
-    if (customer?.user) {
-      user = customer.user;
-    } else {
-      // Check if it's the Owner
-      if (role === 'OWNER' || role === 'ADMIN') {
-        const ownerUser = await prisma.user.findFirst({
-          where: { role: { in: ['SUPER_ADMIN', 'ADMIN'] } },
-        });
-        const settings = await prisma.businessSettings.findFirst();
-        const allowedOwnerPhones = [
-          process.env.OWNER_PHONE,
-          settings?.phone,
-          '9822334455',
-        ].filter(Boolean).map((p) => p.replace(/[^0-9]/g, '').slice(-10));
-
-        if (allowedOwnerPhones.some((p) => last10 === p)) {
-          user = ownerUser;
-        } else if (customer?.user && ['SUPER_ADMIN', 'ADMIN'].includes(customer.user.role)) {
-          user = customer.user;
-        }
-      }
-    }
-
-    if (!user) {
-      if (role === 'OWNER' || role === 'ADMIN') {
-        return errorResponse(res, 'या मोबाइल नंबरवर कोणताही मालक खाते अस्तित्वात नाही.', 404);
-      }
-      return res.status(404).json({
-        success: false,
-        code: 'REGISTRATION_REQUIRED',
-        message: 'या मोबाइल नंबरवर खाते आढळले नाही. कृपया प्रथम नोंदणी करा.',
-        verifiedPhone,
-        firebaseUid,
-      });
-    }
-
-    // Role check: enforce Owner permissions
-    if ((role === 'OWNER' || role === 'ADMIN') && !['SUPER_ADMIN', 'ADMIN'].includes(user.role)) {
-      return errorResponse(res, 'या खात्याला मालक/व्यवस्थापक डॅशबोर्डचा अधिकार नाही.', 403);
-    }
-
-    // Customer status checks
-    if (user.role === 'CUSTOMER' && customer) {
-      if (customer.status === 'PENDING_APPROVAL') {
-        return res.status(403).json({
-          success: false,
-          code: 'PENDING_APPROVAL',
-          message: 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.',
-          customer: {
-            name: customer.name,
-            phone: customer.phone,
-            status: customer.status,
-          },
-        });
-      }
-      if (customer.status === 'REJECTED') {
-        return errorResponse(res, 'आपली नोंदणी नाकारण्यात आली आहे. कृपया मेस व्यवस्थापनाशी संपर्क साधा.', 403);
-      }
-      if (customer.status === 'SUSPENDED' || customer.status === 'INACTIVE') {
-        return errorResponse(res, 'आपले खाते स्थगित करण्यात आले आहे. कृपया मेस व्यवस्थापनाशी संपर्क साधा.', 403);
-      }
-    }
-
-    // Link firebase details if not linked yet
-    if (customer && (!customer.firebaseUid || !customer.phoneVerified)) {
-      await prisma.customer.update({
-        where: { id: customer.id },
-        data: {
-          firebaseUid: firebaseUid || customer.firebaseUid,
-          phoneVerified: true,
-        },
-      });
-    }
-
-    // Update last login
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastLogin: new Date() },
-    });
-
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
-    await logAudit(user.id, 'FIREBASE_PHONE_LOGIN', 'User', user.id, { role: user.role, phone: verifiedPhone }, req);
-
-    return successResponse(res, 'Firebase मोबाइल लॉगिन यशस्वी!', {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        customer,
       },
     });
   } catch (error) {
