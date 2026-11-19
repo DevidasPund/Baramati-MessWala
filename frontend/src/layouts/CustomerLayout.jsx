@@ -18,6 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { InitialPasswordChangeModal } from '../components/customer/InitialPasswordChangeModal';
 
 export const CustomerLayout = () => {
   const location = useLocation();
@@ -172,6 +173,8 @@ export const CustomerLayout = () => {
           );
         })}
       </nav>
+      {/* Mandatory Initial Password Change Gate */}
+      <InitialPasswordChangeModal isOpen={Boolean(user?.mustChangePassword || user?.customer?.mustChangePassword)} />
     </div>
   );
 };

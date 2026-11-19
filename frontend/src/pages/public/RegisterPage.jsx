@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
+  KeyRound,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
@@ -170,18 +171,12 @@ export const RegisterPage = () => {
       return;
     }
 
-    if (formData.password && formData.password !== formData.confirmPassword) {
-      toast.error('पासवर्ड जुळत नाहीत.');
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await api.post('/auth/register-customer', {
         name: formData.name,
         phone: formData.phone,
         email: formData.email || undefined,
-        password: formData.password || 'Customer@123',
         address: formData.address,
         emergencyContact: formData.emergencyContact,
         planId: formData.planId || undefined,
@@ -235,6 +230,17 @@ export const RegisterPage = () => {
                 </span>
               </div>
               <div className="text-amber-700 font-bold">स्थिती: PENDING_APPROVAL (मंजुरीच्या प्रतीक्षेत)</div>
+            </div>
+
+            {/* Initial Password Notice */}
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 text-xs text-blue-900 max-w-sm mx-auto text-left flex items-start gap-2.5">
+              <KeyRound className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold block text-blue-950 mb-0.5">सुरुवातीचा पासवर्ड (Initial Password):</span>
+                <p className="leading-relaxed">
+                  तुमचा सुरुवातीचा पासवर्ड तुमचा १०-अंकी मोबाइल नंबर आहे. सुरक्षिततेसाठी पहिल्या लॉगिननंतर पासवर्ड बदला.
+                </p>
+              </div>
             </div>
 
             <div className="pt-2 flex flex-col gap-2">
@@ -378,30 +384,14 @@ export const RegisterPage = () => {
                 </div>
               </div>
 
-              {/* Optional 4-digit PIN / Password */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">पिन / पासवर्ड *</label>
-                  <input
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="उदा. 1234"
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl font-bold min-h-[44px]"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">पिन पुष्टी करा *</label>
-                  <input
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    placeholder="पुन्हा टाका"
-                    className="w-full px-3 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl font-bold min-h-[44px]"
-                  />
+              {/* Initial Password Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 text-xs text-blue-900 flex items-start gap-2.5">
+                <KeyRound className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold block text-blue-950 mb-0.5">सुरुवातीचा पासवर्ड (Initial Password):</span>
+                  <p className="leading-relaxed">
+                    तुमचा सुरुवातीचा पासवर्ड तुमचा १०-अंकी मोबाइल नंबर असेल. सुरक्षिततेसाठी पहिल्या लॉगिननंतर पासवर्ड बदला.
+                  </p>
                 </div>
               </div>
 

@@ -187,6 +187,7 @@ model Customer {
   rejectionReason  String?
   firebaseUid      String?         @unique
   phoneVerified    Boolean         @default(false)
+  mustChangePassword Boolean       @default(false)
   qrToken          String          @unique // Non-guessable secure token for QR
   notes            String?
   createdAt        DateTime        @default(now())

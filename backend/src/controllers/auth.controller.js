@@ -135,6 +135,16 @@ export const login = async (req, res, next) => {
       data: { lastLogin: new Date() },
     });
 
+    // Calculate mustChangePassword for CUSTOMER accounts
+    let mustChangePassword = false;
+    if (user.role === 'CUSTOMER' && user.customer) {
+      const cleanPhoneDigits = (user.customer.phone || '').replace(/[^0-9]/g, '').slice(-10);
+      mustChangePassword = Boolean(
+        user.customer.mustChangePassword ||
+        (cleanPhoneDigits && (await bcrypt.compare(cleanPhoneDigits, user.passwordHash)))
+      );
+    }
+
     const token = generateToken({
       userId: user.id,
       email: user.email,
@@ -145,11 +155,19 @@ export const login = async (req, res, next) => {
 
     return successResponse(res, 'Login successful', {
       token,
+      mustChangePassword,
+      message: mustChangePassword
+        ? 'तुमचा सुरुवातीचा पासवर्ड तुमचा मोबाइल नंबर आहे. सुरक्षिततेसाठी पहिल्या लॉगिननंतर पासवर्ड बदला.'
+        : undefined,
       user: {
         id: user.id,
         email: user.email,
         role: user.role,
-        customer: user.customer,
+        mustChangePassword,
+        customer: user.customer ? {
+          ...user.customer,
+          mustChangePassword,
+        } : null,
       },
     });
   } catch (error) {
@@ -163,7 +181,6 @@ export const registerCustomer = async (req, res, next) => {
       name,
       phone,
       email,
-      password = 'Customer@123',
       address,
       emergencyContact,
       planId,
@@ -176,16 +193,23 @@ export const registerCustomer = async (req, res, next) => {
     }
 
     const cleanPhone = phone.trim();
+    const rawDigits = cleanPhone.replace(/[^0-9]/g, '');
+    const tenDigitPhone = rawDigits.slice(-10);
+
+    if (tenDigitPhone.length !== 10) {
+      return errorResponse(res, 'कृपया वैध १०-अंकी भारतीय मोबाइल नंबर प्रविष्ट करा.', 400);
+    }
+
     const cleanEmail = (email && email.trim())
       ? email.toLowerCase().trim()
-      : `${cleanPhone.replace(/[^0-9]/g, '')}@customer.baramatimesswala.com`;
+      : `${tenDigitPhone}@customer.baramatimesswala.com`;
 
     // Check existing phone
     const existingPhone = await prisma.customer.findFirst({
       where: {
         OR: [
           { phone: cleanPhone },
-          { phone: { contains: cleanPhone.replace(/[^0-9]/g, '').slice(-10) } },
+          { phone: { contains: tenDigitPhone } },
         ],
       },
     });
@@ -203,7 +227,10 @@ export const registerCustomer = async (req, res, next) => {
     const count = await prisma.customer.count();
     const customerCode = `BMW-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
     const qrToken = 'bmw_qr_' + crypto.randomBytes(16).toString('hex');
-    const passwordHash = await bcrypt.hash(password, 10);
+
+    // REQUIREMENT: For every newly registered customer, use their 10-digit mobile number as initial password
+    const initialPassword = tenDigitPhone;
+    const passwordHash = await bcrypt.hash(initialPassword, 10);
 
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -225,6 +252,7 @@ export const registerCustomer = async (req, res, next) => {
           address,
           emergencyContact,
           status: 'PENDING_APPROVAL', // New registrations require Owner approval
+          mustChangePassword: true, // Forces initial password change upon first login
           firebaseUid: firebaseUid || null,
           phoneVerified: Boolean(phoneVerified || firebaseUid),
           qrToken,
@@ -260,19 +288,22 @@ export const registerCustomer = async (req, res, next) => {
       customerCode,
       phone: cleanPhone,
       status: 'PENDING_APPROVAL',
+      mustChangePassword: true,
     }, req);
 
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      message: 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. मेस मालकाच्या मंजुरीनंतर आपले खाते सुरू केले जाईल.',
+      message: 'आपली नोंदणी यशस्वीरीत्या प्राप्त झाली आहे. तुमचा सुरुवातीचा पासवर्ड तुमचा मोबाइल नंबर आहे. सुरक्षिततेसाठी पहिल्या लॉगिननंतर पासवर्ड बदला.',
       customer: {
         id: result.customer.id,
         name: result.customer.name,
         phone: result.customer.phone,
         customerCode: result.customer.customerCode,
         status: result.customer.status,
+        mustChangePassword: true,
       },
+      initialPasswordNotice: 'तुमचा सुरुवातीचा पासवर्ड तुमचा मोबाइल नंबर आहे. सुरक्षिततेसाठी पहिल्या लॉगिननंतर पासवर्ड बदला.',
       data: {
         customer: result.customer,
         user: { id: result.user.id, email: result.user.email, role: result.user.role },
@@ -463,7 +494,114 @@ export const getMe = async (req, res, next) => {
       },
     });
 
-    return successResponse(res, 'Profile retrieved', { user });
+    if (!user) {
+      return errorResponse(res, 'User not found', 404);
+    }
+
+    let mustChangePassword = false;
+    if (user.role === 'CUSTOMER' && user.customer) {
+      const cleanPhoneDigits = (user.customer.phone || '').replace(/[^0-9]/g, '').slice(-10);
+      mustChangePassword = Boolean(
+        user.customer.mustChangePassword ||
+        (cleanPhoneDigits && (await bcrypt.compare(cleanPhoneDigits, user.passwordHash)))
+      );
+    }
+
+    const sanitizedUser = {
+      ...user,
+      mustChangePassword,
+      customer: user.customer ? {
+        ...user.customer,
+        mustChangePassword,
+      } : null,
+    };
+    delete sanitizedUser.passwordHash;
+
+    return successResponse(res, 'Profile retrieved', { user: sanitizedUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return errorResponse(res, 'सध्याचा पासवर्ड आणि नवीन पासवर्ड आवश्यक आहेत.', 400);
+    }
+
+    if (confirmPassword && newPassword !== confirmPassword) {
+      return errorResponse(res, 'नवीन पासवर्ड आणि खात्री पासवर्ड जुळत नाहीत.', 400);
+    }
+
+    if (newPassword.length < 6) {
+      return errorResponse(res, 'नवीन पासवर्ड किमान ६ अक्षरे किंवा अंकांचा असावा.', 400);
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { customer: true },
+    });
+
+    if (!user) {
+      return errorResponse(res, 'वापरकर्ता आढळला नाही.', 404);
+    }
+
+    // Verify current password using bcrypt
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return errorResponse(res, 'सध्याचा पासवर्ड चुकीचा आहे.', 400);
+    }
+
+    // Prevent using mobile number as the new password for customers
+    if (user.role === 'CUSTOMER' && user.customer?.phone) {
+      const tenDigitPhone = user.customer.phone.replace(/[^0-9]/g, '').slice(-10);
+      if (newPassword === tenDigitPhone || newPassword === user.customer.phone) {
+        return errorResponse(res, 'सुरक्षिततेसाठी नवीन पासवर्ड तुमचा मोबाइल नंबर असू शकत नाही. कृपया वेगळा पासवर्ड ठेवा.', 400);
+      }
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: userId },
+        data: { passwordHash: newPasswordHash },
+      });
+
+      if (user.role === 'CUSTOMER' && user.customer) {
+        await tx.customer.update({
+          where: { id: user.customer.id },
+          data: { mustChangePassword: false },
+        });
+      }
+    });
+
+    // Generate fresh session token
+    const token = generateToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    await logAudit(user.id, 'CHANGE_PASSWORD', 'User', user.id, { role: user.role }, req);
+
+    return successResponse(res, 'पासवर्ड यशस्वीरीत्या बदलला आहे! आता आपण डॅशबोर्ड वापरू शकता.', {
+      token,
+      mustChangePassword: false,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        mustChangePassword: false,
+        customer: user.customer ? {
+          ...user.customer,
+          mustChangePassword: false,
+        } : null,
+      },
+    });
   } catch (error) {
     next(error);
   }

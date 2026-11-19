@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Phone, Mail, MapPin, Calendar, Lock, Save, ShieldCheck } from 'lucide-react';
+import { User, Phone, Mail, MapPin, Calendar, Lock, Save, ShieldCheck, KeyRound, CheckCircle2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
@@ -17,6 +17,44 @@ export const CustomerProfilePage = () => {
   });
 
   const [saving, setSaving] = useState(false);
+
+  // Password change state
+  const [passData, setPassData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [changingPass, setChangingPass] = useState(false);
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (!passData.currentPassword || !passData.newPassword) {
+      toast.error('कृपया सध्याचा आणि नवीन पासवर्ड प्रविष्ट करा.');
+      return;
+    }
+    if (passData.newPassword !== passData.confirmPassword) {
+      toast.error('नवीन पासवर्ड आणि पुष्टीकरण पासवर्ड जुळत नाहीत.');
+      return;
+    }
+    if (passData.newPassword.length < 6) {
+      toast.error('नवीन पासवर्ड किमान ६ अक्षरांचा असावा.');
+      return;
+    }
+
+    setChangingPass(true);
+    try {
+      const res = await api.post('/auth/change-password', passData);
+      toast.success(res?.message || 'पासवर्ड यशस्वीरीत्या बदलला आहे!');
+      setPassData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      if (res?.data?.token) {
+        localStorage.setItem('messmate_token', res.data.token);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || 'पासवर्ड बदलता आला नाही.');
+    } finally {
+      setChangingPass(false);
+    }
+  };
 
   useEffect(() => {
     if (customer) {
@@ -150,6 +188,83 @@ export const CustomerProfilePage = () => {
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'अद्यतनित होत आहे...' : 'प्रोफाइल सेव्ह करा'}</span>
+          </button>
+        </form>
+      </div>
+
+      {/* Change Password Card */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl space-y-5">
+        <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <Lock className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900">सुरक्षितता व पासवर्ड बदला</h2>
+            <p className="text-xs text-slate-500">आपला लॉगिन पासवर्ड अद्यतनित करा</p>
+          </div>
+        </div>
+
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              सध्याचा पासवर्ड / PIN *
+            </label>
+            <input
+              type="password"
+              required
+              value={passData.currentPassword}
+              onChange={(e) => setPassData({ ...passData, currentPassword: e.target.value })}
+              placeholder="सध्याचा पासवर्ड प्रविष्ट करा"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                नवीन पासवर्ड *
+              </label>
+              <input
+                type="password"
+                required
+                value={passData.newPassword}
+                onChange={(e) => setPassData({ ...passData, newPassword: e.target.value })}
+                placeholder="किमान ६ अक्षरे किंवा अंक"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                नवीन पासवर्ड पुष्टी करा *
+              </label>
+              <input
+                type="password"
+                required
+                value={passData.confirmPassword}
+                onChange={(e) => setPassData({ ...passData, confirmPassword: e.target.value })}
+                placeholder="पुन्हा पासवर्ड प्रविष्ट करा"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={changingPass}
+            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md disabled:opacity-50 transition-all"
+          >
+            {changingPass ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>पासवर्ड बदलत आहे...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4" />
+                <span>पासवर्ड अद्यतनित करा</span>
+              </>
+            )}
           </button>
         </form>
       </div>

@@ -5,6 +5,7 @@ import {
   firebasePhoneLogin,
   getMe,
   updateProfile,
+  changePassword,
   forgotPassword,
   resetPassword,
 } from '../controllers/auth.controller.js';
@@ -16,6 +17,7 @@ router.post('/login', login);
 router.post('/firebase-login', firebasePhoneLogin);
 router.post('/register', registerCustomer);
 router.post('/register-customer', registerCustomer);
+router.post('/change-password', authenticate, changePassword);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.get('/me', authenticate, getMe);
