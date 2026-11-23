@@ -300,7 +300,7 @@ export const AdminDashboardPage = () => {
         </div>
 
         {/* Top Header Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <button
             onClick={() => loadDashboardData(true, attendanceRange)}
             disabled={refreshing}
@@ -929,7 +929,7 @@ export const AdminDashboardPage = () => {
           </div>
         </div>
 
-        {/* Outstanding Table */}
+        {/* Outstanding Table & Mobile Cards */}
         {outstandingList.length === 0 ? (
           <div className="py-12 text-center">
             <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2 opacity-85" />
@@ -937,55 +937,90 @@ export const AdminDashboardPage = () => {
             <p className="text-xs text-stone-400 mt-0.5">सर्व ग्राहकांनी मेसचे पेमेंट वेळेवर भरले आहे.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto mt-2">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-[#F5EFE6] text-stone-500 font-bold">
-                  <th className="py-3 px-3">ग्राहकाचे नाव व कोड</th>
-                  <th className="py-3 px-3">प्लॅन</th>
-                  <th className="py-3 px-3">देय तारीख</th>
-                  <th className="py-3 px-3">बाकी रक्कम</th>
-                  <th className="py-3 px-3 text-right">कृती</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F5EFE6]">
-                {outstandingList.map((cust) => (
-                  <tr key={cust.id} className="hover:bg-[#FAF6ED]/70 transition-colors">
-                    <td className="py-3.5 px-3">
-                      <div className="font-bold text-[#2D312E]">{cust.customerName}</div>
-                      <div className="text-[11px] text-stone-400 font-mono">
+          <>
+            {/* Mobile Cards Stack (sm:hidden) */}
+            <div className="sm:hidden space-y-3 mt-3">
+              {outstandingList.map((cust) => (
+                <div key={cust.id} className="p-3.5 bg-[#FAF6ED]/80 rounded-xl border border-[#EAE3D2] space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-[#2D312E] text-sm">{cust.customerName}</div>
+                      <div className="text-[11px] text-stone-500 font-mono mt-0.5">
                         {cust.customerCode} • {cust.phone || 'फोन उपलब्ध नाही'}
                       </div>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <span className="inline-block px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-semibold text-[11px]">
-                        {cust.planName}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <span className="text-stone-500 font-medium">
-                        {cust.dueDate ? new Date(cust.dueDate).toLocaleDateString('mr-IN') : 'तात्काळ'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3">
-                      <span className="inline-block px-2.5 py-1 rounded-lg bg-[#FFF2E8] text-[#8C3B14] border border-[#FADCD0] font-black text-xs font-mono">
-                        ₹{Number(cust.balanceDue || 0).toLocaleString('en-IN')}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-3 text-right">
-                      <button
-                        onClick={() => handleOpenPaymentModal(cust)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer min-h-[36px]"
-                      >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>पेमेंट जमा करा</span>
-                      </button>
-                    </td>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-[#FFF2E8] text-[#8C3B14] border border-[#FADCD0] font-black text-xs font-mono shrink-0">
+                      ₹{Number(cust.balanceDue || 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-stone-600 bg-white/70 p-2 rounded-lg border border-[#EAE3D2]/60">
+                    <span>प्लॅन: <strong>{cust.planName}</strong></span>
+                    <span>देय: {cust.dueDate ? new Date(cust.dueDate).toLocaleDateString('mr-IN') : 'तात्काळ'}</span>
+                  </div>
+
+                  <button
+                    onClick={() => handleOpenPaymentModal(cust)}
+                    className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-2xs min-h-[44px] cursor-pointer"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    <span>पेमेंट जमा करा</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (hidden sm:block) */}
+            <div className="hidden sm:block overflow-x-auto mt-2">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-[#F5EFE6] text-stone-500 font-bold">
+                    <th className="py-3 px-3">ग्राहकाचे नाव व कोड</th>
+                    <th className="py-3 px-3">प्लॅन</th>
+                    <th className="py-3 px-3">देय तारीख</th>
+                    <th className="py-3 px-3">बाकी रक्कम</th>
+                    <th className="py-3 px-3 text-right">कृती</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#F5EFE6]">
+                  {outstandingList.map((cust) => (
+                    <tr key={cust.id} className="hover:bg-[#FAF6ED]/70 transition-colors">
+                      <td className="py-3.5 px-3">
+                        <div className="font-bold text-[#2D312E]">{cust.customerName}</div>
+                        <div className="text-[11px] text-stone-400 font-mono">
+                          {cust.customerCode} • {cust.phone || 'फोन उपलब्ध नाही'}
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="inline-block px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-semibold text-[11px]">
+                          {cust.planName}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="text-stone-500 font-medium">
+                          {cust.dueDate ? new Date(cust.dueDate).toLocaleDateString('mr-IN') : 'तात्काळ'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="inline-block px-2.5 py-1 rounded-lg bg-[#FFF2E8] text-[#8C3B14] border border-[#FADCD0] font-black text-xs font-mono">
+                          ₹{Number(cust.balanceDue || 0).toLocaleString('en-IN')}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-right">
+                        <button
+                          onClick={() => handleOpenPaymentModal(cust)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer min-h-[36px]"
+                        >
+                          <CreditCard className="w-3.5 h-3.5" />
+                          <span>पेमेंट जमा करा</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -20,6 +20,18 @@ export const CustomerLayout = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Lock body scroll when mobile dropdown menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const customer = user?.customer;
 
@@ -50,7 +62,7 @@ export const CustomerLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 pb-20 md:pb-8">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 pb-24 md:pb-8">
       {/* Top Blue Navigation Bar (Inspired by Reference Screenshot Style) */}
       <header className="sticky top-0 z-40 bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-700 text-white shadow-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -157,7 +169,7 @@ export const CustomerLayout = () => {
       </main>
 
       {/* Mobile-First Bottom Floating Navigation Bar (Touch targets >= 44px) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl px-2 py-1 flex items-center justify-around h-16">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl px-2 py-1 pb-safe flex items-center justify-around h-16">
         {[
           { name: 'होम', path: '/customer/dashboard', tabParam: null, icon: LayoutDashboard },
           { name: 'माझी हजेरी', path: '/customer/dashboard?tab=attendance', tabParam: 'attendance', icon: CalendarCheck },

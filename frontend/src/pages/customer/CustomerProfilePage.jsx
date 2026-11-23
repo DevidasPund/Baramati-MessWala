@@ -184,7 +184,7 @@ export const CustomerProfilePage = () => {
           <button
             type="submit"
             disabled={saving}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 disabled:opacity-50 min-h-[44px]"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'अद्यतनित होत आहे...' : 'प्रोफाइल सेव्ह करा'}</span>
@@ -215,7 +215,7 @@ export const CustomerProfilePage = () => {
               value={passData.currentPassword}
               onChange={(e) => setPassData({ ...passData, currentPassword: e.target.value })}
               placeholder="सध्याचा पासवर्ड प्रविष्ट करा"
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500 min-h-[44px]"
             />
           </div>
 
@@ -230,7 +230,7 @@ export const CustomerProfilePage = () => {
                 value={passData.newPassword}
                 onChange={(e) => setPassData({ ...passData, newPassword: e.target.value })}
                 placeholder="किमान ६ अक्षरे किंवा अंक"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500 min-h-[44px]"
               />
             </div>
 
@@ -244,7 +244,7 @@ export const CustomerProfilePage = () => {
                 value={passData.confirmPassword}
                 onChange={(e) => setPassData({ ...passData, confirmPassword: e.target.value })}
                 placeholder="पुन्हा पासवर्ड प्रविष्ट करा"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500 min-h-[44px]"
               />
             </div>
           </div>
@@ -252,7 +252,7 @@ export const CustomerProfilePage = () => {
           <button
             type="submit"
             disabled={changingPass}
-            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md disabled:opacity-50 transition-all"
+            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md disabled:opacity-50 transition-all min-h-[44px]"
           >
             {changingPass ? (
               <>

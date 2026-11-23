@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -23,6 +23,18 @@ export const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
 
   // Exactly the 8 sections requested for Baramati Messwala
   const navItems = [
@@ -297,12 +309,12 @@ export const AdminLayout = () => {
         </header>
 
         {/* Page Body */}
-        <main className="flex-1 p-3 sm:p-7 max-w-7xl mx-auto w-full pb-20 lg:pb-7">
+        <main className="flex-1 p-3 sm:p-7 max-w-7xl mx-auto w-full pb-24 lg:pb-7">
           <Outlet />
         </main>
 
         {/* Mobile Bottom Navigation for Owner (Quick Thumb Access) */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#EAE3D2] shadow-xl px-1 py-1 flex items-center justify-around h-16">
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#EAE3D2] shadow-xl px-1 py-1 pb-safe flex items-center justify-around h-16">
           {[
             { name: 'डॅशबोर्ड', path: '/admin/dashboard', icon: LayoutDashboard },
             { name: 'ग्राहक', path: '/admin/customers', icon: Users },

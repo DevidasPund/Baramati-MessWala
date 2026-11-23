@@ -211,72 +211,125 @@ export const AttendancePage = () => {
         </div>
       </div>
 
-      {/* Attendance Records Table */}
+      {/* Attendance Records Table & Mobile Cards */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
           <div className="text-center py-20 text-xs text-slate-500 font-medium">हजेरी नोंदी लोड होत आहेत...</div>
         ) : records.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-5">ग्राहक कोड</th>
-                  <th className="py-3 px-5">सभासदाचे नाव</th>
-                  <th className="py-3 px-5">जेवणाचा प्रकार</th>
-                  <th className="py-3 px-5">स्कॅन वेळ</th>
-                  <th className="py-3 px-5">पद्धत</th>
-                  <th className="py-3 px-5">नोंदणीकर्ता</th>
-                  <th className="py-3 px-5 text-right">कृती</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {records.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3.5 px-5 font-bold font-mono text-blue-700">
-                      <Link to={`/admin/customers/${r.customer?.id}`} className="hover:underline">
+          <>
+            {/* Mobile Cards View (sm:hidden) */}
+            <div className="sm:hidden divide-y divide-slate-100 p-3 space-y-3">
+              {records.map((r) => (
+                <div key={r.id} className="pt-3 first:pt-0 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-bold text-slate-900 text-sm">{r.customer?.name}</div>
+                      <Link
+                        to={`/admin/customers/${r.customer?.id}`}
+                        className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded inline-block mt-0.5"
+                      >
                         {r.customer?.customerCode}
                       </Link>
-                    </td>
-                    <td className="py-3.5 px-5 font-bold text-slate-900">
-                      {r.customer?.name}
-                    </td>
-                    <td className="py-3.5 px-5">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                    </div>
+
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase shrink-0 ${
                         r.mealType === 'BREAKFAST'
                           ? 'bg-orange-50 text-orange-700'
                           : r.mealType === 'LUNCH'
                           ? 'bg-blue-50 text-blue-700'
                           : 'bg-indigo-50 text-indigo-700'
-                      }`}>
-                        {r.mealType === 'BREAKFAST' && <Coffee className="w-3 h-3" />}
-                        {r.mealType === 'LUNCH' && <Utensils className="w-3 h-3" />}
-                        {r.mealType === 'DINNER' && <Moon className="w-3 h-3" />}
-                        {r.mealType === 'BREAKFAST' ? 'नाश्ता' : r.mealType === 'LUNCH' ? 'दुपार' : 'रात्र'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-5 text-slate-600 font-mono">
+                      }`}
+                    >
+                      {r.mealType === 'BREAKFAST' && <Coffee className="w-3 h-3" />}
+                      {r.mealType === 'LUNCH' && <Utensils className="w-3 h-3" />}
+                      {r.mealType === 'DINNER' && <Moon className="w-3 h-3" />}
+                      {r.mealType === 'BREAKFAST' ? 'नाश्ता' : r.mealType === 'LUNCH' ? 'दुपार' : 'रात्र'}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs flex items-center justify-between text-slate-500">
+                    <span className="font-mono font-semibold">
                       {new Date(r.scanTime).toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    </td>
-                    <td className="py-3.5 px-5 text-slate-500 text-[11px]">
-                      {r.method === 'CUSTOMER_SCANS_MESS' ? 'मेस QR स्कॅन' : r.method === 'STAFF_SCANS_CUSTOMER' ? 'काउंटर स्कॅन' : 'मॅन्युअल नोंद'}
-                    </td>
-                    <td className="py-3.5 px-5 text-slate-500">
-                      {r.scannedByStaff ? `${r.scannedByStaff.name}` : 'स्वयं / सिस्टीम'}
-                    </td>
-                    <td className="py-3.5 px-5 text-right">
-                      <button
-                        onClick={() => handleDelete(r.id, r.customer?.name, r.mealType)}
-                        className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        title="हजेरी नोंद हटवा"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
+                    </span>
+                    <span className="text-[11px]">
+                      {r.method === 'CUSTOMER_SCANS_MESS' ? 'मेस QR' : r.method === 'STAFF_SCANS_CUSTOMER' ? 'काउंटर स्कॅन' : 'मॅन्युअल'}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(r.id, r.customer?.name, r.mealType)}
+                      className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
+                      title="हटवा"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table View (hidden sm:block) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-5">ग्राहक कोड</th>
+                    <th className="py-3 px-5">सभासदाचे नाव</th>
+                    <th className="py-3 px-5">जेवणाचा प्रकार</th>
+                    <th className="py-3 px-5">स्कॅन वेळ</th>
+                    <th className="py-3 px-5">पद्धत</th>
+                    <th className="py-3 px-5">नोंदणीकर्ता</th>
+                    <th className="py-3 px-5 text-right">कृती</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  {records.map((r) => (
+                    <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-5 font-bold font-mono text-blue-700">
+                        <Link to={`/admin/customers/${r.customer?.id}`} className="hover:underline">
+                          {r.customer?.customerCode}
+                        </Link>
+                      </td>
+                      <td className="py-3.5 px-5 font-bold text-slate-900">
+                        {r.customer?.name}
+                      </td>
+                      <td className="py-3.5 px-5">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          r.mealType === 'BREAKFAST'
+                            ? 'bg-orange-50 text-orange-700'
+                            : r.mealType === 'LUNCH'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'bg-indigo-50 text-indigo-700'
+                        }`}>
+                          {r.mealType === 'BREAKFAST' && <Coffee className="w-3 h-3" />}
+                          {r.mealType === 'LUNCH' && <Utensils className="w-3 h-3" />}
+                          {r.mealType === 'DINNER' && <Moon className="w-3 h-3" />}
+                          {r.mealType === 'BREAKFAST' ? 'नाश्ता' : r.mealType === 'LUNCH' ? 'दुपार' : 'रात्र'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-5 text-slate-600 font-mono">
+                        {new Date(r.scanTime).toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </td>
+                      <td className="py-3.5 px-5 text-slate-500 text-[11px]">
+                        {r.method === 'CUSTOMER_SCANS_MESS' ? 'मेस QR स्कॅन' : r.method === 'STAFF_SCANS_CUSTOMER' ? 'काउंटर स्कॅन' : 'मॅन्युअल नोंद'}
+                      </td>
+                      <td className="py-3.5 px-5 text-slate-500">
+                        {r.scannedByStaff ? `${r.scannedByStaff.name}` : 'स्वयं / सिस्टीम'}
+                      </td>
+                      <td className="py-3.5 px-5 text-right">
+                        <button
+                          onClick={() => handleDelete(r.id, r.customer?.name, r.mealType)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          title="हजेरी नोंद हटवा"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           <div className="text-center py-16 space-y-2">
             <CalendarCheck className="w-8 h-8 text-slate-300 mx-auto" />

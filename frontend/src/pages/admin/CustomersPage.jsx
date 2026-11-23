@@ -162,7 +162,7 @@ export const CustomersPage = () => {
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500"
+            className="w-full sm:w-auto px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-blue-500 min-h-[40px]"
           >
             <option value="ALL">सर्व ग्राहक (All)</option>
             <option value="ACTIVE">सक्रिय सभासद (Active)</option>
@@ -172,90 +172,163 @@ export const CustomersPage = () => {
         </div>
       </div>
 
-      {/* Customers Data Table */}
+      {/* Customers Data Table & Mobile Cards */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs overflow-hidden">
         {loading ? (
           <div className="text-center py-20 text-slate-500 text-xs font-medium">ग्राहक माहिती लोड होत आहे...</div>
         ) : customers.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-5">ग्राहक कोड</th>
-                  <th className="py-3 px-5">नाव आणि संपर्क</th>
-                  <th className="py-3 px-5">चालू सबस्क्रिप्शन</th>
-                  <th className="py-3 px-5">स्थिती</th>
-                  <th className="py-3 px-5">नोंदणी तारीख</th>
-                  <th className="py-3 px-5 text-right">कृती</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                {customers.map((c) => {
-                  const activeSub = c.subscriptions?.[0];
-                  return (
-                    <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-5 font-bold font-mono text-blue-700">
-                        {c.customerCode}
-                      </td>
-                      <td className="py-3.5 px-5">
-                        <div className="font-bold text-slate-900">{c.name}</div>
-                        <div className="text-[11px] text-slate-400 font-mono">{c.phone}</div>
-                      </td>
-                      <td className="py-3.5 px-5">
-                        {activeSub ? (
-                          <div>
-                            <span className="font-semibold text-slate-800">{activeSub.plan.name}</span>
-                            <div className="text-[10px] text-slate-400">
-                              वैधता: {new Date(activeSub.endDate).toLocaleDateString('mr-IN')} पर्यंत
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-[11px] text-slate-400 italic">कोणतीही चालू योजना नाही</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-5">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                            c.status === 'ACTIVE'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : c.status === 'PAUSED'
-                              ? 'bg-amber-50 text-amber-700'
-                              : 'bg-rose-50 text-rose-700'
-                          }`}
-                        >
-                          {c.status === 'ACTIVE' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                          {c.status === 'PAUSED' && <PauseCircle className="w-3 h-3 text-amber-600" />}
-                          {c.status === 'INACTIVE' && <XCircle className="w-3 h-3 text-rose-600" />}
-                          {c.status === 'ACTIVE' ? 'सक्रिय' : c.status === 'PAUSED' ? 'स्थगित' : 'निष्क्रिय'}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-5 text-slate-500">
-                        {new Date(c.joiningDate).toLocaleDateString('mr-IN')}
-                      </td>
-                      <td className="py-3.5 px-5 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Link
-                            to={`/admin/customers/${c.id}`}
-                            className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="संपूर्ण प्रोफाइल आणि QR कोड पहा"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => setDeleteModalCustomer(c)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            title="ग्राहक हटवा"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+          <>
+            {/* Mobile Cards Stack (sm:hidden) */}
+            <div className="sm:hidden divide-y divide-slate-100 p-3 space-y-3">
+              {customers.map((c) => {
+                const activeSub = c.subscriptions?.[0];
+                return (
+                  <div key={c.id} className="pt-3 first:pt-0 space-y-2.5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-bold text-slate-900 text-sm">{c.name}</div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
+                            {c.customerCode}
+                          </span>
+                          <a href={`tel:${c.phone}`} className="text-xs text-slate-500 font-mono flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-slate-400" />
+                            <span>{c.phone}</span>
+                          </a>
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      </div>
+
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 ${
+                          c.status === 'ACTIVE'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : c.status === 'PAUSED'
+                            ? 'bg-amber-50 text-amber-700'
+                            : 'bg-rose-50 text-rose-700'
+                        }`}
+                      >
+                        {c.status === 'ACTIVE' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                        {c.status === 'PAUSED' && <PauseCircle className="w-3 h-3 text-amber-600" />}
+                        {c.status === 'INACTIVE' && <XCircle className="w-3 h-3 text-rose-600" />}
+                        {c.status === 'ACTIVE' ? 'सक्रिय' : c.status === 'PAUSED' ? 'स्थगित' : 'निष्क्रिय'}
+                      </span>
+                    </div>
+
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500">सबस्क्रिप्शन:</span>
+                        <span className="font-semibold text-slate-800">{activeSub?.plan?.name || 'चालू योजना नाही'}</span>
+                      </div>
+                      {activeSub && (
+                        <div className="flex items-center justify-between text-[10px] text-slate-400">
+                          <span>वैधता:</span>
+                          <span>{new Date(activeSub.endDate).toLocaleDateString('mr-IN')} पर्यंत</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <Link
+                        to={`/admin/customers/${c.id}`}
+                        className="flex-1 py-2.5 px-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 min-h-[44px]"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>तपशील व QR कोड</span>
+                      </Link>
+                      <button
+                        onClick={() => setDeleteModalCustomer(c)}
+                        className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        title="ग्राहक हटवा"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop Table (hidden sm:block) */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-5">ग्राहक कोड</th>
+                    <th className="py-3 px-5">नाव आणि संपर्क</th>
+                    <th className="py-3 px-5">चालू सबस्क्रिप्शन</th>
+                    <th className="py-3 px-5">स्थिती</th>
+                    <th className="py-3 px-5">नोंदणी तारीख</th>
+                    <th className="py-3 px-5 text-right">कृती</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  {customers.map((c) => {
+                    const activeSub = c.subscriptions?.[0];
+                    return (
+                      <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-5 font-bold font-mono text-blue-700">
+                          {c.customerCode}
+                        </td>
+                        <td className="py-3.5 px-5">
+                          <div className="font-bold text-slate-900">{c.name}</div>
+                          <div className="text-[11px] text-slate-400 font-mono">{c.phone}</div>
+                        </td>
+                        <td className="py-3.5 px-5">
+                          {activeSub ? (
+                            <div>
+                              <span className="font-semibold text-slate-800">{activeSub.plan.name}</span>
+                              <div className="text-[10px] text-slate-400">
+                                वैधता: {new Date(activeSub.endDate).toLocaleDateString('mr-IN')} पर्यंत
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-slate-400 italic">कोणतीही चालू योजना नाही</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-5">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                              c.status === 'ACTIVE'
+                                ? 'bg-emerald-50 text-emerald-700'
+                                : c.status === 'PAUSED'
+                                ? 'bg-amber-50 text-amber-700'
+                                : 'bg-rose-50 text-rose-700'
+                            }`}
+                          >
+                            {c.status === 'ACTIVE' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                            {c.status === 'PAUSED' && <PauseCircle className="w-3 h-3 text-amber-600" />}
+                            {c.status === 'INACTIVE' && <XCircle className="w-3 h-3 text-rose-600" />}
+                            {c.status === 'ACTIVE' ? 'सक्रिय' : c.status === 'PAUSED' ? 'स्थगित' : 'निष्क्रिय'}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-5 text-slate-500">
+                          {new Date(c.joiningDate).toLocaleDateString('mr-IN')}
+                        </td>
+                        <td className="py-3.5 px-5 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Link
+                              to={`/admin/customers/${c.id}`}
+                              className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="संपूर्ण प्रोफाइल आणि QR कोड पहा"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Link>
+                            <button
+                              onClick={() => setDeleteModalCustomer(c)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                              title="ग्राहक हटवा"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         ) : (
           <div className="text-center py-16 space-y-2">
             <Users className="w-8 h-8 text-slate-300 mx-auto" />
