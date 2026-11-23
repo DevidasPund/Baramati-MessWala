@@ -15,6 +15,7 @@ const router = Router();
 // Mess QR Dynamic Session (Method A)
 router.get('/mess-qr-session', authenticate, getActiveMessQrSession);
 router.post('/scan-mess-qr', authenticate, scanMessQrByCustomer);
+router.post('/scan/mess-qr', authenticate, scanMessQrByCustomer);
 
 // Staff Scans Customer QR (Method B)
 router.post('/scan-customer-qr', authenticate, authorize(['SUPER_ADMIN', 'ADMIN', 'STAFF']), scanCustomerQrByStaff);

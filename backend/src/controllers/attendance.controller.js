@@ -82,12 +82,47 @@ export const processAttendanceRecord = async ({
   dateStr,
   method,
   staffId = null,
+  notes = null,
 }) => {
-  // 1. Verify customer status
-  if (customer.status !== 'ACTIVE') {
+  // 1. Verify customer status & account approval
+  // Expected Behavior:
+  // - APPROVED + ACTIVE customer: Allow attendance (subject to subscription & meal rules)
+  // - PENDING_APPROVAL: Reject attendance with "ग्राहक खाते अद्याप मंजूर झालेले नाही. उपस्थिती नोंदवता येणार नाही."
+  // - SUSPENDED: Reject attendance with "ग्राहक खाते निलंबित आहे. उपस्थिती नोंदवता येणार नाही."
+  // - REJECTED: Reject attendance with "ग्राहक खाते नाकारलेले आहे. उपस्थिती नोंदवता येणार नाही."
+  // - INACTIVE: Reject attendance with "ग्राहक खाते निष्क्रिय आहे. उपस्थिती नोंदवता येणार नाही."
+  if (customer.status === 'PENDING_APPROVAL') {
     return {
       allowed: false,
-      reason: `Customer account is currently ${customer.status}. Attendance not allowed.`,
+      reason: 'ग्राहक खाते अद्याप मंजूर झालेले नाही. उपस्थिती नोंदवता येणार नाही.',
+    };
+  }
+
+  if (customer.status === 'SUSPENDED') {
+    return {
+      allowed: false,
+      reason: 'ग्राहक खाते निलंबित आहे. उपस्थिती नोंदवता येणार नाही.',
+    };
+  }
+
+  if (customer.status === 'REJECTED') {
+    return {
+      allowed: false,
+      reason: 'ग्राहक खाते नाकारलेले आहे. उपस्थिती नोंदवता येणार नाही.',
+    };
+  }
+
+  if (customer.user && customer.user.isActive === false) {
+    return {
+      allowed: false,
+      reason: 'ग्राहक खाते निष्क्रिय आहे. उपस्थिती नोंदवता येणार नाही.',
+    };
+  }
+
+  if (!['APPROVED', 'ACTIVE'].includes(customer.status)) {
+    return {
+      allowed: false,
+      reason: 'ग्राहक खाते मंजूर किंवा सक्रिय नाही. उपस्थिती नोंदवता येणार नाही.',
     };
   }
 
@@ -111,15 +146,16 @@ export const processAttendanceRecord = async ({
   if (!activeSubscription) {
     return {
       allowed: false,
-      reason: 'No active subscription found for today. Please renew your plan.',
+      reason: 'सध्या कोणतेही सक्रिय सबस्क्रिप्शन उपलब्ध नाही. कृपया प्लॅनचे नूतनीकरण करा.',
     };
   }
 
   // 3. Verify meal is included in the subscription plan
   if (!activeSubscription.plan.includedMeals.includes(mealType)) {
+    const mealLabel = mealType === 'LUNCH' ? 'दुपारचे जेवण' : mealType === 'DINNER' ? 'रात्रीचे जेवण' : 'नाश्ता';
     return {
       allowed: false,
-      reason: `Your plan (${activeSubscription.plan.name}) does not include ${mealType}.`,
+      reason: `आपल्या प्लॅन (${activeSubscription.plan.name}) मध्ये ${mealLabel} समाविष्ट नाही.`,
     };
   }
 
@@ -136,9 +172,10 @@ export const processAttendanceRecord = async ({
   });
 
   if (skipRequest) {
+    const mealLabel = mealType === 'LUNCH' ? 'दुपारच्या' : mealType === 'DINNER' ? 'रात्रीच्या' : 'नाश्त्याच्या';
     return {
       allowed: false,
-      reason: `Customer has an approved meal skip for ${mealType} on ${dateStr}.`,
+      reason: `ग्राहकाने ${mealLabel} जेवणासाठी सुट्टी (Skip) नोंदवली आहे.`,
     };
   }
 
@@ -156,7 +193,7 @@ export const processAttendanceRecord = async ({
   if (existingAttendance) {
     return {
       allowed: false,
-      reason: `Attendance already marked for ${mealType} today at ${new Date(existingAttendance.scanTime).toLocaleTimeString()}.`,
+      reason: 'आजच्या या जेवणाची उपस्थिती आधीच नोंदवली आहे.',
     };
   }
 
@@ -170,6 +207,7 @@ export const processAttendanceRecord = async ({
       method,
       scannedById: staffId,
       isVerified: true,
+      notes,
     },
     include: {
       customer: {
@@ -180,6 +218,7 @@ export const processAttendanceRecord = async ({
           phone: true,
         },
       },
+      scannedByStaff: true,
     },
   });
 
@@ -198,15 +237,18 @@ export const scanMessQrByCustomer = async (req, res, next) => {
       return errorResponse(res, 'Session token is required', 400);
     }
 
-    const customer = req.user.customer;
+    let customer = req.user.customer;
     if (!customer) {
       return errorResponse(res, 'Only customers can use this attendance scan method.', 403);
+    }
+    if (!customer.user) {
+      customer = { ...customer, user: req.user };
     }
 
     // Verify session token
     const session = await prisma.messQrSession.findUnique({ where: { token: sessionToken } });
     if (!session || session.expiresAt < new Date()) {
-      return errorResponse(res, 'The Mess QR code has expired or is invalid. Please scan the live QR on display.', 400);
+      return errorResponse(res, 'मेस QR कोड कालबाह्य किंवा अवैध आहे. कृपया स्क्रीनवरील थेट QR स्कॅन करा.', 400);
     }
 
     const todayStr = new Date().toISOString().split('T')[0];
@@ -223,7 +265,7 @@ export const scanMessQrByCustomer = async (req, res, next) => {
 
     await logAudit(req.user.id, 'SCAN_ATTENDANCE_METHOD_A', 'Attendance', result.attendance.id, { mealType: session.mealType }, req);
 
-    return successResponse(res, `Attendance marked successfully for ${session.mealType}! Enjoy your meal.`, {
+    return successResponse(res, 'ग्राहक खाते मंजूर आहे. उपस्थिती नोंदवली.', {
       attendance: result.attendance,
       plan: result.planName,
     });
@@ -236,20 +278,36 @@ export const scanMessQrByCustomer = async (req, res, next) => {
 export const scanCustomerQrByStaff = async (req, res, next) => {
   try {
     const { qrToken, mealType } = req.body;
-    if (!qrToken) {
-      return errorResponse(res, 'Customer QR token is required', 400);
+    if (!qrToken || typeof qrToken !== 'string' || !qrToken.trim()) {
+      return errorResponse(res, 'अवैध QR कोड.', 400);
     }
 
     const effectiveMealType = mealType || (await getCurrentMealType());
     const customer = await prisma.customer.findUnique({
-      where: { qrToken },
+      where: { qrToken: qrToken.trim() },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            isActive: true,
+          },
+        },
+      },
     });
 
     if (!customer) {
-      return errorResponse(res, 'Invalid QR code. Customer not found in the system.', 404);
+      return errorResponse(res, 'अवैध QR कोड.', 404);
     }
 
     const staffId = req.user.staff?.id || null;
+    const notes = req.user?.role === 'SUPER_ADMIN' || req.user?.role === 'ADMIN'
+      ? `Scanned by Owner/Admin (${req.user.email})`
+      : req.user.staff
+      ? `Scanned by Staff: ${req.user.staff.name} (${req.user.staff.staffCode})`
+      : 'Scanned via Scanner';
+
     const todayStr = new Date().toISOString().split('T')[0];
 
     const result = await processAttendanceRecord({
@@ -258,6 +316,7 @@ export const scanCustomerQrByStaff = async (req, res, next) => {
       dateStr: todayStr,
       method: 'STAFF_SCANS_CUSTOMER',
       staffId,
+      notes,
     });
 
     if (!result.allowed) {
@@ -268,9 +327,10 @@ export const scanCustomerQrByStaff = async (req, res, next) => {
       customerId: customer.id,
       mealType: effectiveMealType,
       staffId,
+      scannedByRole: req.user.role,
     }, req);
 
-    return successResponse(res, `Attendance marked for ${customer.name} (${effectiveMealType})`, {
+    return successResponse(res, 'ग्राहक खाते मंजूर आहे. उपस्थिती नोंदवली.', {
       attendance: result.attendance,
       plan: result.planName,
       customer: {

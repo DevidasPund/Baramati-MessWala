@@ -130,18 +130,20 @@ export const AdminQrScannerPage = () => {
       });
 
       confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
-      toast.success(res.message || 'हजेरी यशस्वीरित्या नोंदवली गेली!');
+      const successMsg = res.message || 'ग्राहक खाते मंजूर आहे. उपस्थिती नोंदवली.';
+      toast.success(successMsg);
       setScanResult({
         success: true,
-        message: res.message,
+        message: successMsg,
         data: res.data,
       });
       setManualToken('');
     } catch (err) {
-      toast.error(err.message || 'हजेरी पडताळणी अयशस्वी');
+      const errorMsg = err.message || 'हजेरी पडताळणी अयशस्वी';
+      toast.error(errorMsg);
       setScanResult({
         success: false,
-        message: err.message,
+        message: errorMsg,
       });
     } finally {
       setLoading(false);
@@ -299,7 +301,7 @@ export const AdminQrScannerPage = () => {
                       <div className="text-slate-500">वेळ: <strong className="font-mono">{new Date().toLocaleTimeString('mr-IN')}</strong></div>
                     </div>
                     <span className="inline-block px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-full">
-                      हजेरी नोंदवली गेली ✓
+                      {scanResult.message || 'ग्राहक खाते मंजूर आहे. उपस्थिती नोंदवली.'}
                     </span>
                   </>
                 ) : (
