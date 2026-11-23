@@ -139,11 +139,11 @@ async function runMobileFirstTestSuite() {
     );
     console.log(`✅ Customer approved by Owner! Current status: ${approveRes.data.data.customer.status}`);
 
-    // Customer can now log in!
-    console.log('Verifying approved customer can now log in...');
+    // Customer can now log in using initial password (their 10-digit mobile number)!
+    console.log('Verifying approved customer can now log in with initial password (mobile number)...');
     const custLoginRes = await axios.post(`${BASE_URL}/auth/login`, {
       phone: testPhone,
-      password: 'PIN@1234',
+      password: testPhone,
     });
     if (custLoginRes.data.success && custLoginRes.data.data.token) {
       customerToken = custLoginRes.data.data.token;

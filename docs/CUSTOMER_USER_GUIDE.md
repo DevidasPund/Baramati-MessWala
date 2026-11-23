@@ -1,70 +1,74 @@
-# MESSMATE – CUSTOMER & MEMBER USER GUIDE
+# MessMate – Customer User Guide (ग्राहक वापरकर्ता मार्गदर्शिका)
 
-**Business:** Baramati Messwala  
-**System:** MessMate Smart Mess & Tiffin Management  
-**Customer Portal:** `/login` (Select Customer Portal or navigate to `/customer/dashboard`)  
-
----
-
-## 1. Getting Started & Logging In
-1. Open the MessMate website on your smartphone, tablet, or laptop.
-2. Click **Login** in the top navigation bar.
-3. Select **Customer Portal**.
-4. Enter your registered email address and password.
-   - *Tip:* If you are a new member, you can self-register at `/register` or ask the mess manager to create your account at the counter.
+**मेसचे नाव**: बारामती मेसवाला (Baramati Messwala)  
+**ग्राहक पोर्टल**: `https://baramati-messwala-1.onrender.com/login`  
 
 ---
 
-## 2. Marking Attendance at Meal Time
+## १. नवीन ग्राहक नोंदणी (Registration)
 
-You have two easy ways to record your meal:
-
-### Method A: Scan the Counter QR Code (Recommended)
-1. Open your phone camera scanner or navigate to **Scan Mess QR** in the customer menu.
-2. Point your camera at the digital screen displayed at the mess reception counter.
-3. Your screen will flash green with an instant confirmation: "Attendance Verified for Today's Lunch/Dinner!"
-
-### Method B: Show Your Personal QR Code to Counter Staff
-1. If your phone has low battery or no camera access, tap **My QR** in your customer portal.
-2. Present your personal QR code to the staff member on duty.
-3. Staff will scan it and mark your attendance immediately.
-
----
-
-## 3. Viewing Today's & Weekly Food Menu
-1. Tap **Food Menu** from your dashboard.
-2. See what is cooking for Breakfast, Lunch, and Dinner every day of the week.
-3. Check out special Sunday feasts and festive treats (Puran Poli, Kheer, Puri Bhaji).
+1. **नोंदणी पेज उघडा**: `https://baramati-messwala-1.onrender.com/register` वर जा.
+2. **माहिती भरा**:
+   - पूर्ण नाव
+   - १०-अंकी मोबाईल नंबर
+   - पत्ता व कॉलेज / हॉस्टेलचे नाव
+   - मेस प्लॅन (दुपार + रात्र / फक्त दुपार / फक्त रात्र)
+3. **नोंदणी करा** वर क्लिक करा.
+4. **महत्त्वाची सूचना**:
+   - तुमचा सुरुवातीचा पासवर्ड तुमचा **१०-अंकी मोबाईल नंबर** आहे.
+   - मेस मालकाने तुमचे खाते मंजूर केल्यानंतरच तुम्ही लॉगिन करू शकाल.
 
 ---
 
-## 4. Requesting Meal Skips (Save Quotas & Notify Kitchen)
-1. Traveling home for the weekend or attending a college function?
-2. Go to **Extra Meals & Skips > Request Meal Skip**.
-3. Select the date and meal type (**Breakfast**, **Lunch**, or **Dinner**) and tap **Submit**.
-4. Once approved, the kitchen is notified not to waste food, and your account will not be charged.
+## २. पहिले लॉगिन व पासवर्ड बदलणे (First Login & Password Change)
+
+1. **लॉगिन पेज उघडा** (`/login`).
+2. तुमचा **मोबाईल नंबर** टाका.
+3. पासवर्डमध्ये तुमचा **१०-अंकी मोबाईल नंबर** प्रविष्ट करा.
+4. लॉगिन यशस्वी झाल्यावर स्क्रीनवर **पासवर्ड बदला (Change Password)** चा फॉर्म दिसेल:
+   - सध्याचा पासवर्ड: तुमचा मोबाईल नंबर टाका.
+   - नवीन पासवर्ड: तुमचा स्वतःचा सुरक्षित पासवर्ड टाका (किमान ६ अक्षरे/अंक).
+   - पासवर्ड खात्री करा: पुन्हा नवीन पासवर्ड टाका.
+   - **पासवर्ड सेव्ह करा** वर क्लिक करा.
+5. पासवर्ड बदलल्यानंतर तुम्ही थेट ग्राहक डॅशबोर्ड वापरू शकता.
 
 ---
 
-## 5. Ordering Extra Meals or Guest Thalis
-1. Having college friends or family visit your mess?
-2. Open **Extra Meals & Skips > Book Extra Meal**.
-3. Choose the meal type, enter the number of guests (Rate: ₹90/meal or ₹110 for guest feast), and confirm.
-4. The amount is automatically added to your monthly statement.
+## ३. माझा वैयक्तिक डायनिंग QR कोड (Dining Pass)
+
+जेवणाच्या वेळी उपस्थिती नोंदवण्यासाठी:
+1. खालील नेव्हिगेशनमधील **माझे QR** टॅबवर जा (`/customer/my-qr`).
+2. स्क्रीनवर तुमचा फोटो, नाव, सभासद कोड आणि मोठा QR कोड दिसेल.
+3. मेस काउंटरवर हा कोड कॅमेऱ्यासमोर दाखवा.
+4. **फुलस्क्रीन दाखवा** वर क्लिक करून मोठा QR कोड दाखवू शकता.
+5. **गॅलरीमध्ये सेव्ह करा** वर क्लिक करून QR कोड इमेज म्हणून फोनमध्ये डाउनलोड करू शकता (इंटरनेट नसतानाही दाखवता येईल).
 
 ---
 
-## 6. Paying Your Monthly Bill via UPI
-1. Navigate to **My Bills & Invoices**.
-2. Tap **Pay Bill via UPI** on your outstanding invoice.
-3. The official PhonePe / BHIM payment window opens displaying:
-   - **Verified Payee:** **Baramaticha Dabewala**
-   - **UPI ID:** `baramatimesswala@upi`
-4. Tap **Open in UPI App** (or scan the displayed QR with PhonePe, Google Pay, or Paytm).
-5. Complete payment and enter the **12-digit UTR number** or upload a screenshot.
-6. Once the admin confirms credit, your balance clears to ₹0 and a formal PDF receipt becomes available for download.
+## ४. आजचा मेनू पाहणे (Daily Menu)
+
+1. **होम** डॅशबोर्डवर **दैनिक जेवण** कार्ड पहा.
+2. दुपारचे जेवण (१२:०० ते ०३:००) आणि रात्रीचे जेवण (०७:३० ते १०:३०) यामध्ये आज कोणत्या भाज्या, डाळ, भात किंवा गोड पदार्थ आहेत ते दिसेल.
 
 ---
 
-## 7. Feedback & Support
-Have feedback on food taste, cleanliness, or suggestions? Open **Feedback & Complaints** to submit directly to the management team.
+## ५. उपस्थिती व हजेरी तक्ता (Attendance History)
+
+1. **माझी हजेरी** टॅबवर क्लिक करा.
+2. कॅलेंडरमध्ये चालू महिन्यातील सर्व तारखा दिसतील:
+   - 🟢 **हिरवा रंग**: जेवणासाठी उपस्थिती नोंदवली.
+   - 🔴 **लाल रंग**: जेवण अनुपस्थित / सुट्टी.
+3. चालू महिन्यात तुम्ही किती दिवस जेवलात याची अचूक मोजणी येथे उपलब्ध असते.
+
+---
+
+## ६. बिल पाहणे व ऑनलाइन पेमेंट करणे (Bills & UPI Payment)
+
+1. **बिल / पेमेंट** टॅबवर जा.
+2. चालू महिन्याचे बिल, भरलेली रक्कम आणि बाकी रक्कम तपासा.
+3. **ऑनलाइन भरा (Pay Online)** वर क्लिक करा:
+   - मेसच्या अधिकृत QR कोडवर PhonePe, Google Pay किंवा Paytm ने पैसे पाठवा.
+   - पैसे भरल्यानंतर मिळालेला १२-अंकी **UTR / UPI Reference Number** फॉर्ममध्ये टाका.
+   - पावतीचा स्क्रीनशॉट अपलोड करा.
+   - **पेमेंट सबमिट करा** वर क्लिक करा.
+4. मेस मालक पडताळणी करतील आणि तुमच्या बिलावर **PAID (भरले)** असा शिक्का येईल.

@@ -69,6 +69,7 @@ export const login = async (req, res, next) => {
         const allowedOwnerPhones = [
           process.env.OWNER_PHONE,
           settings?.phone,
+          '9209184035',
           '9822334455',
         ].filter(Boolean).map((p) => p.replace(/[^0-9]/g, '').slice(-10));
 

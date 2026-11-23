@@ -159,12 +159,11 @@ export const CustomerLayout = () => {
       {/* Mobile-First Bottom Floating Navigation Bar (Touch targets >= 44px) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl px-2 py-1 flex items-center justify-around h-16">
         {[
-          { name: 'डॅशबोर्ड', path: '/customer/dashboard', tabParam: null, icon: LayoutDashboard },
-          { name: 'जेवण', path: '/customer/dashboard?tab=meals', tabParam: 'meals', icon: Utensils },
-          { name: 'हजेरी', path: '/customer/dashboard?tab=attendance', tabParam: 'attendance', icon: CalendarCheck },
-          { name: 'ऍडव्हान्स', path: '/customer/dashboard?tab=advance', tabParam: 'advance', icon: CreditCard },
-          { name: 'बिले', path: '/customer/dashboard?tab=bills', tabParam: 'bills', icon: Receipt },
+          { name: 'होम', path: '/customer/dashboard', tabParam: null, icon: LayoutDashboard },
+          { name: 'माझी हजेरी', path: '/customer/dashboard?tab=attendance', tabParam: 'attendance', icon: CalendarCheck },
           { name: 'माझे QR', path: '/customer/my-qr', tabParam: null, icon: QrCode },
+          { name: 'बिल / पेमेंट', path: '/customer/dashboard?tab=bills', tabParam: 'bills', icon: Receipt },
+          { name: 'प्रोफाइल', path: '/customer/profile', tabParam: null, icon: User },
         ].map((item) => {
           const active = isLinkActive(item);
           const Icon = item.icon;
@@ -172,7 +171,7 @@ export const CustomerLayout = () => {
             <Link
               key={item.name}
               to={item.path}
-              className={`min-h-[44px] min-w-[48px] flex flex-col items-center justify-center py-1 px-1.5 rounded-xl transition-all ${
+              className={`min-h-[44px] min-w-[56px] flex flex-col items-center justify-center py-1 px-1 rounded-xl transition-all ${
                 active ? 'text-blue-600 font-extrabold scale-105' : 'text-slate-400 hover:text-slate-600 font-medium'
               }`}
             >

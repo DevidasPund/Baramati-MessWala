@@ -51,4 +51,6 @@ services:
       - key: FIREBASE_PRIVATE_KEY
         sync: false
       - key: OWNER_PHONE
+        value: "+919209184035"
+      - key: SECONDARY_OWNER_PHONE
         value: "+919822334455"

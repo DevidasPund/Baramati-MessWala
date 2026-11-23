@@ -1,80 +1,85 @@
-# MESSMATE – ADMIN & MESS OWNER OPERATIONAL GUIDE
+# MessMate – Admin & Owner User Guide (मार्गदर्शिका)
 
-**Business:** Baramati Messwala  
-**System:** MessMate Smart Mess & Tiffin Management  
-**Admin Portal URL:** `/login` (Select Admin Portal or navigate to `/admin/dashboard`)  
-
----
-
-## 1. Initial Login & Security
-1. Navigate to the login screen.
-2. Select **Admin Portal**.
-3. Credentials:
-   - **Email:** `admin@baramatimesswala.com`
-   - **Temporary Password:** `Baramati@Admin2026#`
-4. Once logged in, you can update your business profile, meal pricing, and contact details under **Settings**.
+**व्यवस्थापक**: बारामती मेसवाला (Baramati Messwala)  
+**ॲडमिन पोर्टल**: `https://baramati-messwala-1.onrender.com/login`  
 
 ---
 
-## 2. Admin Dashboard & Metrics
-The dashboard displays live operational insights:
-- **Active / Total Customers:** Real-time count of active subscribers.
-- **Today's Attendance:** Live breakdown across Breakfast, Lunch, and Dinner.
-- **Monthly Revenue & Pending Collections:** Real-time totals derived directly from verified payments.
-- **Subscription Expiry Alerts:** Customers whose memberships will lapse within 7, 3, or 1 days.
+## १. ॲडमिन लॉगिन (Owner Login)
+
+मेस मालक लॉगिन करण्यासाठी:
+1. **लॉगिन पेज उघडा**: `https://baramati-messwala-1.onrender.com/login` वर जा.
+2. **मोबाईल नंबर किंवा ईमेल टाका**:
+   - प्राथमिक व्यावसायिक मोबाईल: `9209184035`
+   - किंवा दुय्यम मोबाईल: `9822334455`
+   - किंवा ईमेल: `admin@baramatimesswala.com`
+3. **पासवर्ड टाका**: ॲडमिनचा अधिकृत पासवर्ड प्रविष्ट करा.
+4. **लॉगिन बटणावर क्लिक करा**: थेट मुख्य ॲडमिन डॅशबोर्डवर प्रवेश मिळेल.
+
+> [!TIP]
+> पासवर्ड बदलण्यासाठी ॲडमिन सेटिंग्ज (`/admin/settings`) मधून सुरक्षित पासवर्ड बदलता येतो.
 
 ---
 
-## 3. Customer Management
-1. Navigate to **Customers** in the sidebar.
-2. **Add Customer:** Click **+ Add Customer**, enter student name, mobile number, emergency guardian contact, college hostel address, and select an initial meal plan.
-3. **Customer Code:** The system automatically issues a standardized permanent code (e.g., `BMW-2026-015`).
-4. **QR Code Card:** Open any customer's details to view or regenerate their unique attendance QR card or print it for physical ID badges.
-5. **Pause / Resume:** If a student is traveling home for Diwali, vacations, or exams, click **Pause Subscription**. The system freezes their attendance rights and pauses their billing days.
+## २. मुख्य डॅशबोर्ड विहंगावलोकन (Dashboard Overview)
+
+ॲडमिन डॅशबोर्डवर खालील ४ मुख्य माहिती कार्ड्स दिसतात:
+- **एकूण सक्रिय ग्राहक**: मेसमध्ये नियमित जेवण घेणाऱ्या मंजूर ग्राहकांची संख्या.
+- **आजची हजेरी**: आज दुपारच्या व रात्रीच्या जेवणासाठी उपस्थित राहिलेल्या ग्राहकांची संख्या.
+- **या महिन्याची कमाई**: चालू महिन्यात जमा झालेले एकूण प्रमाणित महसूल (₹).
+- **थकबाकी (येणे बाकी)**: ग्राहकांकडे बाकी असलेली थकीत रक्कम.
 
 ---
 
-## 4. Attendance Management
-MessMate offers two real-time attendance recording options:
+## ३. झटपट कृती (Quick Actions)
 
-### Method A: Counter QR Display (Self-Service)
-1. In the admin sidebar, open **QR Scanner > Display Mess Session QR**.
-2. Select the current meal session (**Breakfast**, **Lunch**, or **Dinner**).
-3. The display generates a dynamic, auto-refreshing QR code on a tablet, laptop, or counter monitor.
-4. Students scan this screen using their phone's MessMate camera scanner to verify attendance.
-
-### Method B: Staff / Admin Manual Check-in
-1. In **Attendance**, click **Mark Manual Attendance**.
-2. Search for the student by name or customer code (`BMW-2026-xxx`).
-3. Select the meal type and date, add optional remarks, and click **Record Attendance**.
-4. *Protection:* The system strictly prevents duplicate attendance for the same customer within the same meal session.
+डॅशबोर्डवरील ४ प्रमुख शॉर्टकट्स:
+1. **QR स्कॅन करा** (`/admin/qr-scanner`): कॅमेरा सुरू करून ग्राहकाचा QR कोड स्कॅन करण्यासाठी.
+2. **नवीन ग्राहक** (`/admin/customers?action=new`): मेसमध्ये नवीन सदस्याची नोंदणी करण्यासाठी.
+3. **पेमेंट तपासा** (`/admin/payment-management`): ग्राहकांनी भरलेल्या ऑनलाइन/रोख पावत्या पडताळण्यासाठी.
+4. **आजचा मेनू अपडेट करा** (`/admin/menu`): दुपारचे व रात्रीचे जेवण बदलण्यासाठी.
 
 ---
 
-## 5. Billing, Invoices & Payment Verification
+## ४. ग्राहक व्यवस्थापन व मंजुरी (Customer Verification & Approval)
 
-### Generating Monthly Bills:
-1. Navigate to **Billing & Invoices**.
-2. Click **Generate Monthly Invoices**, select the billing month (e.g. `2026-11`).
-3. The system compiles the base plan cost, computes approved extra meals, carries forward unpaid arrears, and generates a finalized invoice with an auto-incremented invoice number (e.g., `INV-2026-0028`).
-4. Click **Download PDF** on any invoice to generate and print a formal receipt.
-
-### Verifying UPI Payments:
-1. When a student pays via PhonePe / Google Pay / BHIM and uploads their screenshot and 12-digit UTR reference, it appears under **Payments > Pending Review**.
-2. Check your bank account or PhonePe business app for the corresponding UTR amount.
-3. Click **Verify**: The invoice balance due is automatically updated, and the customer receives an instant payment confirmation.
-4. Click **Reject** if the UTR is invalid, supplying a clear reason (e.g., "UTR not found in bank statement").
+नवीन ग्राहक नोंदणी झाल्यानंतर:
+1. **ग्राहक पडताळणी विभागात जा**: साइडबारमधील **ग्राहक** $\rightarrow$ **पडताळणी** (`/admin/customer-verification`) उघडा.
+2. **प्रलंबित यादी तपासा**: ग्राहकाचे नाव, मोबाईल नंबर आणि निवडलेला मेस प्लॅन तपासा.
+3. **मंजुरी (Approve) किंवा नकार (Reject)**:
+   - **मंजूर करा (Approve)**: खाते तात्काळ सुरू होते व ग्राहकाला हजेरी नोंदवण्याची परवानगी मिळते.
+   - **नकार द्या (Reject)**: खाते नाकारले जाते व कारण नोंदवले जाते.
+   - **निलंबित करा (Suspend)**: तात्पुरती मेस बंद करण्यासाठी.
 
 ---
 
-## 6. Daily Food Menu Updates
-1. Navigate to **Food Menu**.
-2. Select day of the week and meal type (**Breakfast**, **Lunch**, **Dinner**).
-3. Edit dishes, special festival items (e.g., Puran Poli, Modak, Shrikhand), and save.
-4. Click **Broadcast Menu** to notify members.
+## ५. उपस्थिती नोंदणी (QR Attendance)
+
+हजेरी नोंदवण्याच्या २ पद्धती:
+- **पद्धत २: ग्राहकाचा QR स्कॅन करणे (शिफारस केलेली)**:
+  1. **हजेरी (QR)** वर क्लिक करा.
+  2. जेवणाची वेळ निवडा (नाश्ता / दुपारचे जेवण / रात्रीचे जेवण).
+  3. **कॅमेरा सुरू करा** वर टॅप करा.
+  4. ग्राहकाच्या मोबाईलवरील QR पास कॅमेऱ्यासमोर धरा.
+  5. सिस्टीम तात्काळ हिरवा संदेश दाखवेल: *"ग्राहकाची उपस्थिती यशस्वीरित्या नोंदवली."*
+- **पद्धत १: काउंटरवर मेस स्क्रीन QR दाखवणे**:
+  1. **पद्धत १** टॅब निवडा.
+  2. काउंटरवर स्क्रीन सुरू ठेवा; ग्राहक स्वतःच्या मोबाईलने हा QR स्कॅन करतील.
 
 ---
 
-## 7. Reports & Excel Export
-- Navigate to **Reports & Analytics**.
-- Filter by date range and export complete spreadsheet archives (`.xlsx`) for attendance, revenue, customer registries, and outstanding payment lists.
+## ६. बिलिंग व पेमेंट पडताळणी (Billing & Payment Confirmation)
+
+- ग्राहकाने UPI द्वारे पैसे भरल्यास स्टेटस `PENDING` (प्रलंबित) राहते.
+- **पेमेंट मॅनेजमेंट** विभागात जाऊन ट्रान्झॅक्शन आयडी (UTR) तपासा.
+- **Confirm Paid (प्रमाणित करा)** वर क्लिक केल्यावरच ग्राहकाचे बिल `PAID` होते.
+- रोख (Cash) रक्कम मिळाल्यास थेट **पेमेंट नोंदवा** बटणावर क्लिक करून रक्कम जमा करा.
+
+---
+
+## ७. आजचा मेनू अपडेट करणे (Menu Management)
+
+1. **आजचा मेनू** विभागात जा (`/admin/menu`).
+2. आजची तारीख आणि जेवणाचा प्रकार (दुपारचे जेवण / रात्रीचे जेवण) निवडा.
+3. डिशची नावे टाका (उदा. चपाती, वरण-भात, पनीर भाजी, कोशिंबीर).
+4. **मेनू सेव्ह करा** वर क्लिक करा. सर्व ग्राहकांच्या मोबाईल ॲपवर हा मेनू तात्काळ दिसेल.
