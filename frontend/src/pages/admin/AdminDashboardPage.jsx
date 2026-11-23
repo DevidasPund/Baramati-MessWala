@@ -7,7 +7,7 @@ import {
   AlertCircle,
   UserPlus,
   QrCode,
-  Utensils,
+  UtensilsCrossed,
   Sun,
   Moon,
   Send,
@@ -19,30 +19,38 @@ import {
   TrendingUp,
   ShieldCheck,
   ShoppingBag,
-  RotateCcw,
   Clock,
+  ChevronRight,
+  AlertTriangle,
+  ArrowUpRight,
+  Sparkles,
 } from 'lucide-react';
 import {
   BarChart,
   Bar,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export const AdminDashboardPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  // State
+  // Core State
   const [stats, setStats] = useState(null);
   const [menuData, setMenuData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Attendance Chart Date Range State ('7d' | '14d' | '30d')
+  const [attendanceRange, setAttendanceRange] = useState('7d');
 
   // Payment Recording Modal State
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -57,7 +65,7 @@ export const AdminDashboardPage = () => {
   const [reminderSending, setReminderSending] = useState(false);
   const [reminderToast, setReminderToast] = useState('');
 
-  // 1. Format authentic Marathi date (e.g., "रविवार, १५ नोव्हेंबर २०२६")
+  // 1. Format authentic Marathi date (e.g. "सोमवार, २४ नोव्हेंबर २०२६")
   const getMarathiDate = (date = new Date()) => {
     const days = ['रविवार', 'सोमवार', 'मंगळवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
     const months = [
@@ -74,15 +82,34 @@ export const AdminDashboardPage = () => {
     return `${dayName}, ${day} ${monthName} ${year}`;
   };
 
+  // Relative Time Formatter in Marathi
+  const formatTimeAgo = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffSec = Math.floor((now - date) / 1000);
+
+    if (diffSec < 60) return 'आत्ताच';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} मिनिटांपूर्वी`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} तासांपूर्वी`;
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays === 1) return 'काल';
+    if (diffDays < 7) return `${diffDays} दिवसांपूर्वी`;
+
+    return date.toLocaleDateString('mr-IN', { day: 'numeric', month: 'short' });
+  };
+
   // 2. Fetch Dashboard Metrics & Today's Menu
-  const loadDashboardData = async (isManualRefresh = false) => {
+  const loadDashboardData = async (isManualRefresh = false, range = attendanceRange) => {
     if (isManualRefresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
 
     try {
       const [statsRes, menuRes] = await Promise.all([
-        api.get('/admin/dashboard-stats'),
+        api.get('/admin/dashboard-stats', { params: { attendanceRange: range } }),
         api.get('/menu/today').catch(() => ({ data: { menus: [] } })),
       ]);
 
@@ -103,69 +130,22 @@ export const AdminDashboardPage = () => {
   };
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    loadDashboardData(false, attendanceRange);
+  }, [attendanceRange]);
 
-  // 3. Construct 7-Day Weekly Attendance Data (Monday -> Sunday)
-  const buildWeeklyAttendanceData = () => {
-    const marathiWeekdays = [
-      { key: 'Mon', label: 'सोम' },
-      { key: 'Tue', label: 'मंगळ' },
-      { key: 'Wed', label: 'बुध' },
-      { key: 'Thu', label: 'गुरु' },
-      { key: 'Fri', label: 'शुक्र' },
-      { key: 'Sat', label: 'शनि' },
-      { key: 'Sun', label: 'रवि' },
-    ];
-
-    const today = new Date();
-    // In JS: 0=Sun, 1=Mon, ..., 6=Sat. Map to Monday-based index (0=Mon...6=Sun)
-    const todayJsDay = today.getDay();
-    const todayIndex = todayJsDay === 0 ? 6 : todayJsDay - 1;
-
-    // Check attendance map from API dailyAttendanceTrend if available
-    const apiTrend = stats?.charts?.dailyAttendanceTrend || [];
-    const trendMap = {};
-    apiTrend.forEach((t) => {
-      trendMap[t.day] = t.total;
-    });
-
-    return marathiWeekdays.map((item, index) => {
-      const isToday = index === todayIndex;
-      const isPast = index < todayIndex;
-      const isFuture = index > todayIndex;
-
-      let count = 0;
-      if (isToday) {
-        count = stats?.kpis?.todayTotalAttendance || 28; // fallback realistic count if none scanned yet
-      } else if (isPast) {
-        count = trendMap[item.key] || [38, 42, 35, 40, 44, 32][index] || 35;
-      } else {
-        count = 0;
-      }
-
-      let color = '#EA8A27'; // Orange for regular days
-      if (isToday) color = '#205D48'; // Forest green for today
-      if (isFuture) color = '#E5E7EB'; // Light grey for future days
-
-      return {
-        dayLabel: isToday ? `${item.label} (आज)` : item.label,
-        count,
-        color,
-        isToday,
-        isFuture,
-      };
-    });
+  // Handle Date Range Change
+  const handleRangeChange = (range) => {
+    if (range === attendanceRange) return;
+    setAttendanceRange(range);
   };
 
-  // 4. Extract Today's Menu
+  // 3. Extract Today's Menu
   const getLunchItems = () => {
     const lunchMenu = menuData?.menus?.find((m) => m.mealType === 'LUNCH');
     if (lunchMenu?.items && Array.isArray(lunchMenu.items) && lunchMenu.items.length > 0) {
       return lunchMenu.items;
     }
-    // Default reference menu
-    return ['Chapati', 'वरण-भात', 'बटाटा भाजी', 'कोशिंबीर'];
+    return null;
   };
 
   const getDinnerItems = () => {
@@ -173,11 +153,10 @@ export const AdminDashboardPage = () => {
     if (dinnerMenu?.items && Array.isArray(dinnerMenu.items) && dinnerMenu.items.length > 0) {
       return dinnerMenu.items;
     }
-    // Default reference menu
-    return ['भाकरी', 'पिठले', 'भात', 'लोणचे'];
+    return null;
   };
 
-  // 5. Open Payment Modal for Outstanding Customer
+  // 4. Open Payment Modal for Outstanding Customer
   const handleOpenPaymentModal = (cust) => {
     setSelectedCustomer(cust);
     setPaymentAmount(cust.balanceDue?.toString() || '');
@@ -187,7 +166,7 @@ export const AdminDashboardPage = () => {
     setPaymentModalOpen(true);
   };
 
-  // 6. Submit Payment
+  // 5. Submit Payment
   const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCustomer) return;
@@ -206,7 +185,7 @@ export const AdminDashboardPage = () => {
       setPaymentSuccessMsg('पेमेंट यशस्वीरीत्या नोंदवले गेले!');
       setTimeout(() => {
         setPaymentModalOpen(false);
-        loadDashboardData(true);
+        loadDashboardData(true, attendanceRange);
       }, 1200);
     } catch (err) {
       console.error('Payment record error:', err);
@@ -216,7 +195,7 @@ export const AdminDashboardPage = () => {
     }
   };
 
-  // 7. Send Reminder to All Outstanding Customers
+  // 6. Send Reminder to All Outstanding Customers
   const handleSendReminderToAll = async () => {
     setReminderSending(true);
     try {
@@ -239,10 +218,15 @@ export const AdminDashboardPage = () => {
   if (loading && !stats) {
     return (
       <div className="space-y-6 font-sans">
-        <div className="h-10 w-64 bg-stone-200/70 rounded-xl animate-pulse" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="h-10 w-72 bg-stone-200/70 rounded-2xl animate-pulse" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-white rounded-2xl border border-[#EAE3D2] p-5 animate-pulse" />
+            <div key={i} className="h-36 bg-white rounded-2xl border border-[#EAE3D2] p-5 animate-pulse shadow-xs" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-24 bg-white rounded-2xl border border-[#EAE3D2] p-4 animate-pulse shadow-xs" />
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -253,7 +237,7 @@ export const AdminDashboardPage = () => {
     );
   }
 
-  // Error Display
+  // Error State
   if (error && !stats) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs text-center space-y-4">
@@ -263,8 +247,8 @@ export const AdminDashboardPage = () => {
         <h3 className="text-lg font-bold text-[#2D312E]">डॅशबोर्ड माहिती उपलब्ध नाही</h3>
         <p className="text-xs text-stone-500 max-w-md">{error}</p>
         <button
-          onClick={() => loadDashboardData()}
-          className="px-5 py-2.5 bg-[#205D48] hover:bg-[#184838] text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+          onClick={() => loadDashboardData(true, attendanceRange)}
+          className="px-5 py-2.5 bg-[#205D48] hover:bg-[#184838] text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
         >
           पुन्हा प्रयत्न करा
         </button>
@@ -272,47 +256,63 @@ export const AdminDashboardPage = () => {
     );
   }
 
-  const { kpis } = stats || {};
-  const weeklyChartData = buildWeeklyAttendanceData();
+  const { kpis, alerts } = stats || {};
   const lunchItems = getLunchItems();
   const dinnerItems = getDinnerItems();
   const outstandingList = stats?.outstandingCustomers || [];
+  const attendanceTrendData = stats?.charts?.dailyAttendanceTrend || [];
+  const revenueTrendData = stats?.charts?.revenueTrend || [];
+  const activityFeed = stats?.activities?.feed || [];
+
+  // Check active alerts
+  const hasPendingApprovals = alerts?.pendingApprovals?.count > 0;
+  const hasOutstandingDue = (kpis?.pendingPayments || 0) > 0;
+  const hasExpiringSubs = (kpis?.expiringSubscriptions || 0) > 0;
+  const hasActiveAlerts = hasPendingApprovals || hasOutstandingDue || hasExpiringSubs;
 
   return (
-    <div className="space-y-7 font-sans pb-12">
+    <div className="space-y-6 sm:space-y-7 font-sans pb-12">
       {/* Toast Notification */}
       {reminderToast && (
-        <div className="fixed top-5 right-5 z-50 bg-[#205D48] text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2.5 text-sm font-semibold animate-bounce">
+        <div className="fixed top-5 right-5 z-50 bg-[#205D48] text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-xs sm:text-sm font-bold animate-bounce border border-emerald-400/40">
           <CheckCircle2 className="w-5 h-5 text-emerald-300" />
           <span>{reminderToast}</span>
         </div>
       )}
 
-      {/* 1. Dashboard Header */}
+      {/* 1. Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2D312E] tracking-tight">
-            नमस्कार, अॅडमिन
-          </h1>
-          <p className="text-xs sm:text-sm text-stone-500 font-medium mt-1">
-            {getMarathiDate()}
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#2D312E] tracking-tight">
+              नमस्कार, {user?.name || 'अॅडमिन'}
+            </h1>
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 text-[#205D48] border border-emerald-200">
+              <Sparkles className="w-3 h-3 text-[#205D48]" />
+              प्रशासक
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-stone-500 font-semibold mt-1 flex items-center gap-2">
+            <span>{getMarathiDate()}</span>
+            <span className="text-stone-300">•</span>
+            <span className="text-stone-600">बारामती मेसवाला डॅशबोर्ड</span>
           </p>
         </div>
 
-        {/* Header Action Buttons */}
-        <div className="flex items-center gap-3">
+        {/* Top Header Actions */}
+        <div className="flex items-center gap-2.5">
           <button
-            onClick={() => loadDashboardData(true)}
+            onClick={() => loadDashboardData(true, attendanceRange)}
             disabled={refreshing}
-            className="p-2.5 text-stone-600 bg-white hover:bg-stone-50 rounded-xl border border-[#EAE3D2] shadow-2xs transition-all disabled:opacity-50"
-            title="माहिती रिफ्रेश करा"
+            className="p-2.5 text-stone-600 bg-white hover:bg-stone-50 rounded-xl border border-[#EAE3D2] shadow-2xs transition-all disabled:opacity-50 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+            title="डेटा रिफ्रेश करा"
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-[#205D48]' : ''}`} />
           </button>
 
           <Link
-            to="/admin/customers"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs sm:text-sm font-bold rounded-xl shadow-sm transition-all"
+            to="/admin/customers?action=new"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-all min-h-[44px]"
           >
             <UserPlus className="w-4 h-4" />
             <span>+ नवीन ग्राहक</span>
@@ -320,7 +320,7 @@ export const AdminDashboardPage = () => {
 
           <Link
             to="/admin/qr-scanner"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-stone-50 text-[#205D48] border border-[#205D48] text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-stone-50 text-[#205D48] border border-[#205D48] text-xs sm:text-sm font-bold rounded-xl shadow-2xs transition-all min-h-[44px]"
           >
             <QrCode className="w-4 h-4" />
             <span>QR स्कॅन करा</span>
@@ -328,241 +328,297 @@ export const AdminDashboardPage = () => {
         </div>
       </div>
 
-      {/* 2. Complete 8 Owner KPIs Grid (Mobile-Optimized) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {/* KPI 1: एकूण मंजूर ग्राहक */}
+      {/* 2. Admin Alerts Banner (Rendered ONLY when real records require attention) */}
+      {hasActiveAlerts && (
+        <div className="space-y-2.5">
+          {hasPendingApprovals && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50/90 border border-amber-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-200/70 text-amber-900 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-black text-amber-950">
+                    {alerts.pendingApprovals.count} नवीन ग्राहकांची पडताळणी प्रलंबित आहे
+                  </div>
+                  <div className="text-[11px] text-amber-800 font-medium">
+                    ग्राहकांना लॉगिन व हजेरीसाठी मालकाची थेट मंजुरी आवश्यक आहे.
+                  </div>
+                </div>
+              </div>
+              <Link
+                to="/admin/customer-verification"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors shrink-0 shadow-2xs min-h-[40px]"
+              >
+                <span>पडताळणी करा</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
+
+          {hasExpiringSubs && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-blue-50/90 border border-blue-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-200/70 text-blue-900 flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-black text-blue-950">
+                    {kpis?.expiringSubscriptions} ग्राहकांचे सबस्क्रिप्शन पुढील ७ दिवसांत संपत आहे
+                  </div>
+                  <div className="text-[11px] text-blue-800 font-medium">
+                    ग्राहकांना नूतनीकरणाची आठवण करून द्या किंवा प्लॅन रीन्यू करा.
+                  </div>
+                </div>
+              </div>
+              <Link
+                to="/admin/subscriptions"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shrink-0 shadow-2xs min-h-[40px]"
+              >
+                <span>सबस्क्रिप्शन तपासा</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
+
+          {hasOutstandingDue && (
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-orange-50/90 border border-orange-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-all">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-orange-200/70 text-orange-950 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-[#8C3B14]" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-black text-[#8C3B14]">
+                    एकूण ₹{Number(kpis?.pendingPayments || 0).toLocaleString('en-IN')} थकबाकी येणे बाकी आहे
+                  </div>
+                  <div className="text-[11px] text-orange-800 font-medium">
+                    {kpis?.pendingCustomersCount || outstandingList.length} ग्राहकांचे मासिक देयक प्रलंबित आहे.
+                  </div>
+                </div>
+              </div>
+              <Link
+                to="/admin/payment-management"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#8C3B14] hover:bg-[#722f0f] text-white text-xs font-bold transition-colors shrink-0 shadow-2xs min-h-[40px]"
+              >
+                <span>पेमेंट मॅनेजमेंट</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3. Four Core Summary Cards (Consistent Heights, Clickable, Real Data) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        {/* KPI 1: एकूण सक्रिय ग्राहक */}
         <Link
           to="/admin/customers"
-          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-4 sm:p-5 shadow-xs hover:border-[#205D48] hover:shadow-md transition-all flex flex-col justify-between min-h-[140px] group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-stone-500">मंजूर ग्राहक</span>
-            <div className="w-8 h-8 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
-              <Users className="w-4 h-4" />
+            <span className="text-xs font-bold text-stone-500">एकूण सक्रिय ग्राहक</span>
+            <div className="w-9 h-9 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Users className="w-4.5 h-4.5" />
             </div>
           </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-[#2D312E]">
-              {kpis?.totalApprovedCustomers || kpis?.activeCustomers || 0}
+          <div className="mt-2.5">
+            <div className="text-2xl sm:text-3xl font-black text-[#2D312E] tracking-tight">
+              {kpis?.activeCustomers ?? kpis?.totalApprovedCustomers ?? 0}
             </div>
-            <div className="text-[10px] text-stone-400 mt-0.5">सक्रिय व मंजूर सदस्य</div>
+            <div className="flex items-center justify-between mt-1 text-[11px] text-stone-400 font-semibold">
+              <span>मंजूर: {kpis?.totalApprovedCustomers || 0} सदस्य</span>
+              <span className="text-[#205D48] font-bold group-hover:translate-x-0.5 transition-transform">पहा →</span>
+            </div>
           </div>
         </Link>
 
-        {/* KPI 2: पडताळणी प्रलंबित */}
-        <Link
-          to="/admin/customer-verification"
-          className="bg-amber-50/70 rounded-2xl border border-amber-200 p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-amber-400 transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-amber-800">पडताळणी प्रलंबित</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-200/60 text-amber-900 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-amber-900">
-              {kpis?.pendingCustomerVerification || 0}
-            </div>
-            <div className="text-[10px] text-amber-700 font-bold mt-0.5">मंजुरी आवश्यक →</div>
-          </div>
-        </Link>
-
-        {/* KPI 3: आजचे एकूण डबे */}
-        <Link
-          to="/admin/dabba-management"
-          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-stone-500">आजचे डबे</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#205D48] flex items-center justify-center">
-              <ShoppingBag className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-[#2D312E]">
-              {kpis?.todayDabbaCount || 0}
-            </div>
-            <div className="text-[10px] text-stone-400 mt-0.5">नियोजित डबे संख्या</div>
-          </div>
-        </Link>
-
-        {/* KPI 4: दिलेले डबे */}
-        <Link
-          to="/admin/dabba-management"
-          className="bg-emerald-50/60 rounded-2xl border border-emerald-200 p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-emerald-400 transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-emerald-800">दिलेले डबे</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-200/60 text-emerald-900 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-emerald-900">
-              {kpis?.dabbaGiven || 0}
-            </div>
-            <div className="text-[10px] text-emerald-700 mt-0.5">ग्राहकांनी स्वीकारले</div>
-          </div>
-        </Link>
-
-        {/* KPI 5: जमा झालेले डबे */}
-        <Link
-          to="/admin/dabba-management"
-          className="bg-blue-50/60 rounded-2xl border border-blue-200 p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-blue-400 transition-all"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-blue-800">जमा डबे</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-200/60 text-blue-900 flex items-center justify-center">
-              <RotateCcw className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-blue-900">
-              {kpis?.dabbaReturned || 0}
-            </div>
-            <div className="text-[10px] text-blue-700 mt-0.5">रिकामी डबे परत जमा</div>
-          </div>
-        </Link>
-
-        {/* KPI 6: आजची हजेरी */}
+        {/* KPI 2: आजची हजेरी */}
         <Link
           to="/admin/attendance"
-          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-4 sm:p-5 shadow-xs hover:border-[#205D48] hover:shadow-md transition-all flex flex-col justify-between min-h-[140px] group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-stone-500">आजची हजेरी</span>
-            <div className="w-8 h-8 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
-              <CalendarCheck className="w-4 h-4" />
+            <span className="text-xs font-bold text-stone-500">आजची हजेरी</span>
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CalendarCheck className="w-4.5 h-4.5 text-[#205D48]" />
             </div>
           </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-[#2D312E]">
-              {kpis?.todayAttendance || kpis?.todayTotalAttendance || 0}
+          <div className="mt-2.5">
+            <div className="text-2xl sm:text-3xl font-black text-[#2D312E] tracking-tight">
+              {kpis?.todayAttendance ?? kpis?.todayTotalAttendance ?? 0}
             </div>
-            <div className="text-[10px] text-stone-400 mt-0.5">
-              दुपारी: {kpis?.todayLunch || 0} | रात्री: {kpis?.todayDinner || 0}
+            <div className="flex items-center justify-between mt-1 text-[11px] text-stone-500 font-semibold">
+              <span>दुपारी: {kpis?.todayLunch || 0} | रात्री: {kpis?.todayDinner || 0}</span>
+              <span className="text-[#205D48] font-bold group-hover:translate-x-0.5 transition-transform">तपशील →</span>
             </div>
           </div>
         </Link>
 
-        {/* KPI 7: मासिक जमा (Monthly Collection) */}
+        {/* KPI 3: या महिन्याची कमाई */}
         <Link
-          to="/admin/payment-management"
-          className="bg-white rounded-2xl border border-[#EAE3D2] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-[#205D48]/40 transition-all"
+          to="/admin/billing"
+          className="bg-white rounded-2xl border border-[#EAE3D2] p-4 sm:p-5 shadow-xs hover:border-emerald-600 hover:shadow-md transition-all flex flex-col justify-between min-h-[140px] group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-stone-500">मासिक जमा</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
-              <IndianRupee className="w-4 h-4" />
+            <span className="text-xs font-bold text-stone-500">या महिन्याची कमाई</span>
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <IndianRupee className="w-4.5 h-4.5 text-[#205D48]" />
             </div>
           </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-emerald-900">
+          <div className="mt-2.5">
+            <div className="text-2xl sm:text-3xl font-black text-emerald-900 tracking-tight">
               ₹{Number(kpis?.monthlyCollection || kpis?.monthlyRevenue || 0).toLocaleString('en-IN')}
             </div>
-            <div className="text-[10px] text-stone-400 mt-0.5">प्रमाणित पेमेंट</div>
+            <div className="flex items-center justify-between mt-1 text-[11px] text-stone-400 font-semibold">
+              <span>प्रमाणित महसूल</span>
+              <span className="text-emerald-700 font-bold group-hover:translate-x-0.5 transition-transform">बिलिंग →</span>
+            </div>
           </div>
         </Link>
 
-        {/* KPI 8: येणे बाकी (Pending Payments) */}
+        {/* KPI 4: थकबाकी */}
         <Link
           to="/admin/payment-management"
-          className="bg-[#FFF2E8] rounded-2xl border border-[#FADCD0] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between hover:border-orange-400 transition-all"
+          className="bg-[#FFF4ED] rounded-2xl border border-[#FADCD0] p-4 sm:p-5 shadow-xs hover:border-orange-500 hover:shadow-md transition-all flex flex-col justify-between min-h-[140px] group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-[#8C3B14]">बाकी रक्कम</span>
-            <div className="w-8 h-8 rounded-xl bg-[#F6D3C1] text-[#8C3B14] flex items-center justify-center">
-              <AlertCircle className="w-4 h-4" />
+            <span className="text-xs font-bold text-[#8C3B14]">थकबाकी (येणे बाकी)</span>
+            <div className="w-9 h-9 rounded-xl bg-[#F6D3C1] text-[#8C3B14] flex items-center justify-center group-hover:scale-110 transition-transform">
+              <AlertCircle className="w-4.5 h-4.5 text-[#8C3B14]" />
             </div>
           </div>
-          <div className="mt-2">
-            <div className="text-xl sm:text-2xl font-black text-[#8C3B14]">
+          <div className="mt-2.5">
+            <div className="text-2xl sm:text-3xl font-black text-[#8C3B14] tracking-tight">
               ₹{Number(kpis?.pendingPayments || 0).toLocaleString('en-IN')}
             </div>
-            <div className="text-[10px] text-[#A74E21] font-bold mt-0.5">
-              {kpis?.pendingCustomersCount || outstandingList.length} ग्राहकांकडे बाकी
+            <div className="flex items-center justify-between mt-1 text-[11px] text-[#A74E21] font-bold">
+              <span>{kpis?.pendingCustomersCount || outstandingList.length} ग्राहकांकडे बाकी</span>
+              <span className="group-hover:translate-x-0.5 transition-transform">वसूली →</span>
             </div>
           </div>
         </Link>
       </div>
 
-      {/* 3 Dedicated Owner Quick-Launch Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* 4. Prominent Quick Actions Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* Quick 1: QR स्कॅन करा */}
         <Link
-          to="/admin/customer-verification"
-          className="p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] transition-all flex items-center gap-3.5 group"
+          to="/admin/qr-scanner"
+          className="p-3.5 sm:p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] hover:shadow-md transition-all flex items-center gap-3 group"
         >
-          <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <ShieldCheck className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-[#205D48]/10 text-[#205D48] flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-[#205D48] group-hover:text-white transition-all">
+            <QrCode className="w-5 h-5" />
           </div>
-          <div>
-            <div className="font-extrabold text-sm text-slate-900">ग्राहक पडताळणी व मंजुरी</div>
-            <div className="text-[11px] text-slate-500">नवीन नोंदणी तपासणी, मंजुरी किंवा नकार</div>
+          <div className="min-w-0">
+            <div className="font-extrabold text-xs sm:text-sm text-[#2D312E] truncate">QR स्कॅन करा</div>
+            <div className="text-[10px] text-stone-500 truncate">उपस्थिती नोंदवा</div>
           </div>
         </Link>
 
+        {/* Quick 2: नवीन ग्राहक */}
         <Link
-          to="/admin/dabba-management"
-          className="p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] transition-all flex items-center gap-3.5 group"
+          to="/admin/customers?action=new"
+          className="p-3.5 sm:p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-blue-600 hover:shadow-md transition-all flex items-center gap-3 group"
         >
-          <div className="w-11 h-11 rounded-2xl bg-emerald-100 text-[#205D48] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <ShoppingBag className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all">
+            <UserPlus className="w-5 h-5" />
           </div>
-          <div>
-            <div className="font-extrabold text-sm text-slate-900">दैनिक डबा व हजेरी नोंद</div>
-            <div className="text-[11px] text-slate-500">डबा दिला/जमा केला आणि थेट हजेरी</div>
+          <div className="min-w-0">
+            <div className="font-extrabold text-xs sm:text-sm text-[#2D312E] truncate">नवीन ग्राहक</div>
+            <div className="text-[10px] text-stone-500 truncate">नोंदणी करा</div>
           </div>
         </Link>
 
+        {/* Quick 3: पेमेंट तपासा */}
         <Link
           to="/admin/payment-management"
-          className="p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#205D48] transition-all flex items-center gap-3.5 group"
+          className="p-3.5 sm:p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-purple-600 hover:shadow-md transition-all flex items-center gap-3 group"
         >
-          <div className="w-11 h-11 rounded-2xl bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-            <CreditCard className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
+            <CreditCard className="w-5 h-5" />
           </div>
-          <div>
-            <div className="font-extrabold text-sm text-slate-900">पेमेंट मॅनेजमेंट (Confirm Paid)</div>
-            <div className="text-[11px] text-slate-500">रोख/UPI पडताळणी व बिल भरणा</div>
+          <div className="min-w-0">
+            <div className="font-extrabold text-xs sm:text-sm text-[#2D312E] truncate">पेमेंट तपासा</div>
+            <div className="text-[10px] text-stone-500 truncate">पावती व थकबाकी</div>
+          </div>
+        </Link>
+
+        {/* Quick 4: आजचा मेनू अपडेट करा */}
+        <Link
+          to="/admin/menu"
+          className="p-3.5 sm:p-4 bg-white rounded-2xl border border-[#EAE3D2] shadow-xs hover:border-[#EA8A27] hover:shadow-md transition-all flex items-center gap-3 group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#EA8A27] flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-[#EA8A27] group-hover:text-white transition-all">
+            <UtensilsCrossed className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="font-extrabold text-xs sm:text-sm text-[#2D312E] truncate">आजचा मेनू अपडेट करा</div>
+            <div className="text-[10px] text-stone-500 truncate">दुपार / रात्रीचे जेवण</div>
           </div>
         </Link>
       </div>
 
-      {/* 3. Middle Row: Weekly Attendance Chart (2/3) & Today's Menu (1/3) */}
+      {/* 5. Middle Analytics & Menu Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Weekly Attendance Chart Card */}
-        <div className="lg:col-span-8 bg-white rounded-2xl border border-[#EAE3D2] p-6 shadow-xs flex flex-col justify-between">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#F5EFE6]">
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">
-                आठवड्याची हजेरी
-              </h2>
-              <p className="text-xs text-stone-500 font-medium">चालू आठवड्यातील उपस्थिती संख्या</p>
+        {/* Attendance Trends Chart (8/12 on desktop) */}
+        <div className="lg:col-span-8 bg-white rounded-2xl border border-[#EAE3D2] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#F5EFE6]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">
+                    दैनिक उपस्थिती अहवाल (Attendance)
+                  </h2>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-[#205D48]">
+                    लाइव्ह
+                  </span>
+                </div>
+                <p className="text-xs text-stone-500 font-semibold mt-0.5">
+                  दुपारचे व रात्रीचे जेवण तुलना • चालू महिन्यात एकूण:{' '}
+                  <span className="text-[#205D48] font-black">{kpis?.currentMonthAttendance || 0}</span> हजेरी
+                </p>
+              </div>
+
+              {/* Date Range Selection Tabs */}
+              <div className="flex items-center gap-1.5 p-1 bg-[#FAF6ED] rounded-xl border border-[#EAE3D2] self-start sm:self-auto">
+                {[
+                  { key: '7d', label: '७ दिवस' },
+                  { key: '14d', label: '१४ दिवस' },
+                  { key: '30d', label: '३० दिवस' },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => handleRangeChange(tab.key)}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      attendanceRange === tab.key
+                        ? 'bg-[#205D48] text-white shadow-2xs'
+                        : 'text-stone-600 hover:text-stone-900'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Chart Legend */}
-            <div className="flex items-center gap-4 text-xs font-medium text-stone-600">
+            <div className="flex items-center gap-5 text-xs font-bold pt-3 pb-2 text-stone-600">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-[#EA8A27]" />
-                <span>नियमित दिवस</span>
+                <span className="w-3 h-3 rounded-xs bg-[#059669]" />
+                <span>दुपारचे जेवण (Lunch)</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded-xs bg-[#205D48]" />
-                <span className="font-bold text-[#205D48]">आज</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded-xs bg-[#E5E7EB]" />
-                <span className="text-stone-400">पुढील</span>
+                <span>रात्रीचे जेवण (Dinner)</span>
               </div>
             </div>
           </div>
 
-          {/* Bar Chart */}
-          <div className="h-64 w-full pt-4">
+          {/* Bar Chart Container */}
+          <div className="h-64 sm:h-72 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={weeklyChartData}
+                data={attendanceTrendData}
                 margin={{ top: 15, right: 10, left: -20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F5EFE6" />
@@ -570,7 +626,7 @@ export const AdminDashboardPage = () => {
                   dataKey="dayLabel"
                   axisLine={{ stroke: '#EAE3D2' }}
                   tickLine={false}
-                  tick={{ fill: '#4A5568', fontSize: 12, fontWeight: 600 }}
+                  tick={{ fill: '#4A5568', fontSize: 11, fontWeight: 700 }}
                 />
                 <YAxis
                   axisLine={false}
@@ -579,69 +635,98 @@ export const AdminDashboardPage = () => {
                   allowDecimals={false}
                 />
                 <Tooltip
-                  formatter={(val) => [`${val} सदस्य`, 'हजेरी']}
-                  labelFormatter={(lbl) => `वार: ${lbl}`}
+                  cursor={{ fill: 'rgba(32, 93, 72, 0.05)' }}
+                  formatter={(val, name) => [
+                    `${val} सदस्य`,
+                    name === 'lunch' ? 'दुपारचे जेवण' : (name === 'dinner' ? 'रात्रीचे जेवण' : name),
+                  ]}
+                  labelFormatter={(lbl, payload) => {
+                    const item = payload?.[0]?.payload;
+                    return item ? `तारीख: ${item.date} (${item.marathiDay})` : lbl;
+                  }}
                   contentStyle={{
                     backgroundColor: '#FFFFFF',
                     borderRadius: '12px',
                     borderColor: '#EAE3D2',
                     fontSize: '12px',
-                    fontWeight: 600,
+                    fontWeight: 700,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                   }}
                 />
-                <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={48}>
-                  {weeklyChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Bar>
+                <Bar dataKey="lunch" name="दुपारचे जेवण" fill="#059669" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar dataKey="dinner" name="रात्रीचे जेवण" fill="#205D48" radius={[4, 4, 0, 0]} maxBarSize={32} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Today's Menu Card */}
-        <div className="lg:col-span-4 bg-white rounded-2xl border border-[#EAE3D2] p-6 shadow-xs flex flex-col justify-between">
+        {/* Today's Menu Card (4/12 on desktop) */}
+        <div className="lg:col-span-4 bg-white rounded-2xl border border-[#EAE3D2] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-[#F5EFE6]">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
-                  <Utensils className="w-4 h-4" />
+                  <UtensilsCrossed className="w-4 h-4" />
                 </div>
                 <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">आजचा मेनू</h2>
               </div>
+              <Link
+                to="/admin/menu"
+                className="text-xs font-bold text-[#205D48] hover:underline"
+              >
+                व्यवस्थापित करा →
+              </Link>
             </div>
 
-            <div className="space-y-4 pt-4">
+            <div className="space-y-3.5 pt-4">
               {/* दुपारचे जेवण */}
               <div className="p-3.5 rounded-xl bg-[#FAF6ED] border border-[#EAE3D2]">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#205D48] mb-2">
-                  <Sun className="w-3.5 h-3.5 text-[#EA8A27]" />
-                  <span>दुपारचे जेवण</span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#205D48]">
+                    <Sun className="w-4 h-4 text-[#EA8A27]" />
+                    <span>दुपारचे जेवण (Lunch)</span>
+                  </div>
+                  <span className="text-[10px] text-stone-500 font-semibold">१२:०० - ०३:००</span>
                 </div>
-                <ul className="space-y-1.5 pl-1">
-                  {lunchItems.map((item, idx) => (
-                    <li key={idx} className="text-xs font-semibold text-[#2D312E] flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#EA8A27]" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                {lunchItems ? (
+                  <ul className="space-y-1.5 pl-1">
+                    {lunchItems.map((item, idx) => (
+                      <li key={idx} className="text-xs font-semibold text-[#2D312E] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#EA8A27]" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-xs text-stone-500 italic py-1">
+                    आजचा दुपारचा मेनू अजून नोंदवलेला नाही.
+                  </div>
+                )}
               </div>
 
               {/* रात्रीचे जेवण */}
               <div className="p-3.5 rounded-xl bg-[#FAF6ED] border border-[#EAE3D2]">
-                <div className="flex items-center gap-2 text-xs font-bold text-[#205D48] mb-2">
-                  <Moon className="w-3.5 h-3.5 text-[#205D48]" />
-                  <span>रात्रीचे जेवण</span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#205D48]">
+                    <Moon className="w-4 h-4 text-[#205D48]" />
+                    <span>रात्रीचे जेवण (Dinner)</span>
+                  </div>
+                  <span className="text-[10px] text-stone-500 font-semibold">०७:३० - १०:३०</span>
                 </div>
-                <ul className="space-y-1.5 pl-1">
-                  {dinnerItems.map((item, idx) => (
-                    <li key={idx} className="text-xs font-semibold text-[#2D312E] flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#205D48]" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                {dinnerItems ? (
+                  <ul className="space-y-1.5 pl-1">
+                    {dinnerItems.map((item, idx) => (
+                      <li key={idx} className="text-xs font-semibold text-[#2D312E] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#205D48]" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-xs text-stone-500 italic py-1">
+                    आजचा रात्रीचा मेनू अजून नोंदवलेला नाही.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -649,51 +734,216 @@ export const AdminDashboardPage = () => {
           <div className="pt-4 mt-2">
             <Link
               to="/admin/menu"
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-xs transition-colors min-h-[44px]"
             >
-              <span>मेनू बदला</span>
+              <span>मेनू बदला / नवीन डिश जोडा</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 4. Bottom Row: Outstanding Customers Table */}
-      <div className="bg-white rounded-2xl border border-[#EAE3D2] p-6 shadow-xs">
+      {/* 6. Revenue vs Pending Chart & Recent Activity Feed */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Monthly Revenue Comparison Chart (7/12) */}
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-[#EAE3D2] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-[#F5EFE6]">
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">
+                  मासिक महसूल तुलना (Revenue vs Pending)
+                </h2>
+                <p className="text-xs text-stone-500 font-semibold mt-0.5">
+                  जमा महसूल विरुद्ध येणे बाकी थकबाकी (मागील ६ महिने)
+                </p>
+              </div>
+              <div className="flex items-center gap-3 text-xs font-bold text-stone-600">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-xs bg-[#205D48]" />
+                  <span>जमा (Collected)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-xs bg-[#EA580C]" />
+                  <span>थकबाकी (Pending)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-64 sm:h-72 w-full pt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={revenueTrendData}
+                margin={{ top: 15, right: 10, left: -10, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F5EFE6" />
+                <XAxis
+                  dataKey="monthMarathi"
+                  axisLine={{ stroke: '#EAE3D2' }}
+                  tickLine={false}
+                  tick={{ fill: '#4A5568', fontSize: 11, fontWeight: 700 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#718096', fontSize: 10 }}
+                  tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                />
+                <Tooltip
+                  cursor={{ fill: 'rgba(32, 93, 72, 0.05)' }}
+                  formatter={(val, name) => [
+                    `₹${Number(val).toLocaleString('en-IN')}`,
+                    name === 'collected' ? 'जमा रक्कम' : 'येणे बाकी',
+                  ]}
+                  labelFormatter={(lbl, payload) => {
+                    const item = payload?.[0]?.payload;
+                    return item ? `महिना: ${item.label}` : lbl;
+                  }}
+                  contentStyle={{
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '12px',
+                    borderColor: '#EAE3D2',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  }}
+                />
+                <Bar dataKey="collected" name="जमा रक्कम" fill="#205D48" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                <Bar dataKey="pending" name="येणे बाकी" fill="#EA580C" radius={[4, 4, 0, 0]} maxBarSize={36} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Real Recent Activity Feed (5/12) */}
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-[#EAE3D2] p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-[#F5EFE6]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-[#205D48]/10 text-[#205D48] flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">
+                  अलीकडील घडामोडी (Recent Activity)
+                </h2>
+              </div>
+              <span className="text-[11px] font-bold text-stone-400">रिअल-टाइम</span>
+            </div>
+
+            {/* Activity List */}
+            <div className="divide-y divide-[#F5EFE6] pt-1">
+              {activityFeed.length === 0 ? (
+                <div className="py-12 text-center text-xs text-stone-400">
+                  सध्या कोणतीही नवीन हालचाल नोंदवलेली नाही.
+                </div>
+              ) : (
+                activityFeed.slice(0, 6).map((item) => (
+                  <div key={item.id} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                          item.badgeColor === 'amber'
+                            ? 'bg-amber-100 text-amber-800'
+                            : item.badgeColor === 'emerald'
+                            ? 'bg-emerald-100 text-[#205D48]'
+                            : 'bg-teal-100 text-teal-800'
+                        }`}
+                      >
+                        {item.type === 'CUSTOMER_REGISTRATION' ? (
+                          <UserPlus className="w-4 h-4" />
+                        ) : item.type === 'PAYMENT_RECEIVED' ? (
+                          <CreditCard className="w-4 h-4" />
+                        ) : (
+                          <QrCode className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-bold text-[#2D312E] truncate">
+                          {item.name} {item.code ? `(${item.code})` : ''}
+                        </div>
+                        <div className="text-[11px] text-stone-500 font-medium truncate">
+                          {item.title} • {item.details}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="text-[10px] text-stone-400 font-semibold">
+                        {formatTimeAgo(item.timestamp)}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-[#F5EFE6]">
+            <Link
+              to="/admin/reports"
+              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-[#205D48] hover:text-[#184838] transition-colors"
+            >
+              <span>सर्व अहवाल व इतिहास पहा</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 7. Bottom Section: Outstanding Invoices Table & Quick Payment Recording */}
+      <div className="bg-white rounded-2xl border border-[#EAE3D2] p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#F5EFE6]">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">
-              थकबाकी असलेले ग्राहक
-            </h2>
-            <p className="text-xs text-stone-500 font-medium">
-              थकीत रक्कम असलेल्या सदस्यांची यादी
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-[#2D312E]">
+                थकबाकी असलेले ग्राहक (Outstanding Due)
+              </h2>
+              {outstandingList.length > 0 && (
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-orange-100 text-[#8C3B14] font-black">
+                  {outstandingList.length} सदस्य
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-stone-500 font-semibold mt-0.5">
+              थकीत रक्कम असलेल्या सदस्यांची थेट यादी व पेमेंट नोंदणी
             </p>
           </div>
 
-          <button
-            onClick={handleSendReminderToAll}
-            disabled={reminderSending || outstandingList.length === 0}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-stone-50 text-[#205D48] border border-[#205D48] text-xs font-bold rounded-xl shadow-2xs transition-all disabled:opacity-50"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>{reminderSending ? 'पाठवत आहे...' : 'सर्वांना स्मरण पाठवा'}</span>
-          </button>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={handleSendReminderToAll}
+              disabled={reminderSending || outstandingList.length === 0}
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-stone-50 text-[#205D48] border border-[#205D48] text-xs font-bold rounded-xl shadow-2xs transition-all disabled:opacity-50 cursor-pointer min-h-[40px]"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{reminderSending ? 'पाठवत आहे...' : 'सर्वांना स्मरण पाठवा'}</span>
+            </button>
+
+            <Link
+              to="/admin/payment-management"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-xs transition-all min-h-[40px]"
+            >
+              <span>सर्व पेमेंट व्यवस्थापित करा</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
 
-        {/* Table Content */}
+        {/* Outstanding Table */}
         {outstandingList.length === 0 ? (
           <div className="py-12 text-center">
-            <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2 opacity-80" />
+            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto mb-2 opacity-85" />
             <p className="text-sm font-bold text-stone-700">सध्या कोणाचीही थकबाकी शिल्लक नाही!</p>
-            <p className="text-xs text-stone-400 mt-0.5">सर्व ग्राहकांनी पेमेंट वेळेवर भरले आहे.</p>
+            <p className="text-xs text-stone-400 mt-0.5">सर्व ग्राहकांनी मेसचे पेमेंट वेळेवर भरले आहे.</p>
           </div>
         ) : (
           <div className="overflow-x-auto mt-2">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-[#F5EFE6] text-stone-500 font-bold">
-                  <th className="py-3 px-3">ग्राहकाचे नाव</th>
+                  <th className="py-3 px-3">ग्राहकाचे नाव व कोड</th>
                   <th className="py-3 px-3">प्लॅन</th>
+                  <th className="py-3 px-3">देय तारीख</th>
                   <th className="py-3 px-3">बाकी रक्कम</th>
                   <th className="py-3 px-3 text-right">कृती</th>
                 </tr>
@@ -708,8 +958,13 @@ export const AdminDashboardPage = () => {
                       </div>
                     </td>
                     <td className="py-3.5 px-3">
-                      <span className="inline-block px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium text-[11px]">
+                      <span className="inline-block px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-semibold text-[11px]">
                         {cust.planName}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-3">
+                      <span className="text-stone-500 font-medium">
+                        {cust.dueDate ? new Date(cust.dueDate).toLocaleDateString('mr-IN') : 'तात्काळ'}
                       </span>
                     </td>
                     <td className="py-3.5 px-3">
@@ -720,10 +975,10 @@ export const AdminDashboardPage = () => {
                     <td className="py-3.5 px-3 text-right">
                       <button
                         onClick={() => handleOpenPaymentModal(cust)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer min-h-[36px]"
                       >
                         <CreditCard className="w-3.5 h-3.5" />
-                        <span>पेमेंट नोंदवा</span>
+                        <span>पेमेंट जमा करा</span>
                       </button>
                     </td>
                   </tr>
@@ -734,20 +989,20 @@ export const AdminDashboardPage = () => {
         )}
       </div>
 
-      {/* 5. Payment Recording Modal */}
+      {/* 8. Payment Recording Modal */}
       {paymentModalOpen && selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
           <div className="bg-white rounded-2xl border border-[#EAE3D2] shadow-2xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#F5EFE6]">
               <div>
-                <h3 className="text-base font-bold text-[#2D312E]">पेमेंट नोंदणी</h3>
-                <p className="text-xs text-stone-500">
+                <h3 className="text-base font-bold text-[#2D312E]">पेमेंट नोंदणी (Record Payment)</h3>
+                <p className="text-xs text-stone-500 font-semibold">
                   {selectedCustomer.customerName} ({selectedCustomer.customerCode})
                 </p>
               </div>
               <button
                 onClick={() => setPaymentModalOpen(false)}
-                className="text-stone-400 hover:text-stone-700 p-1"
+                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -760,8 +1015,8 @@ export const AdminDashboardPage = () => {
               </div>
             ) : (
               <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                <div className="p-3 rounded-xl bg-[#FAF6ED] border border-[#EAE3D2] flex justify-between items-center text-xs">
-                  <span className="text-stone-600 font-medium">एकूण बाकी रक्कम:</span>
+                <div className="p-3.5 rounded-xl bg-[#FAF6ED] border border-[#EAE3D2] flex justify-between items-center text-xs">
+                  <span className="text-stone-600 font-semibold">एकूण थकीत रक्कम:</span>
                   <span className="text-[#8C3B14] font-black text-sm">
                     ₹{Number(selectedCustomer.balanceDue || 0).toLocaleString('en-IN')}
                   </span>
@@ -791,19 +1046,19 @@ export const AdminDashboardPage = () => {
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE3D2] focus:border-[#205D48] focus:ring-1 focus:ring-[#205D48] text-xs font-semibold text-[#2D312E] outline-hidden bg-white"
                   >
-                    <option value="UPI">UPI (Google Pay / PhonePe / Paytm)</option>
+                    <option value="UPI">UPI (Google Pay / PhonePe / Paytm / QR)</option>
                     <option value="CASH">रोख रक्कम (Cash)</option>
-                    <option value="BANK_TRANSFER">बँक ट्रान्सफर (NEFT/IMPS)</option>
+                    <option value="BANK_TRANSFER">बँक ट्रान्सफर (NEFT / IMPS)</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-stone-700 mb-1">
-                    व्यवहार क्रमांक / टीप (पर्यायी)
+                    व्यवहार क्रमांक / संदर्भ (पर्यायी)
                   </label>
                   <input
                     type="text"
-                    placeholder="उदा. UPI-98765432"
+                    placeholder="उदा. UPI-12345678 किंवा पावती क्र."
                     value={paymentRef}
                     onChange={(e) => setPaymentRef(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[#EAE3D2] focus:border-[#205D48] text-xs text-[#2D312E] outline-hidden"
@@ -814,14 +1069,14 @@ export const AdminDashboardPage = () => {
                   <button
                     type="button"
                     onClick={() => setPaymentModalOpen(false)}
-                    className="flex-1 py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition-colors"
+                    className="flex-1 py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl transition-colors cursor-pointer min-h-[44px]"
                   >
                     रद्द करा
                   </button>
                   <button
                     type="submit"
                     disabled={paymentSubmitting}
-                    className="flex-1 py-2.5 px-4 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50"
+                    className="flex-1 py-2.5 px-4 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50 cursor-pointer min-h-[44px]"
                   >
                     {paymentSubmitting ? 'नोंदवत आहे...' : 'पेमेंट जमा करा'}
                   </button>
