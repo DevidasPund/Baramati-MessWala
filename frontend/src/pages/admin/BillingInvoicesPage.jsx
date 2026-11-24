@@ -10,6 +10,7 @@ import {
   AlertCircle,
   Clock,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
@@ -80,6 +81,30 @@ export const BillingInvoicesPage = () => {
       'जुलै', 'ऑगस्ट', 'सप्टेंबर', 'ऑक्टोबर', 'नोव्हेंबर', 'डिसेंबर'
     ];
     return months[m - 1] || `${m}`;
+  };
+
+  const handleSendWhatsApp = (inv) => {
+    const rawPhone = inv.customer?.phone || '';
+    const phone = rawPhone.replace(/\D/g, '');
+    if (!phone) {
+      toast.error('ग्राहकाचा मोबाईल नंबर उपलब्ध नाही');
+      return;
+    }
+    const cleanPhone = phone.length === 10 ? `91${phone}` : phone;
+    const monthName = getMonthNameMarathi(inv.billingMonth);
+    const text = `नमस्कार ${inv.customer?.name || 'सभासद'} जी,
+
+बारामती मेसवाला कडून आपले ${monthName} ${inv.billingYear} चे मासिक मेस बिल:
+📄 इनव्हॉइस क्र: ${inv.invoiceNumber}
+💰 एकूण बिल: ₹${Number(inv.totalAmount).toLocaleString('en-IN')}
+⚠️ बाकी रक्कम: ₹${Number(inv.balanceDue).toLocaleString('en-IN')}
+📅 देय तारीख: ${inv.dueDate ? new Date(inv.dueDate).toLocaleDateString('mr-IN') : 'लवकरच'}
+
+कृपया आपले बिल Google Pay / PhonePe (UPI) द्वारे किंवा मेस काऊंटरवर रोख भरून सहकार्य करावे.
+धन्यवाद!
+- बारामती मेसवाला`;
+
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   return (
@@ -187,16 +212,27 @@ export const BillingInvoicesPage = () => {
                       </span>
                     </td>
                     <td className="py-3.5 px-5 text-right">
-                      <a
-                        href={`/api/invoices/${inv.id}/pdf?token=${localStorage.getItem('messmate_token') || ''}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-blue-700 bg-blue-50 hover:bg-blue-100 font-bold rounded-lg transition-colors"
-                        title="अधिकृत PDF इनव्हॉइस डाउनलोड करा"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        <span>PDF पावती</span>
-                      </a>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSendWhatsApp(inv)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-bold rounded-lg transition-colors cursor-pointer"
+                          title="ग्राहकाला व्हॉट्सॲपवर बिल पाठवा"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>व्हॉट्सॲप</span>
+                        </button>
+                        <a
+                          href={`/api/invoices/${inv.id}/pdf?token=${localStorage.getItem('messmate_token') || ''}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-blue-700 bg-blue-50 hover:bg-blue-100 font-bold rounded-lg transition-colors"
+                          title="अधिकृत PDF इनव्हॉइस डाउनलोड करा"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>PDF पावती</span>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 ))}

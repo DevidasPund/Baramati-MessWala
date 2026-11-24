@@ -32,6 +32,7 @@ export const getDashboardStats = async (req, res, next) => {
       rangeAttendance,
       currentMonthAttendanceCount,
       monthlyVerifiedPayments,
+      todayVerifiedPayments,
       todayDabbasGroup,
     ] = await Promise.all([
       // 1. Customer Counts grouped by status
@@ -63,6 +64,15 @@ export const getDashboardStats = async (req, res, next) => {
         where: {
           status: 'VERIFIED',
           createdAt: { gte: startOfMonth, lte: endOfMonth },
+        },
+        _sum: { amount: true },
+      }),
+
+      // 5b. Today's actual verified revenue aggregate (Cash + UPI received today)
+      prisma.payment.aggregate({
+        where: {
+          status: 'VERIFIED',
+          createdAt: { gte: today },
         },
         _sum: { amount: true },
       }),
@@ -236,10 +246,10 @@ export const getDashboardStats = async (req, res, next) => {
     }
 
     const monthlyRevenue = Number(monthlyVerifiedPayments._sum?.amount || 0);
+    const todayRevenue = Number(todayVerifiedPayments._sum?.amount || 0);
     const pendingPayments = Number(unpaidInvoices._sum?.balanceDue || 0);
     const activeSubscriptions = plansWithSubs.reduce((acc, p) => acc + (p._count?.subscriptions || 0), 0);
     const totalExtraMeals = (recentAttendance.length || 0) + (pendingExtraMeals.length || 0);
-    const todayRevenue = Math.round(monthlyRevenue / 30);
 
     // Process Attendance Trend in-memory for requested range (7d, 14d, 30d)
     const attendanceMap = new Map();

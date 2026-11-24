@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   ArrowUpRight,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react';
 import {
   BarChart,
@@ -212,6 +213,30 @@ export const AdminDashboardPage = () => {
     } finally {
       setReminderSending(false);
     }
+  };
+
+  // 6b. Send 1-Click WhatsApp Reminder to individual customer
+  const handleSendCustomerWhatsApp = (cust) => {
+    const rawPhone = cust.phone || '';
+    const phone = rawPhone.replace(/\D/g, '');
+    if (!phone) {
+      alert('ग्राहकाचा मोबाईल नंबर उपलब्ध नाही.');
+      return;
+    }
+    const cleanPhone = phone.length === 10 ? `91${phone}` : phone;
+    const text = `नमस्कार ${cust.customerName || 'सभासद'} जी,
+
+बारामती मेसवाला कडून आपले चालू मेस बिल:
+👤 ग्राहक कोड: ${cust.customerCode || ''}
+🍲 मेस प्लॅन: ${cust.planName || 'नियमित मेस'}
+⚠️ बाकी रक्कम: ₹${Number(cust.balanceDue || 0).toLocaleString('en-IN')}
+📅 देय तारीख: ${cust.dueDate ? new Date(cust.dueDate).toLocaleDateString('mr-IN') : 'लवकरच'}
+
+कृपया आपले मेस बिल Google Pay / PhonePe (UPI) किंवा मेस काऊंटरवर जमा करून सहकार्य करावे.
+धन्यवाद!
+- बारामती मेसवाला`;
+
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   // Loading Skeleton
@@ -959,13 +984,22 @@ export const AdminDashboardPage = () => {
                     <span>देय: {cust.dueDate ? new Date(cust.dueDate).toLocaleDateString('mr-IN') : 'तात्काळ'}</span>
                   </div>
 
-                  <button
-                    onClick={() => handleOpenPaymentModal(cust)}
-                    className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 px-3 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-2xs min-h-[44px] cursor-pointer"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    <span>पेमेंट जमा करा</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <button
+                      onClick={() => handleSendCustomerWhatsApp(cust)}
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-xl shadow-2xs min-h-[44px] cursor-pointer"
+                    >
+                      <MessageCircle className="w-4 h-4 text-emerald-600" />
+                      <span>व्हॉट्सॲप</span>
+                    </button>
+                    <button
+                      onClick={() => handleOpenPaymentModal(cust)}
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-xl shadow-2xs min-h-[44px] cursor-pointer"
+                    >
+                      <CreditCard className="w-4 h-4" />
+                      <span>पेमेंट जमा</span>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1007,13 +1041,23 @@ export const AdminDashboardPage = () => {
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-right">
-                        <button
-                          onClick={() => handleOpenPaymentModal(cust)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer min-h-[36px]"
-                        >
-                          <CreditCard className="w-3.5 h-3.5" />
-                          <span>पेमेंट जमा करा</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleSendCustomerWhatsApp(cust)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer min-h-[36px]"
+                            title="व्हॉट्सॲपवर आठवण पाठवा"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>व्हॉट्सॲप</span>
+                          </button>
+                          <button
+                            onClick={() => handleOpenPaymentModal(cust)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#205D48] hover:bg-[#184838] text-white text-xs font-bold rounded-lg shadow-2xs transition-colors cursor-pointer min-h-[36px]"
+                          >
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>पेमेंट जमा करा</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

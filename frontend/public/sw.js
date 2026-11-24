@@ -1,5 +1,5 @@
 // MessMate Progressive Web App Service Worker
-const CACHE_NAME = 'messmate-v1';
+const CACHE_NAME = 'messmate-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -29,7 +29,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event - Network-first for APIs, Cache-first for static assets
+// Fetch Event - Network-first for APIs, Cache-first for static assets, with offline fallback for navigation
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -38,28 +38,46 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // SPA Navigation fallback: When offline, return cached /index.html so React loads
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return caches.match('/index.html');
+      })
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).then((networkResponse) => {
-        // Cache static assets on the fly
-        if (
-          networkResponse &&
-          networkResponse.status === 200 &&
-          (url.pathname.endsWith('.js') ||
-            url.pathname.endsWith('.css') ||
-            url.pathname.endsWith('.png') ||
-            url.pathname.endsWith('.svg'))
-        ) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return networkResponse;
-      });
+      return fetch(event.request)
+        .then((networkResponse) => {
+          // Cache static assets on the fly
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            (url.pathname.endsWith('.js') ||
+              url.pathname.endsWith('.css') ||
+              url.pathname.endsWith('.png') ||
+              url.pathname.endsWith('.jpg') ||
+              url.pathname.endsWith('.jpeg') ||
+              url.pathname.endsWith('.svg') ||
+              url.pathname.endsWith('.woff2'))
+          ) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Return nothing or empty response if network and cache both fail
+          return null;
+        });
     })
   );
 });

@@ -15,10 +15,46 @@ import {
   Flashlight,
   FlashlightOff,
   AlertTriangle,
+  Zap,
+  Volume2,
+  Check,
+  User,
+  Clock,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import confetti from 'canvas-confetti';
 import api from '../../services/api';
+
+// Audio chime using Web Audio API (zero external assets, 100% offline reliable)
+const playChime = (type = 'success') => {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === 'success') {
+      // Pleasant high double beep
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    } else {
+      // Low buzz for duplicate / rejected
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.35);
+    }
+  } catch (e) {
+    // Audio context may be restricted by autoplay policy until user gesture
+  }
+};
 
 export const AdminQrScannerPage = () => {
   const [mode, setMode] = useState('SCAN_CUSTOMER'); // 'SCAN_CUSTOMER' (Method B) or 'DISPLAY_MESS_QR' (Method A)
@@ -31,11 +67,24 @@ export const AdminQrScannerPage = () => {
   const [hasTorch, setHasTorch] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
 
+  // Rapid Scan (Continuous Hands-Free) Mode State
+  const [rapidMode, setRapidMode] = useState(true);
+  const [hudMessage, setHudMessage] = useState(null);
+  const [recentScans, setRecentScans] = useState([]);
+
   // Method A Mess Session State
   const [messSession, setMessSession] = useState(null);
   const [countdown, setCountdown] = useState(600); // 10 minutes
 
   const scannerRef = useRef(null);
+  const rapidModeRef = useRef(rapidMode);
+  const lastScanRef = useRef({ token: '', timestamp: 0 });
+  const isProcessingRef = useRef(false);
+
+  // Keep rapidModeRef in sync with rapidMode state
+  useEffect(() => {
+    rapidModeRef.current = rapidMode;
+  }, [rapidMode]);
 
   // Auto detect meal type based on current local time
   useEffect(() => {
@@ -102,8 +151,22 @@ export const AdminQrScannerPage = () => {
         { facingMode: 'environment' },
         config,
         async (decodedText) => {
-          await handleProcessScan(decodedText);
-          stopCamera();
+          const now = Date.now();
+          // Prevent multiple scans of the same QR code within 2.5 seconds
+          if (lastScanRef.current.token === decodedText && now - lastScanRef.current.timestamp < 2500) {
+            return;
+          }
+          if (isProcessingRef.current) return;
+          isProcessingRef.current = true;
+          lastScanRef.current = { token: decodedText, timestamp: now };
+
+          await handleProcessScan(decodedText, rapidModeRef.current);
+          isProcessingRef.current = false;
+
+          // If NOT in rapid continuous mode, stop camera for individual acknowledgement
+          if (!rapidModeRef.current) {
+            stopCamera();
+          }
         },
         () => {}
       );
@@ -169,7 +232,7 @@ export const AdminQrScannerPage = () => {
   }, []);
 
   // Process Scan (Method B: Staff/Admin Scans Customer QR)
-  const handleProcessScan = async (tokenToUse) => {
+  const handleProcessScan = async (tokenToUse, isRapid = false) => {
     const token = tokenToUse || manualToken.trim();
     if (!token) {
       toast.error('कृपया ग्राहकाचा QR कोड स्कॅन करा किंवा टोकन टाका');
@@ -183,22 +246,74 @@ export const AdminQrScannerPage = () => {
         mealType,
       });
 
-      confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
+      playChime('success');
+      confetti({ particleCount: 50, spread: 50, origin: { y: 0.8 } });
       const successMsg = res.message || 'ग्राहकाची उपस्थिती यशस्वीरित्या नोंदवली.';
-      toast.success(successMsg);
-      setScanResult({
+
+      const scanData = {
         success: true,
         message: successMsg,
         data: res.data,
-      });
+      };
+
+      setScanResult(scanData);
+
+      // Add to recent counter queue
+      setRecentScans((prev) => [
+        {
+          id: Date.now(),
+          name: res.data?.customer?.name || 'ग्राहक',
+          code: res.data?.customer?.code || '',
+          plan: res.data?.plan || 'नियमित मेस',
+          mealType,
+          time: new Date().toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          success: true,
+        },
+        ...prev.slice(0, 9),
+      ]);
+
+      if (isRapid) {
+        setHudMessage({
+          type: 'success',
+          text: `✅ ${res.data?.customer?.name || 'ग्राहक'} (${res.data?.customer?.code || ''}) - हजेरी नोंदवली!`,
+        });
+        setTimeout(() => setHudMessage(null), 2200);
+      } else {
+        toast.success(successMsg);
+      }
+
       setManualToken('');
     } catch (err) {
+      playChime('error');
       const errorMsg = err.message || 'हजेरी पडताळणी अयशस्वी';
-      toast.error(errorMsg);
+
       setScanResult({
         success: false,
         message: errorMsg,
       });
+
+      setRecentScans((prev) => [
+        {
+          id: Date.now(),
+          name: 'अस्वीकृत',
+          code: '',
+          plan: errorMsg,
+          mealType,
+          time: new Date().toLocaleTimeString('mr-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          success: false,
+        },
+        ...prev.slice(0, 9),
+      ]);
+
+      if (isRapid) {
+        setHudMessage({
+          type: 'error',
+          text: `❌ ${errorMsg}`,
+        });
+        setTimeout(() => setHudMessage(null), 2500);
+      } else {
+        toast.error(errorMsg);
+      }
     } finally {
       setLoading(false);
     }
@@ -233,10 +348,10 @@ export const AdminQrScannerPage = () => {
         </button>
       </div>
 
-      {/* Meal Category Selector */}
+      {/* Meal Category & Rapid Mode Selector */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between gap-3 flex-wrap">
-        <span className="text-xs font-extrabold text-slate-700 tracking-wide">सध्याची जेवणाची वेळ:</span>
         <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-extrabold text-slate-700 tracking-wide">जेवणाची वेळ:</span>
           {[
             { id: 'BREAKFAST', label: 'नाश्ता', icon: Coffee },
             { id: 'LUNCH', label: 'दुपारचे जेवण', icon: Utensils },
@@ -248,7 +363,7 @@ export const AdminQrScannerPage = () => {
               <button
                 key={m.id}
                 onClick={() => setMealType(m.id)}
-                className={`px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all min-h-[40px] cursor-pointer ${
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all min-h-[38px] cursor-pointer ${
                   isSelected
                     ? 'bg-emerald-100 text-[#205D48] border border-emerald-300 shadow-2xs'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -260,15 +375,42 @@ export const AdminQrScannerPage = () => {
             );
           })}
         </div>
+
+        {/* Rapid Continuous Scan Toggle */}
+        {mode === 'SCAN_CUSTOMER' && (
+          <div className="flex items-center gap-2 bg-[#FAF6ED] px-3 py-1.5 rounded-xl border border-[#EAE3D2]">
+            <Zap className={`w-4 h-4 ${rapidMode ? 'text-amber-500 fill-amber-500' : 'text-stone-400'}`} />
+            <span className="text-xs font-bold text-stone-700">फास्ट स्कॅन मोड:</span>
+            <button
+              type="button"
+              onClick={() => setRapidMode(!rapidMode)}
+              className={`px-2.5 py-1 text-[11px] font-extrabold rounded-lg transition-colors cursor-pointer ${
+                rapidMode
+                  ? 'bg-[#205D48] text-white shadow-2xs'
+                  : 'bg-stone-200 text-stone-600'
+              }`}
+            >
+              {rapidMode ? 'चालू (ऑटो)' : 'बंद'}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* MODE B: Staff Scans Customer QR */}
       {mode === 'SCAN_CUSTOMER' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Scanner Card */}
+          {/* Scanner Viewport Card */}
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-2xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-sm">कॅमेरा हजेरी स्कॅनर</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-slate-900 text-sm">कॅमेरा हजेरी स्कॅनर</h3>
+                {rapidMode && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
+                    <Zap className="w-2.5 h-2.5 fill-amber-600" />
+                    <span>फास्ट मोड</span>
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-2">
                 {hasTorch && scanning && (
                   <button
@@ -288,9 +430,23 @@ export const AdminQrScannerPage = () => {
               </div>
             </div>
 
-            {/* Video Viewport */}
+            {/* Video Viewport with HUD Overlay */}
             <div className="w-full h-64 sm:h-72 bg-slate-900 rounded-2xl overflow-hidden relative flex items-center justify-center text-slate-400">
               <div id="qr-reader-container" className="w-full h-full"></div>
+
+              {/* Floating Live HUD Notification during Rapid Mode */}
+              {hudMessage && (
+                <div
+                  className={`absolute top-3 left-3 right-3 p-3 rounded-xl shadow-lg border text-xs font-bold text-center animate-in fade-in slide-in-from-top-2 duration-200 z-20 ${
+                    hudMessage.type === 'success'
+                      ? 'bg-emerald-600 text-white border-emerald-500'
+                      : 'bg-rose-600 text-white border-rose-500'
+                  }`}
+                >
+                  {hudMessage.text}
+                </div>
+              )}
+
               {!scanning && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center">
                   <Camera className="w-10 h-10 text-slate-500" />
@@ -316,7 +472,7 @@ export const AdminQrScannerPage = () => {
                   className="flex-1 py-3 bg-[#205D48] hover:bg-[#184838] text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-xs min-h-[44px] cursor-pointer"
                 >
                   <Camera className="w-4 h-4" />
-                  <span>कॅमेरा सुरू करा</span>
+                  <span>{rapidMode ? 'फास्ट कॅमेरा सुरू करा' : 'कॅमेरा सुरू करा'}</span>
                 </button>
               ) : (
                 <button
@@ -342,7 +498,7 @@ export const AdminQrScannerPage = () => {
                   className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-hidden focus:border-[#205D48] font-mono min-h-[44px]"
                 />
                 <button
-                  onClick={() => handleProcessScan()}
+                  onClick={() => handleProcessScan(undefined, false)}
                   disabled={loading}
                   className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl disabled:opacity-50 min-h-[44px] cursor-pointer"
                 >
@@ -352,19 +508,68 @@ export const AdminQrScannerPage = () => {
             </div>
           </div>
 
-          {/* Result Card */}
+          {/* Right Card: Result Detail & Live Counter Queue */}
           <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-2xs space-y-4 flex flex-col justify-between">
             <div>
-              <h3 className="font-bold text-slate-900 text-sm mb-1">स्कॅन पडताळणी निकाल</h3>
-              <p className="text-xs text-slate-400 font-semibold">रिअल-टाइम हजेरी पडताळणी</p>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="font-bold text-slate-900 text-sm">
+                  {rapidMode ? 'काउंटर उपस्थिती यादी (Live Queue)' : 'स्कॅन पडताळणी निकाल'}
+                </h3>
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  {recentScans.length} स्कॅन झाले
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 font-semibold">
+                {rapidMode ? 'प्रत्येक स्कॅन नंतर रीफ्रेश न करता अखंड हजेरी नोंदवली जाईल.' : 'रिअल-टाइम हजेरी पडताळणी'}
+              </p>
             </div>
 
-            {scanResult ? (
-              <div className={`p-5 sm:p-6 rounded-2xl border text-center space-y-3 ${
-                scanResult.success
-                  ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950'
-                  : 'bg-rose-50/90 border-rose-200 text-rose-950'
-              }`}>
+            {/* In Rapid Mode, render the live queue stack */}
+            {rapidMode ? (
+              <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
+                {recentScans.length === 0 ? (
+                  <div className="p-8 border border-dashed border-slate-200 rounded-2xl text-center text-slate-400 space-y-2">
+                    <Zap className="w-8 h-8 mx-auto text-amber-500 opacity-60" />
+                    <p className="text-xs font-semibold">फास्ट मोड सज्ज आहे. समोर QR धरताच सेकंदात नोंद होईल.</p>
+                  </div>
+                ) : (
+                  recentScans.map((scan) => (
+                    <div
+                      key={scan.id}
+                      className={`p-3 rounded-xl border flex items-center justify-between text-xs transition-all ${
+                        scan.success
+                          ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+                          : 'bg-rose-50/70 border-rose-200 text-rose-950'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                            scan.success ? 'bg-emerald-200/80 text-emerald-800' : 'bg-rose-200/80 text-rose-800'
+                          }`}
+                        >
+                          {scan.success ? <Check className="w-4 h-4 font-black" /> : <AlertCircle className="w-4 h-4" />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-bold truncate">{scan.name}</div>
+                          <div className="text-[11px] opacity-75 truncate">{scan.plan}</div>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0 font-mono text-[11px] font-bold opacity-70">
+                        {scan.time}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : scanResult ? (
+              <div
+                className={`p-5 sm:p-6 rounded-2xl border text-center space-y-3 ${
+                  scanResult.success
+                    ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950'
+                    : 'bg-rose-50/90 border-rose-200 text-rose-950'
+                }`}
+              >
                 {scanResult.success ? (
                   <>
                     <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
@@ -374,8 +579,12 @@ export const AdminQrScannerPage = () => {
                     </div>
                     <div className="p-3 bg-white rounded-xl text-xs border border-emerald-100 text-left space-y-1">
                       <div className="text-slate-600">प्लॅन: <strong>{scanResult.data?.plan}</strong></div>
-                      <div className="text-slate-600">जेवण: <strong>{mealType === 'LUNCH' ? 'दुपारचे जेवण' : mealType === 'DINNER' ? 'रात्रीचे जेवण' : 'नाश्ता'}</strong></div>
-                      <div className="text-slate-600">वेळ: <strong className="font-mono">{new Date().toLocaleTimeString('mr-IN')}</strong></div>
+                      <div className="text-slate-600">
+                        जेवण: <strong>{mealType === 'LUNCH' ? 'दुपारचे जेवण' : mealType === 'DINNER' ? 'रात्रीचे जेवण' : 'नाश्ता'}</strong>
+                      </div>
+                      <div className="text-slate-600">
+                        वेळ: <strong className="font-mono">{new Date().toLocaleTimeString('mr-IN')}</strong>
+                      </div>
                     </div>
                     <span className="inline-block px-3 py-1 bg-[#205D48] text-white text-xs font-bold rounded-full">
                       {scanResult.message || 'ग्राहकाची उपस्थिती यशस्वीरित्या नोंदवली.'}
@@ -400,7 +609,7 @@ export const AdminQrScannerPage = () => {
 
             <div className="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 space-y-1">
               <div>• एका वेळेच्या जेवणासाठी फक्त एकदाच हजेरी ग्राह्य धरली जाते.</div>
-              <div>• एकाच जेवणाच्या सत्रात पुन्हा स्कॅन केल्यास सिस्टीम आपोआप नकार देते.</div>
+              <div>• जलद मोडमध्ये स्क्रीनवर हात न लावता सलग ५० ग्राहकांची हजेरी घेता येते.</div>
             </div>
           </div>
         </div>
